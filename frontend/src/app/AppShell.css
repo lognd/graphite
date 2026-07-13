@@ -1,0 +1,27 @@
+.gr-app-shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.gr-app-shell__header {
+  flex: 0 0 auto;
+  padding: var(--graphite-space-2);
+}
+
+.gr-app-shell__body {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+}
+
+.gr-app-shell__content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: var(--graphite-space-4);
+  min-width: 0;
+}
+
+.gr-app-shell__footer {
+  flex: 0 0 auto;
+}

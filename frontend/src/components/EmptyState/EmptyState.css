@@ -1,0 +1,20 @@
+.gr-empty-state {
+  display: flex;
+  flex-direction: column;
+  gap: var(--graphite-space-2);
+  padding: var(--graphite-space-8) var(--graphite-space-4);
+  border: var(--graphite-border-width-hairline) dashed var(--graphite-color-hairline);
+  align-items: flex-start;
+}
+
+.gr-empty-state__title {
+  margin: 0;
+  color: var(--graphite-color-ink);
+  font-size: var(--graphite-font-size-14);
+}
+
+.gr-empty-state__detail {
+  margin: 0;
+  color: var(--graphite-color-ink-dim);
+  font-size: var(--graphite-font-size-12);
+}

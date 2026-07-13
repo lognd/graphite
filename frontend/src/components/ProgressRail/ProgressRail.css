@@ -1,0 +1,46 @@
+.gr-progress-rail {
+  display: flex;
+  align-items: center;
+  gap: var(--graphite-space-2);
+}
+
+.gr-progress-rail__track {
+  position: relative;
+  flex: 1 1 auto;
+  height: var(--graphite-space-1);
+  background: var(--graphite-color-raised);
+  border: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  overflow: hidden;
+}
+
+.gr-progress-rail__fill {
+  display: block;
+  height: 100%;
+  background: var(--graphite-color-accent);
+  transition: width var(--graphite-motion-ack) linear;
+}
+
+.gr-progress-rail__step {
+  font-size: var(--graphite-font-size-12);
+  color: var(--graphite-color-ink);
+  white-space: nowrap;
+}
+
+.gr-progress-rail__elapsed {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--graphite-font-size-12);
+  color: var(--graphite-color-ink-dim);
+}
+
+.gr-progress-rail__cancel {
+  border: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  background: transparent;
+  color: var(--graphite-color-ink);
+  padding: 0 var(--graphite-space-2);
+  cursor: pointer;
+}
+
+.gr-progress-rail__cancel:hover {
+  border-color: var(--graphite-color-verdict-violated);
+  color: var(--graphite-color-verdict-violated);
+}
