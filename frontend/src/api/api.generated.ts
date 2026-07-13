@@ -420,6 +420,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/runs/{run_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel Project Run
+         * @description Stop a running run (deliverable 1's cancel affordance; WOG1-F6
+         *     closed -- no kill route existed before WO-G5).
+         */
+        post: operations["cancel_project_run_api_runs__run_id__cancel_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/runs/{run_id}/events": {
         parameters: {
             query?: never;
@@ -429,10 +450,55 @@ export interface paths {
         };
         /**
          * Run Events
-         * @description SSE stream of `run_id`'s log lines, closing with a `done` event
-         *     once the run finishes.
+         * @description SSE stream of `run_id`'s log lines + parsed progress events,
+         *     closing with a `done` event once the run finishes.
          */
         get: operations["run_events_api_runs__run_id__events_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/runs/{run_id}/log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Run Log
+         * @description The full captured log for `run_id` as a plain array -- run-
+         *     history detail replay (deliverable 2), no SSE subscription needed
+         *     for a run that has already finished (or is still running; this
+         *     still returns whatever has been captured so far).
+         */
+        get: operations["get_run_log_api_runs__run_id__log_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/runs/{run_id}/verdict-diff": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Run Verdict Diff
+         * @description The before/after health-snapshot pair for `run_id`'s exit summary
+         *     (deliverable 1) -- both real report reads, never a recomputed
+         *     verdict (charter sec. 3.2).
+         */
+        get: operations["get_run_verdict_diff_api_runs__run_id__verdict_diff_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1189,6 +1255,24 @@ export interface components {
             detail?: components["schemas"]["ValidationError"][];
         };
         /**
+         * HealthSnapshot
+         * @description A best-effort project-health reading (same two reports
+         *     `graphite.server.routes.health.get_project_health` combines), taken
+         *     once before a run starts and once after it finishes, so the exit
+         *     summary can render a real before -> after verdict diff (deliverable
+         *     1) instead of a client-computed one. `None` fields mean the report
+         *     was not present/parseable at that moment (e.g. no prior build) --
+         *     an honest gap, not a zero.
+         */
+        HealthSnapshot: {
+            /** Release Ok */
+            release_ok?: boolean | null;
+            /** Total Obligations */
+            total_obligations?: number | null;
+            /** Violated */
+            violated?: number | null;
+        };
+        /**
          * Invalid
          * @description A present-but-unverifiable attestation: INDETERMINATE, never a verdict.
          */
@@ -1434,15 +1518,19 @@ export interface components {
          *     status, timestamps, and the project root it ran against. The log
          *     file and (for `--json` verbs) the stdout JSON blob live alongside
          *     it as sibling files (`<id>.log`, `<id>.stdout.json`), not inlined
-         *     here -- this record is the cheap-to-list summary row.
+         *     here -- this record is the cheap-to-list summary row. `before_health`
+         *     is captured at `start_run` time (deliverable 1's diff baseline).
          */
         RunRecord: {
             /** Args */
             args: string[];
+            before_health?: components["schemas"]["HealthSnapshot"] | null;
             /** Exit Code */
             exit_code?: number | null;
             /** Finished At */
             finished_at?: string | null;
+            /** Pid */
+            pid?: number | null;
             /** Project Root */
             project_root: string;
             /** Run Id */
@@ -1453,7 +1541,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "running" | "ok" | "failed";
+            status: "running" | "ok" | "failed" | "cancelled";
             /**
              * Verb
              * @enum {string}
@@ -1559,6 +1647,16 @@ export interface components {
              * @description The enumerated values, as text.
              */
             values: string[];
+        };
+        /**
+         * VerdictDiff
+         * @description The before/after health-snapshot pair for one run's exit summary
+         *     (deliverable 1) -- both sides real reports, never a recomputed
+         *     verdict.
+         */
+        VerdictDiff: {
+            after: components["schemas"]["HealthSnapshot"];
+            before: components["schemas"]["HealthSnapshot"];
         };
     };
     responses: never;
@@ -2216,6 +2314,37 @@ export interface operations {
             };
         };
     };
+    cancel_project_run_api_runs__run_id__cancel_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunRecord"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     run_events_api_runs__run_id__events_get: {
         parameters: {
             query?: never;
@@ -2234,6 +2363,68 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_run_log_api_runs__run_id__log_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_run_verdict_diff_api_runs__run_id__verdict_diff_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerdictDiff"];
                 };
             };
             /** @description Validation Error */

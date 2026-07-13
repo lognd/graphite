@@ -13,6 +13,7 @@ import type {
   AuditIndex,
   AuditRow,
   CalcSheet,
+  ConfigEntry,
   GateSummary,
   Lockfile,
   ManifestSummary,
@@ -20,6 +21,7 @@ import type {
   ObligationsResponse,
   ProjectHealth,
   ProjectInfo,
+  RunRecord,
   StagedBuildReport,
 } from '../api/client';
 
@@ -593,3 +595,44 @@ export const mockManifest: ManifestSummary = {
     ],
   },
 };
+
+// RECORDED shape from `regolith config list`'s stable stdout format
+// (graphite/service/config_cli.py); values here are `regolith`'s real
+// registered defaults for a fresh project, so the run console's
+// config-aware default-args attribution has something honest to show
+// in mock mode.
+export const mockConfigEntries: ConfigEntry[] = [
+  { key: 'build.release', value: 'false', source: 'default' },
+  { key: 'ui.port', value: '8765', source: 'default' },
+];
+
+// Two synthesized run-history rows (WO-G5 deliverable 2 mock mode --
+// there is no real subprocess to record from in VITE_USE_MOCKS=1 dev
+// mode; shapes are the real RunRecord wire shape, values are honest
+// placeholders, not a recorded run).
+export const mockRuns: RunRecord[] = [
+  {
+    run_id: 'a1b2c3d4e5f6',
+    verb: 'check',
+    project_root: '/tmp/examples.timber_pavilion',
+    args: ['program.calx'],
+    status: 'ok',
+    started_at: '2026-07-13T10:00:00+00:00',
+    finished_at: '2026-07-13T10:00:03+00:00',
+    exit_code: 0,
+    pid: null,
+    before_health: { release_ok: null, violated: null, total_obligations: null },
+  },
+  {
+    run_id: 'f6e5d4c3b2a1',
+    verb: 'build',
+    project_root: '/tmp/examples.timber_pavilion',
+    args: ['--release', 'program.calx'],
+    status: 'failed',
+    started_at: '2026-07-13T09:55:00+00:00',
+    finished_at: '2026-07-13T09:55:05+00:00',
+    exit_code: 1,
+    pid: null,
+    before_health: { release_ok: false, violated: 1, total_obligations: 2 },
+  },
+];
