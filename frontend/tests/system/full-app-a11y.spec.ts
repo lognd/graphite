@@ -84,9 +84,7 @@ const ARTIFACT_FAMILIES: Array<[label: string, testid: string]> = [
 ];
 
 for (const [label] of ARTIFACT_FAMILIES) {
-  test(`axe: artifacts/${label} family view has no violations (dark + light)`, async ({
-    page,
-  }) => {
+  test(`axe: artifacts/${label} family view has no violations (dark + light)`, async ({ page }) => {
     await page.goto('/artifacts');
     await page.getByLabel('project').selectOption(PROJECT);
     await page.getByRole('link', { name: new RegExp(label) }).click();

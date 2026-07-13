@@ -44,6 +44,11 @@
 .gr-data-table__scroll {
   overflow: auto;
   flex: 1 1 auto;
+  /* Allow the scroll viewport to actually shrink inside flex-column
+     layouts (obligation explorer's flat mode) -- without this the div
+     grows to its content and virtualization has nothing to window
+     against (WO-G8 perf pass). */
+  min-height: 0;
 }
 
 .gr-data-table__table {
@@ -82,6 +87,10 @@
 }
 
 .gr-data-table__tr {
+  /* Fixed row height (WO-G8 perf pass): DataTable.tsx's ROW_HEIGHT_PX
+     constant assumes this exact value for its virtualization math past
+     VIRTUALIZE_ROW_THRESHOLD rows -- change both together. */
+  height: 32px;
   border-bottom: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
   cursor: pointer;
 }

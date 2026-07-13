@@ -9,6 +9,19 @@ import type { ReactNode } from 'react';
 import { EmptyState } from '../EmptyState/EmptyState';
 import './DataTable.css';
 
+// WO-G8 deliverable 2: the obligation explorer (and any other DataTable
+// consumer) must stay responsive past 1k rows -- the real ../lithos fleet
+// ships projects with 200+ obligations, and a synthetic 2k-row mock
+// exercises the windowing path in vitest. Below this row count, plain
+// rendering keeps the DOM simpler (a11y tooling, existing keyboard-nav
+// tests) with no visible behavior change; above it, only rows in and
+// around the scrolled viewport are ever mounted. ROW_HEIGHT_PX must match
+// DataTable.css's fixed `.gr-data-table__tr` height -- the ONE place both
+// are defined, see the CSS comment.
+const VIRTUALIZE_ROW_THRESHOLD = 1000;
+const ROW_HEIGHT_PX = 32;
+const OVERSCAN_ROWS = 8;
+
 export interface DataTableColumn<T> {
   key: string;
   header: string;
@@ -41,6 +54,8 @@ export function DataTable<T>({
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [activeRow, setActiveRow] = useState(0);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(480);
 
   const filtered = useMemo(() => {
     if (!filter) return rows;
@@ -100,6 +115,24 @@ export function DataTable<T>({
     URL.revokeObjectURL(url);
   }
 
+  const virtualize = sorted.length > VIRTUALIZE_ROW_THRESHOLD;
+  const startIndex = virtualize
+    ? Math.max(0, Math.floor(scrollTop / ROW_HEIGHT_PX) - OVERSCAN_ROWS)
+    : 0;
+  const visibleCount = virtualize
+    ? Math.ceil(viewportHeight / ROW_HEIGHT_PX) + OVERSCAN_ROWS * 2
+    : sorted.length;
+  const endIndex = virtualize ? Math.min(sorted.length, startIndex + visibleCount) : sorted.length;
+  const visibleRows = virtualize ? sorted.slice(startIndex, endIndex) : sorted;
+  const topPad = virtualize ? startIndex * ROW_HEIGHT_PX : 0;
+  const bottomPad = virtualize ? (sorted.length - endIndex) * ROW_HEIGHT_PX : 0;
+
+  function onScroll(e: React.UIEvent<HTMLDivElement>) {
+    if (!virtualize) return;
+    setScrollTop(e.currentTarget.scrollTop);
+    setViewportHeight(e.currentTarget.clientHeight);
+  }
+
   function onKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'j') {
       setActiveRow((i) => Math.min(i + 1, sorted.length - 1));
@@ -138,8 +171,10 @@ export function DataTable<T>({
           className="gr-data-table__scroll"
           tabIndex={0}
           onKeyDown={onKeyDown}
+          onScroll={onScroll}
           aria-label="results"
           data-row-count={sorted.length}
+          data-virtualized={virtualize}
         >
           <table className="gr-data-table__table">
             <thead className="gr-data-table__thead">
@@ -181,20 +216,33 @@ export function DataTable<T>({
               </tr>
             </thead>
             <tbody>
-              {sorted.map((row, i) => (
-                <tr
-                  key={rowKey(row)}
-                  className={`gr-data-table__tr${i === activeRow ? ' gr-data-table__tr--active' : ''}`}
-                  aria-rowindex={i + 1}
-                  onClick={() => setActiveRow(i)}
-                >
-                  {columns.map((col) => (
-                    <td key={col.key} className="gr-data-table__td">
-                      {col.render ? col.render(row) : col.accessor(row)}
-                    </td>
-                  ))}
+              {topPad > 0 ? (
+                <tr aria-hidden="true" style={{ height: topPad }}>
+                  <td colSpan={columns.length} />
                 </tr>
-              ))}
+              ) : null}
+              {visibleRows.map((row, visibleI) => {
+                const i = virtualize ? startIndex + visibleI : visibleI;
+                return (
+                  <tr
+                    key={rowKey(row)}
+                    className={`gr-data-table__tr${i === activeRow ? ' gr-data-table__tr--active' : ''}`}
+                    aria-rowindex={i + 1}
+                    onClick={() => setActiveRow(i)}
+                  >
+                    {columns.map((col) => (
+                      <td key={col.key} className="gr-data-table__td">
+                        {col.render ? col.render(row) : col.accessor(row)}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })}
+              {bottomPad > 0 ? (
+                <tr aria-hidden="true" style={{ height: bottomPad }}>
+                  <td colSpan={columns.length} />
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </div>
