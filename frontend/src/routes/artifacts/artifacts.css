@@ -1,0 +1,86 @@
+/* Shared styling for the artifact-family views (calc book, calc sheet,
+ * drawings, BOM, boards) -- one stylesheet so the table/list conventions
+ * don't drift across five separate route files (dedup law 04.2). */
+
+.gr-calc-sheet__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--graphite-space-4);
+}
+
+.gr-calc-sheet__meta {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--graphite-space-2) var(--graphite-space-4);
+  margin: var(--graphite-space-4) 0;
+}
+
+.gr-calc-sheet__meta dt {
+  margin: 0;
+}
+
+.gr-calc-sheet__meta dd {
+  margin: 0;
+}
+
+.gr-calc-sheet__inputs {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.gr-calc-sheet__inputs th,
+.gr-calc-sheet__inputs td {
+  border: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  padding: var(--graphite-space-1) var(--graphite-space-2);
+  text-align: left;
+}
+
+.gr-calc-sheet__chain {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--graphite-space-1);
+}
+
+.gr-calc-sheet__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--graphite-space-4);
+  margin-top: var(--graphite-space-4);
+}
+
+.gr-calc-sheet__raw {
+  background: var(--graphite-color-raised);
+  border: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  padding: var(--graphite-space-2);
+  overflow: auto;
+  max-height: 24rem;
+}
+
+.gr-drawing-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--graphite-space-1);
+}
+
+.gr-drawing-view__actions {
+  margin-top: var(--graphite-space-4);
+}
+
+.gr-artifacts-hub__families {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--graphite-space-4);
+}
+
+.gr-artifacts-hub__family {
+  border: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  padding: var(--graphite-space-4);
+  min-width: 12rem;
+}
