@@ -1,79 +1,68 @@
 // Committed fixture data for VITE_USE_MOCKS=1 dev mode and for vitest
-// component tests (spec 02.5). Recorded shape mirrors WO-G1's fixture
-// project; values are representative, not fabricated live data (charter
-// 3.2 -- graphite never invents numbers in the real app, but a mock fixture
-// standing in for the server during dev is the sanctioned exception).
+// component tests (spec 02.5). RECORDED from the WO-G1 fixture project
+// (tests/fixtures/timber_pavilion: its audit_index.json summary and first
+// rows) so the mock shapes are the real wire shapes, never invented
+// (charter 3.2).
 
-import type { FleetHealthSummary, ObligationRow, ProjectSummary } from '../api/api.generated';
+import type { ObligationsResponse, ProjectHealth, ProjectInfo } from '../api/client';
 
-export const mockProjects: ProjectSummary[] = [
+export const mockProjects: ProjectInfo[] = [
   {
-    id: 'flagship-printer-a',
-    name: 'flagship-printer-a',
-    designHashShort: 'a3f9c21',
-    schemaVersion: 26,
-    lastReportAt: '2026-07-12T18:32:00Z',
-    verdict: 'discharged',
-  },
-  {
-    id: 'flagship-printer-b',
-    name: 'flagship-printer-b',
-    designHashShort: '7be0142',
-    schemaVersion: 26,
-    lastReportAt: '2026-07-12T18:40:00Z',
-    verdict: 'deferred',
-  },
-  {
-    id: 'bearing-rig',
-    name: 'bearing-rig',
-    designHashShort: '0c88ee1',
-    schemaVersion: 26,
-    lastReportAt: '2026-07-11T09:12:00Z',
-    verdict: 'violated',
+    name: 'examples.timber_pavilion',
+    version: '0.1.0',
+    root: 'tests/fixtures/timber_pavilion',
+    manifest_path: 'tests/fixtures/timber_pavilion/magnetite.toml',
+    has_build_report: true,
+    has_dist: true,
+    has_lockfile: true,
   },
 ];
 
-export const mockFleetHealth: FleetHealthSummary = {
-  totalProjects: 3,
-  byVerdict: {
-    discharged: 1,
-    violated: 1,
-    deferred: 1,
-    'accepted-deviation': 0,
-    excluded: 0,
+export const mockProjectHealth: ProjectHealth = {
+  release_ok: true,
+  obligation_summary: {
+    accepted_deviation: 3,
+    accepted_rows: 4,
+    deferred: 0,
+    discharged: 6,
+    obligations: 10,
+    violated: 0,
   },
-  generatedAt: '2026-07-12T18:40:00Z',
 };
 
-export const mockObligations: ObligationRow[] = [
-  {
-    id: 'OB-001',
-    family: 'thermal',
-    reason: null,
-    fNumber: null,
-    verdict: 'discharged',
-    marginValue: 12.4,
-    marginUnit: 'degC',
-    marginLimit: 20,
-  },
-  {
-    id: 'OB-002',
-    family: 'structural',
-    reason: 'load case exceeds rated envelope',
-    fNumber: 'F118',
-    verdict: 'violated',
-    marginValue: -3.2,
-    marginUnit: 'mm',
-    marginLimit: 0,
-  },
-  {
-    id: 'OB-003',
-    family: 'electrical',
-    reason: 'awaiting derating study',
-    fNumber: 'F121',
-    verdict: 'deferred',
-    marginValue: null,
-    marginUnit: null,
-    marginLimit: null,
-  },
-];
+export const mockObligations: ObligationsResponse = {
+  summary: mockProjectHealth.obligation_summary,
+  groups: null,
+  rows: [
+    {
+      claim_name: 'bearing',
+      content_hash: '2594cf83371265486ae8f40dcab0c1f69667b78ced5035585041ddc5ce3abca4',
+      detail:
+        'waiver bearing by doc(memos/release-residuals.md) memo=blake3:2f32189789e28f0088479e890998248dff6ad60081d7600de6b47470e0089b22',
+      disposition: 'accepted_deviation',
+      subject_anchor: 'afc15fc09a7f',
+    },
+    {
+      claim_name: 'construction',
+      content_hash: 'b49951b61ab79cf3debb8113884fb5653ce23fb1484e0610aa3ca0c898b51703',
+      detail: 'construction::',
+      disposition: 'calc_sheet',
+      subject_anchor: '',
+    },
+    {
+      claim_name: 'deflect',
+      content_hash: 'c02c7276e99447cb34f28bec429399b39fefdbb43b72e8b061f5469fb54b8b2f',
+      detail: 'deflect::afc15fc09a7f',
+      disposition: 'calc_sheet',
+      subject_anchor: 'afc15fc09a7f',
+    },
+    {
+      claim_name: 'import:std.civil',
+      content_hash: 'ead667e9a11ae76416bbe22f3d931c6823f050424db2b90539efae28cadc0c35',
+      detail:
+        'waiver import(std.civil) by doc(memos/release-residuals.md) memo=blake3:2f32189789e28f0088479e890998248dff6ad60081d7600de6b47470e0089b22',
+      disposition: 'accepted_deviation',
+      subject_anchor: '2f5a6b49526e',
+    },
+  ],
+};

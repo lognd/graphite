@@ -1,0 +1,13 @@
+drawing audit: contract_graph
+sheet CGR-contract_graph rev A
+  dimensions:
+rules:
+  [PASS] title-block-completeness (per: ASME Y14.1 title block content) sheet=CGR-contract_graph: all title-block fields populated
+  [PASS] view-scale-sanity (per: ASME Y14.5 4.2 (scale designation)) sheet=CGR-contract_graph: every view scale is positive
+  [PASS] minimum-text-height (per: ASME Y14.2 (min 2.5mm lettering)) sheet=CGR-contract_graph: every annotation meets minimum text height
+  [PASS] no-overlapping-annotations (per: ISO 128-24 (legibility, non-overlapping text)) sheet=CGR-contract_graph: no two annotations share an anchor
+  [PASS] gdt-datum-discipline (per: ASME Y14.5 sec. 4 (datum reference frames)) sheet=CGR-contract_graph: every GD&T frame cites a datum
+  [PASS] dimension-completeness (per: ASME Y14.5 1.4 (each feature dimensioned exactly once)) sheet=CGR-contract_graph: no feature is over-dimensioned
+coverage:
+  covered: (none)
+  missing: (none)

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="431.8000mm" height="279.4000mm" viewBox="0 0 431.8000 279.4000">
+<g class="sheet" transform="translate(0,0.0000)">
+<rect class="frame" x="10.0000" y="10.0000" width="411.8000" height="259.4000" fill="none" stroke="black"/>
+<rect class="title-block-frame" x="341.8000" y="241.4000" width="80.0000" height="28.0000" fill="none" stroke="black"/>
+<text class="title-block-title" x="343.8000" y="246.4000">PavilionFrame Plan</text>
+<text class="title-block-drawing_number" x="343.8000" y="251.4000">PLN-PavilionFrame</text>
+<text class="title-block-revision" x="343.8000" y="256.4000">rev A</text>
+<text class="title-block-scale_label" x="343.8000" y="261.4000">scale NTS</text>
+<text class="title-block-subject" x="343.8000" y="266.4000">PavilionFrame</text>
+<g class="view" data-view="plan" transform="translate(31.3769,184.7077) scale(3.0754)">
+<use class="symbol" x="0.0000" y="0.0000" data-record="local-blake3:6860f6e3a7e45d126ff428f3370bcfcb7bb85578cd7390fcdaececfe8378720b"/>
+<use class="symbol" x="40.0000" y="0.0000" data-record="local-blake3:6860f6e3a7e45d126ff428f3370bcfcb7bb85578cd7390fcdaececfe8378720b"/>
+<use class="symbol" x="80.0000" y="0.0000" data-record="local-blake3:6860f6e3a7e45d126ff428f3370bcfcb7bb85578cd7390fcdaececfe8378720b"/>
+<use class="symbol" x="120.0000" y="0.0000" data-record="local-blake3:6860f6e3a7e45d126ff428f3370bcfcb7bb85578cd7390fcdaececfe8378720b"/>
+<use class="symbol" x="0.0000" y="-40.0000" data-record="local-blake3:6860f6e3a7e45d126ff428f3370bcfcb7bb85578cd7390fcdaececfe8378720b"/>
+<use class="symbol" x="40.0000" y="-40.0000" data-record="local-blake3:6860f6e3a7e45d126ff428f3370bcfcb7bb85578cd7390fcdaececfe8378720b"/>
+<line class="segment" x1="0.0000" y1="0.0000" x2="80.0000" y2="0.0000" stroke="black"/>
+<line class="segment" x1="0.0000" y1="0.0000" x2="80.0000" y2="0.0000" stroke="black"/>
+<line class="segment" x1="40.0000" y1="0.0000" x2="0.0000" y2="0.0000" stroke="black"/>
+<line class="segment" x1="120.0000" y1="0.0000" x2="80.0000" y2="0.0000" stroke="black"/>
+<line class="segment" x1="0.0000" y1="0.0000" x2="80.0000" y2="0.0000" stroke="black"/>
+</g>
+<circle class="dimension-leader" cx="154.3923" cy="184.7077" r="0.5"/><text class="dimension" x="154.3923" y="175.4815">member.length:G1=3.0000m</text>
+<circle class="dimension-leader" cx="154.3923" cy="184.7077" r="0.5"/><text class="dimension" x="154.3923" y="175.4815">member.length:G2=3.0000m</text>
+<circle class="dimension-leader" cx="92.8846" cy="184.7077" r="0.5"/><text class="dimension" x="92.8846" y="175.4815">member.length:P_A=3.0000m</text>
+<circle class="dimension-leader" cx="338.9154" cy="184.7077" r="0.5"/><text class="dimension" x="338.9154" y="175.4815">member.length:P_B=3.0000m</text>
+<circle class="dimension-leader" cx="154.3923" cy="184.7077" r="0.5"/><text class="dimension" x="154.3923" y="175.4815">member.length:Purlin=3.0000m</text>
+<text class="table-title" x="10.0000" y="241.4000">Member Schedule</text>
+<text class="table-row" x="10.0000" y="246.4000">G1|beam|3.000 m|sawn_38x286|spf_no1</text>
+<text class="table-row" x="10.0000" y="251.4000">G2|beam|3.000 m|sawn_38x235|spf_no1</text>
+<text class="table-row" x="10.0000" y="256.4000">P_A|column|3.000 m|sawn_150x150|sp_no2_treated</text>
+<text class="table-row" x="10.0000" y="261.4000">P_B|column|3.000 m|sawn_150x150|sp_no2_treated</text>
+<text class="table-row" x="10.0000" y="266.4000">Purlin|slab|3.000 m|sawn_50x100|spf_no2</text>
+</g>
+</svg>

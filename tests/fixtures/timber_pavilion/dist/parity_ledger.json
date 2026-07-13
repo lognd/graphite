@@ -1,0 +1,164 @@
+{
+  "subjects": [
+    "",
+    "2f5a6b49526e1e0e9d4e1cde71dcf8f4df99e5241bbff8e2cb8d40e37546d5ea",
+    "PavilionFrame",
+    "afc15fc09a7f96d3aa16c9753118ca3dca1c182433599910ca6bd636eb3afd22",
+    "bearing",
+    "cost",
+    "import(std",
+    "strength[Purlin]"
+  ],
+  "rows": [
+    {
+      "subject": "PavilionFrame",
+      "slot": "PavilionFrame.G1.section",
+      "value": "G1=sawn_38x286",
+      "cause": "optimize(mass_per_length, trace=blake3:1ed0051f835e0cbceda5cd9c50ed5a3257018c00dcad9bef1809d0d260ebd40b)",
+      "provenance_class": "optimize"
+    },
+    {
+      "subject": "PavilionFrame",
+      "slot": "PavilionFrame.G2.section",
+      "value": "G2=sawn_38x235",
+      "cause": "optimize(mass_per_length, trace=blake3:1d71622442e0e0d6210d8e44f54ea9e4d0eb987c091c00c7940432b01861cfad)",
+      "provenance_class": "optimize"
+    },
+    {
+      "subject": "bearing",
+      "slot": "bearing",
+      "value": "2594cf83371265486ae8f40dcab0c1f69667b78ced5035585041ddc5ce3abca4",
+      "cause": "waive",
+      "provenance_class": "report_error"
+    },
+    {
+      "subject": "cost",
+      "slot": "cost.profile",
+      "value": "construction",
+      "cause": "cost_profile(manifest_default)",
+      "provenance_class": "process"
+    },
+    {
+      "subject": "import(std",
+      "slot": "import(std.civil)",
+      "value": "ead667e9a11ae76416bbe22f3d931c6823f050424db2b90539efae28cadc0c35",
+      "cause": "waive",
+      "provenance_class": "report_error"
+    },
+    {
+      "subject": "strength[Purlin]",
+      "slot": "strength[Purlin]",
+      "value": "0e929836dab7695ace513f7372595e4d0a779f7b282764bc7bb708fc988781e1",
+      "cause": "waive",
+      "provenance_class": "report_error"
+    }
+  ],
+  "demands": [
+    {
+      "subject_ref": "",
+      "key": "blake3:be7c5f08294d6372ace2e77ba60fdaf6b21bb80fc412f9ef7919abaf7de2f635",
+      "status": "discharged",
+      "basis": null
+    },
+    {
+      "subject_ref": "2f5a6b49526e1e0e9d4e1cde71dcf8f4df99e5241bbff8e2cb8d40e37546d5ea",
+      "key": "blake3:2dbb5542da1969fba1cd18e5eb9d88a8988628e5df969bc25ceaa28e817aa7d5",
+      "status": "deviation",
+      "basis": "module-import conformance edge: no scalar window exists on a bare import (D195.3); addressable per D213"
+    },
+    {
+      "subject_ref": "2f5a6b49526e1e0e9d4e1cde71dcf8f4df99e5241bbff8e2cb8d40e37546d5ea",
+      "key": "blake3:2dbb5542da1969fba1cd18e5eb9d88a8988628e5df969bc25ceaa28e817aa7d5",
+      "status": "deviation",
+      "basis": "module-import conformance edge: no scalar window exists on a bare import (D195.3); addressable per D213"
+    },
+    {
+      "subject_ref": "2f5a6b49526e1e0e9d4e1cde71dcf8f4df99e5241bbff8e2cb8d40e37546d5ea",
+      "key": "blake3:2dbb5542da1969fba1cd18e5eb9d88a8988628e5df969bc25ceaa28e817aa7d5",
+      "status": "deviation",
+      "basis": "module-import conformance edge: no scalar window exists on a bare import (D195.3); addressable per D213"
+    },
+    {
+      "subject_ref": "2f5a6b49526e1e0e9d4e1cde71dcf8f4df99e5241bbff8e2cb8d40e37546d5ea",
+      "key": "blake3:2dbb5542da1969fba1cd18e5eb9d88a8988628e5df969bc25ceaa28e817aa7d5",
+      "status": "deviation",
+      "basis": "module-import conformance edge: no scalar window exists on a bare import (D195.3); addressable per D213"
+    },
+    {
+      "subject_ref": "afc15fc09a7f96d3aa16c9753118ca3dca1c182433599910ca6bd636eb3afd22",
+      "key": "blake3:449eb1b9547a9e0f2d09db513de7d7dc6c0733d332dd1240fec058d0b591c384",
+      "status": "discharged",
+      "basis": null
+    },
+    {
+      "subject_ref": "afc15fc09a7f96d3aa16c9753118ca3dca1c182433599910ca6bd636eb3afd22",
+      "key": "blake3:64504c73263e42abe3542da6b732601745ba55e192400c9138ea5635fc5bc262",
+      "status": "discharged",
+      "basis": null
+    },
+    {
+      "subject_ref": "afc15fc09a7f96d3aa16c9753118ca3dca1c182433599910ca6bd636eb3afd22",
+      "key": "blake3:6be7feff60fd492e7cfd57fdb2f85d3fc5981f70d3ed48879d7e50e59c22ad3a",
+      "status": "discharged",
+      "basis": null
+    },
+    {
+      "subject_ref": "afc15fc09a7f96d3aa16c9753118ca3dca1c182433599910ca6bd636eb3afd22",
+      "key": "blake3:6df1be9aca04ce2e605a29c80f5265ac984c96062f7ab626e8dd33c3cfd365e4",
+      "status": "deviation",
+      "basis": "footing FA reaction path not closed in the single modelled bay (WO-74 wall, frame.calx sec. 2); footing sized against a separately-computed bay reaction"
+    },
+    {
+      "subject_ref": "afc15fc09a7f96d3aa16c9753118ca3dca1c182433599910ca6bd636eb3afd22",
+      "key": "blake3:6df1be9aca04ce2e605a29c80f5265ac984c96062f7ab626e8dd33c3cfd365e4",
+      "status": "deviation",
+      "basis": "footing FA reaction path not closed in the single modelled bay (WO-74 wall, frame.calx sec. 2); footing sized against a separately-computed bay reaction"
+    },
+    {
+      "subject_ref": "afc15fc09a7f96d3aa16c9753118ca3dca1c182433599910ca6bd636eb3afd22",
+      "key": "blake3:70a9008522670976ea7fcf1e6be7d139c52e657d94b43d197eca7ef867e7d91e",
+      "status": "deviation",
+      "basis": "pressure-only purlin defers alone by design (D194 ruling 3 / WO-85 wall note 4): its kPa load is a tributary source fact, not its own beam demand"
+    },
+    {
+      "subject_ref": "afc15fc09a7f96d3aa16c9753118ca3dca1c182433599910ca6bd636eb3afd22",
+      "key": "blake3:70a9008522670976ea7fcf1e6be7d139c52e657d94b43d197eca7ef867e7d91e",
+      "status": "deviation",
+      "basis": "pressure-only purlin defers alone by design (D194 ruling 3 / WO-85 wall note 4): its kPa load is a tributary source fact, not its own beam demand"
+    },
+    {
+      "subject_ref": "afc15fc09a7f96d3aa16c9753118ca3dca1c182433599910ca6bd636eb3afd22",
+      "key": "blake3:a43277e886a72011f427b059f7854c6377e61501230f6e0719d705569fea4c0c",
+      "status": "discharged",
+      "basis": null
+    },
+    {
+      "subject_ref": "afc15fc09a7f96d3aa16c9753118ca3dca1c182433599910ca6bd636eb3afd22",
+      "key": "blake3:dcfd893dd9d0b816512f381c75c5e85e3c18922aa7b04371d9fc5955672a9487",
+      "status": "discharged",
+      "basis": null
+    }
+  ],
+  "assumed_waived": [
+    {
+      "kind": "waived",
+      "target": "bearing",
+      "basis": "footing FA reaction path not closed in the single modelled bay (WO-74 wall, frame.calx sec. 2); footing sized against a separately-computed bay reaction"
+    },
+    {
+      "kind": "waived",
+      "target": "import(std.civil)",
+      "basis": "module-import conformance edge: no scalar window exists on a bare import (D195.3); addressable per D213"
+    },
+    {
+      "kind": "waived",
+      "target": "strength[Purlin]",
+      "basis": "pressure-only purlin defers alone by design (D194 ruling 3 / WO-85 wall note 4): its kPa load is a tributary source fact, not its own beam demand"
+    }
+  ],
+  "report_errors": [
+    "bearing = 2594cf83371265486ae8f40dcab0c1f69667b78ced5035585041ddc5ce3abca4  cause='waive' (unrecognized cause prefix)",
+    "import(std.civil) = ead667e9a11ae76416bbe22f3d931c6823f050424db2b90539efae28cadc0c35  cause='waive' (unrecognized cause prefix)",
+    "strength[Purlin] = 0e929836dab7695ace513f7372595e4d0a779f7b282764bc7bb708fc988781e1  cause='waive' (unrecognized cause prefix)"
+  ]
+}

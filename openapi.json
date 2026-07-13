@@ -1,0 +1,2722 @@
+{
+  "components": {
+    "schemas": {
+      "AcceptanceOutcome": {
+        "description": "The release gate's read of the ledger (WO-98).\n\n``accepted_hashes`` are the obligation content hashes an\nevidence-carrying, trust-floor-meeting, unexpired waiver accepted --\nthe gate removes them from the refusing counts (kept DISTINCT as\n``GateCounts.accepted_deviation``, never folded into ``discharged``).\n``ledger_blocked`` is set when the ledger itself carries a hole that\nrefuses independent of the results (a ``todo!``/``assume!`` that\nemitted no obligation of its own). ``refusals``/``errors`` are the\nhuman-readable reasons the gate reports.",
+        "properties": {
+          "accepted_hashes": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Accepted Hashes",
+            "type": "array"
+          },
+          "cli_accepts_used": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Cli Accepts Used",
+            "type": "array"
+          },
+          "deviations": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/Deviation"
+            },
+            "title": "Deviations",
+            "type": "array"
+          },
+          "errors": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "ledger_blocked": {
+            "default": false,
+            "title": "Ledger Blocked",
+            "type": "boolean"
+          },
+          "refusals": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Refusals",
+            "type": "array"
+          }
+        },
+        "title": "AcceptanceOutcome",
+        "type": "object"
+      },
+      "ArtifactEntry": {
+        "description": "One indexed file under a project's `dist/`: its content hash,\na UI-facing relative path (display only, never used to serve),\nsize, and guessed MIME type.",
+        "properties": {
+          "content_hash": {
+            "title": "Content Hash",
+            "type": "string"
+          },
+          "content_type": {
+            "title": "Content Type",
+            "type": "string"
+          },
+          "relpath": {
+            "title": "Relpath",
+            "type": "string"
+          },
+          "size": {
+            "title": "Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "content_hash",
+          "relpath",
+          "size",
+          "content_type"
+        ],
+        "title": "ArtifactEntry",
+        "type": "object"
+      },
+      "AuditIndex": {
+        "description": "The package-level audit index: total accounting + per-obligation rows.",
+        "properties": {
+          "project": {
+            "title": "Project",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/AuditRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/AuditSummary"
+          }
+        },
+        "required": [
+          "project",
+          "summary",
+          "rows"
+        ],
+        "title": "AuditIndex",
+        "type": "object"
+      },
+      "AuditRow": {
+        "description": "One obligation's disposition in the audit index (D221.2).\n\n``detail`` names the exact evidence: for a ``calc_sheet`` the sheet\nid; for an ``accepted_deviation`` the waiver target + its memo digest\n(cross-linking ``acceptance_ledger.json``, never duplicating it); for\na ``deferred``/``violated`` row the named reason.",
+        "properties": {
+          "claim_name": {
+            "title": "Claim Name",
+            "type": "string"
+          },
+          "content_hash": {
+            "title": "Content Hash",
+            "type": "string"
+          },
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "disposition": {
+            "enum": [
+              "calc_sheet",
+              "accepted_deviation",
+              "deferred",
+              "violated"
+            ],
+            "title": "Disposition",
+            "type": "string"
+          },
+          "subject_anchor": {
+            "title": "Subject Anchor",
+            "type": "string"
+          }
+        },
+        "required": [
+          "claim_name",
+          "subject_anchor",
+          "content_hash",
+          "disposition",
+          "detail"
+        ],
+        "title": "AuditRow",
+        "type": "object"
+      },
+      "AuditSummary": {
+        "description": "The audit index's obligation accounting (D221.2).\n\nTWO honest denominators, both reported so they can never be confused:\n\n* the CENSUS-shape counts (``discharged`` = results with no deferral;\n  ``accepted_deviation`` = the number of UNIQUE accepted obligation\n  content addresses -- exactly ``len(acceptance.accepted_hashes)``,\n  the same value ``fleet._census_from_report`` records; ``violated``)\n  so the audit index reconciles with ``fleet_census.json`` field for\n  field via :meth:`census_row`;\n* the ROW partition (``discharged`` + ``accepted_rows`` + ``deferred``\n  + ``violated`` == ``obligations``), because a calc sheet and an\n  audit row are PER OBLIGATION and forall-expanded obligation\n  instances legitimately share one content address -- so the number\n  of accepted ROWS (:attr:`accepted_rows`) can exceed the number of\n  unique accepted addresses (:attr:`accepted_deviation`). The row\n  partition is the zero-unexplained property (:meth:`balanced`).",
+        "properties": {
+          "accepted_deviation": {
+            "title": "Accepted Deviation",
+            "type": "integer"
+          },
+          "accepted_rows": {
+            "title": "Accepted Rows",
+            "type": "integer"
+          },
+          "deferred": {
+            "title": "Deferred",
+            "type": "integer"
+          },
+          "discharged": {
+            "title": "Discharged",
+            "type": "integer"
+          },
+          "obligations": {
+            "title": "Obligations",
+            "type": "integer"
+          },
+          "violated": {
+            "title": "Violated",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "obligations",
+          "discharged",
+          "accepted_deviation",
+          "accepted_rows",
+          "deferred",
+          "violated"
+        ],
+        "title": "AuditSummary",
+        "type": "object"
+      },
+      "Body_set_project_config_api_projects__project__config__key__put": {
+        "properties": {
+          "level": {
+            "enum": [
+              "global",
+              "local"
+            ],
+            "title": "Level",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "level"
+        ],
+        "title": "Body_set_project_config_api_projects__project__config__key__put",
+        "type": "object"
+      },
+      "Body_start_project_run_api_projects__project__runs_post": {
+        "properties": {
+          "args": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Args",
+            "type": "array"
+          },
+          "verb": {
+            "enum": [
+              "build",
+              "ship",
+              "test",
+              "optimize",
+              "check",
+              "preview"
+            ],
+            "title": "Verb",
+            "type": "string"
+          }
+        },
+        "required": [
+          "verb"
+        ],
+        "title": "Body_start_project_run_api_projects__project__runs_post",
+        "type": "object"
+      },
+      "BuildReport": {
+        "description": "The outcome of one orchestrated build at a given tier.",
+        "properties": {
+          "acceptance": {
+            "$ref": "#/components/schemas/AcceptanceOutcome",
+            "default": {
+              "accepted_hashes": [],
+              "cli_accepts_used": [],
+              "deviations": [],
+              "errors": [],
+              "ledger_blocked": false,
+              "refusals": []
+            }
+          },
+          "cache_stats": {
+            "$ref": "#/components/schemas/CacheStats",
+            "default": {
+              "hits": 0,
+              "misses": 0
+            }
+          },
+          "cost_estimates": {
+            "default": [],
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Cost Estimates",
+            "type": "array"
+          },
+          "cost_profile": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Profile"
+          },
+          "cost_record_pins": {
+            "default": [],
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Cost Record Pins",
+            "type": "array"
+          },
+          "fluid_record_pins": {
+            "default": [],
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Fluid Record Pins",
+            "type": "array"
+          },
+          "frame_lock_rows": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/LockRow"
+            },
+            "title": "Frame Lock Rows",
+            "type": "array"
+          },
+          "frame_record_pins": {
+            "default": [],
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Frame Record Pins",
+            "type": "array"
+          },
+          "loop_iterations": {
+            "default": 0,
+            "title": "Loop Iterations",
+            "type": "integer"
+          },
+          "material_record_pins": {
+            "default": [],
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Material Record Pins",
+            "type": "array"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "payload_json": {
+            "contentMediaType": "application/octet-stream",
+            "default": "",
+            "title": "Payload Json",
+            "type": "string"
+          },
+          "plan_record_pins": {
+            "default": [],
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Plan Record Pins",
+            "type": "array"
+          },
+          "plugin_errors": {
+            "default": [],
+            "items": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/DuplicateModelId"
+                },
+                {
+                  "$ref": "#/components/schemas/EntryPointRaised"
+                },
+                {
+                  "$ref": "#/components/schemas/MethodNamedKind"
+                },
+                {
+                  "$ref": "#/components/schemas/DuplicatePluginId"
+                },
+                {
+                  "$ref": "#/components/schemas/MalformedPluginManifest"
+                },
+                {
+                  "$ref": "#/components/schemas/PluginEntryPointRaised"
+                }
+              ]
+            },
+            "title": "Plugin Errors",
+            "type": "array"
+          },
+          "release_ok": {
+            "default": true,
+            "title": "Release Ok",
+            "type": "boolean"
+          },
+          "rendered": {
+            "default": "",
+            "title": "Rendered",
+            "type": "string"
+          },
+          "results": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ObligationResult"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "tier": {
+            "$ref": "#/components/schemas/BuildTier"
+          },
+          "unresolved": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ObligationResult"
+            },
+            "title": "Unresolved",
+            "type": "array"
+          }
+        },
+        "required": [
+          "tier",
+          "ok"
+        ],
+        "title": "BuildReport",
+        "type": "object"
+      },
+      "BuildTier": {
+        "description": "The build ladder, ordered by how much work the tier performs.\n\nThe integer value IS the order (``IntEnum``): higher tiers include the\nlower tiers' work, so ``BuildTier.RELEASE > BuildTier.CHECK`` and\n:meth:`includes` are the same fact.",
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "title": "BuildTier",
+        "type": "integer"
+      },
+      "CacheStats": {
+        "description": "Hit/miss counters for one orchestration run (observability).",
+        "properties": {
+          "hits": {
+            "default": 0,
+            "title": "Hits",
+            "type": "integer"
+          },
+          "misses": {
+            "default": 0,
+            "title": "Misses",
+            "type": "integer"
+          }
+        },
+        "title": "CacheStats",
+        "type": "object"
+      },
+      "CalcInput": {
+        "description": "One input to a calc sheet's obligation, with its provenance pin.\n\n``value`` is the datum as written (unit-carrying text is kept\nverbatim -- the source is the truth, never re-normalized); ``pin`` is\nthe content address for a ``record_ref`` (else empty). ``source`` is\nthe human-readable origin (the record name, the literal expression,\nor the derived value-source text).",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "pin": {
+            "default": "",
+            "title": "Pin",
+            "type": "string"
+          },
+          "provenance": {
+            "enum": [
+              "record_ref",
+              "declared_literal",
+              "derived",
+              "unresolved"
+            ],
+            "title": "Provenance",
+            "type": "string"
+          },
+          "source": {
+            "default": "",
+            "title": "Source",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "value",
+          "provenance"
+        ],
+        "title": "CalcInput",
+        "type": "object"
+      },
+      "CalcSheet": {
+        "description": "One discharged obligation's calc sheet (D221.1).",
+        "properties": {
+          "attestation": {
+            "title": "Attestation",
+            "type": "string"
+          },
+          "chain": {
+            "$ref": "#/components/schemas/EvidenceChain"
+          },
+          "citation": {
+            "title": "Citation",
+            "type": "string"
+          },
+          "claim_name": {
+            "title": "Claim Name",
+            "type": "string"
+          },
+          "claim_text": {
+            "title": "Claim Text",
+            "type": "string"
+          },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/CalcInput"
+            },
+            "title": "Inputs",
+            "type": "array"
+          },
+          "margin": {
+            "title": "Margin",
+            "type": "string"
+          },
+          "model_id": {
+            "title": "Model Id",
+            "type": "string"
+          },
+          "model_version": {
+            "title": "Model Version",
+            "type": "string"
+          },
+          "sheet_id": {
+            "title": "Sheet Id",
+            "type": "string"
+          },
+          "solver": {
+            "title": "Solver",
+            "type": "string"
+          },
+          "subject_anchor": {
+            "title": "Subject Anchor",
+            "type": "string"
+          },
+          "subject_ref": {
+            "title": "Subject Ref",
+            "type": "string"
+          },
+          "tier": {
+            "title": "Tier",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          },
+          "verdict": {
+            "title": "Verdict",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sheet_id",
+          "claim_name",
+          "claim_text",
+          "subject_anchor",
+          "subject_ref",
+          "model_id",
+          "model_version",
+          "citation",
+          "solver",
+          "tier",
+          "attestation",
+          "inputs",
+          "value",
+          "margin",
+          "verdict",
+          "chain"
+        ],
+        "title": "CalcSheet",
+        "type": "object"
+      },
+      "ConfigEntry": {
+        "description": "One `regolith config` key: its effective value and the\nwhere-attribution level that won it (04.1 \"ANY FORM/CONFIG FIELD\"\nfloor: source attribution is mandatory, never omitted).",
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value",
+          "source"
+        ],
+        "title": "ConfigEntry",
+        "type": "object"
+      },
+      "Coverage": {
+        "description": "Structured coverage (D95, sec. 8.2): per-axis coverage plus the conservative scalar collapse kept for margin notes and old consumers -- `fraction` must never overstate what `axes` states. `Evidence`/`SolverResponse` carry this instead of a bare float.",
+        "properties": {
+          "axes": {
+            "description": "The per-axis coverage record (empty for a closed-form/full claim).",
+            "items": {
+              "$ref": "#/components/schemas/CoverageAxis"
+            },
+            "title": "Axes",
+            "type": "array"
+          },
+          "fraction_bits": {
+            "description": "The conservative scalar collapse (`1.0` = full), as `f64` bits.",
+            "minimum": 0.0,
+            "title": "Fraction Bits",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "axes",
+          "fraction_bits"
+        ],
+        "title": "Coverage",
+        "type": "object"
+      },
+      "CoverageAxis": {
+        "description": "One axis of structured coverage: the swept variable, its domain, and the method used to cover it (D95, sec. 8.2).",
+        "properties": {
+          "axis": {
+            "description": "The swept axis name.",
+            "title": "Axis",
+            "type": "string"
+          },
+          "domain": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CoverageDomain1"
+              },
+              {
+                "$ref": "#/components/schemas/CoverageDomain2"
+              }
+            ],
+            "description": "The axis's domain (continuous or discrete).",
+            "title": "Domain"
+          },
+          "method": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CoverageMethod1"
+              },
+              {
+                "$ref": "#/components/schemas/CoverageMethod2"
+              },
+              {
+                "$ref": "#/components/schemas/CoverageMethod3"
+              },
+              {
+                "$ref": "#/components/schemas/CoverageMethod4"
+              },
+              {
+                "$ref": "#/components/schemas/CoverageMethod5"
+              },
+              {
+                "$ref": "#/components/schemas/CoverageMethod6"
+              }
+            ],
+            "description": "The method used to cover this axis.",
+            "title": "Method"
+          }
+        },
+        "required": [
+          "axis",
+          "domain",
+          "method"
+        ],
+        "title": "CoverageAxis",
+        "type": "object"
+      },
+      "CoverageDomain1": {
+        "additionalProperties": false,
+        "description": "A continuous domain, as text (e.g. `\"[300K, 400K]\"`).",
+        "properties": {
+          "interval": {
+            "title": "Interval",
+            "type": "string"
+          }
+        },
+        "required": [
+          "interval"
+        ],
+        "title": "CoverageDomain1",
+        "type": "object"
+      },
+      "CoverageDomain2": {
+        "additionalProperties": false,
+        "description": "A discrete domain (valve line-ups, failure states, ...).",
+        "properties": {
+          "values": {
+            "$ref": "#/components/schemas/Values"
+          }
+        },
+        "required": [
+          "values"
+        ],
+        "title": "CoverageDomain2",
+        "type": "object"
+      },
+      "CoverageMethod1": {
+        "description": "Corner-only sampling.",
+        "enum": [
+          "corners"
+        ],
+        "title": "CoverageMethod1",
+        "type": "string"
+      },
+      "CoverageMethod2": {
+        "additionalProperties": false,
+        "description": "A grid with per-axis resolution `k` (multi-dim: `grid(k x m)`, the G29 demand).",
+        "properties": {
+          "grid": {
+            "$ref": "#/components/schemas/Grid"
+          }
+        },
+        "required": [
+          "grid"
+        ],
+        "title": "CoverageMethod2",
+        "type": "object"
+      },
+      "CoverageMethod3": {
+        "description": "Every discrete value was enumerated.",
+        "enum": [
+          "enumerated"
+        ],
+        "title": "CoverageMethod3",
+        "type": "string"
+      },
+      "CoverageMethod4": {
+        "description": "A closed-form analytic bound covers the whole domain.",
+        "enum": [
+          "analytic"
+        ],
+        "title": "CoverageMethod4",
+        "type": "string"
+      },
+      "CoverageMethod5": {
+        "description": "Declared monotonicity lets the worst corner stand for the domain.",
+        "enum": [
+          "monotone"
+        ],
+        "title": "CoverageMethod5",
+        "type": "string"
+      },
+      "CoverageMethod6": {
+        "description": "WO-33 D98: the axis is DECLARED (a `compute` claim's index domain) but not yet resolved by any model -- the honest pre-discharge state of a [`crate::field::FieldDatum`]'s axis (`payload: null`). Never appears once evidence has landed; a discharging model replaces it with the method it actually used.",
+        "enum": [
+          "undischarged"
+        ],
+        "title": "CoverageMethod6",
+        "type": "string"
+      },
+      "Deferral": {
+        "description": "An obligation the orchestrator could not lower to a numeric request.\n\nHonest, greppable, and release-gated: a deferral is neither a pass nor\na violation -- it says \"no numeric obligation was formed here\" and the\nrelease gate (INV-24) treats it as unresolved.",
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "reason": {
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "detail"
+        ],
+        "title": "Deferral",
+        "type": "object"
+      },
+      "Deviation": {
+        "description": "One accepted deviation for the gate summary + acceptance ledger.\n\nMirrors the source waiver's declared surface (target/scope/basis/\nevidence/kind/match set/expiry) plus the obligation content hashes it\nactually accepted this build -- the audit row `ship` writes into\n``acceptance_ledger.json`` and `ship --explain` lists.",
+        "properties": {
+          "accepted": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Accepted",
+            "type": "array"
+          },
+          "basis": {
+            "title": "Basis",
+            "type": "string"
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence"
+          },
+          "evidence_digest": {
+            "default": "",
+            "title": "Evidence Digest",
+            "type": "string"
+          },
+          "expires": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "match_set": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Match Set",
+            "type": "array"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scope"
+          },
+          "target": {
+            "title": "Target",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target",
+          "scope",
+          "basis",
+          "evidence",
+          "kind",
+          "accepted",
+          "match_set",
+          "expires"
+        ],
+        "title": "Deviation",
+        "type": "object"
+      },
+      "DuplicateModelId": {
+        "description": "A pack declared a model id something already registered (D-B).\n\nD94: the registry key is ``(claim_kind, model_id)`` -- one model MAY\nregister under two DIFFERENT kinds legally, so this is a duplicate\nonly when the SAME kind already has that id. Two models sharing one\nid under ONE kind would make selection ambiguous; the whole pack is\nskipped (no partial load) and named.",
+        "properties": {
+          "model_id": {
+            "title": "Model Id",
+            "type": "string"
+          },
+          "pack": {
+            "title": "Pack",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pack",
+          "model_id"
+        ],
+        "title": "DuplicateModelId",
+        "type": "object"
+      },
+      "DuplicatePluginId": {
+        "description": "Two plugins of the same kind declared the same id (AD-26: ids are\nglobally unique per kind; the second is skipped, named by its\nsource entry point).",
+        "properties": {
+          "plugin_id": {
+            "title": "Plugin Id",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "plugin_id"
+        ],
+        "title": "DuplicatePluginId",
+        "type": "object"
+      },
+      "EntryPointRaised": {
+        "description": "A pack's ``register_fn`` callable raised while composing (not while\nthe entry point resolved to a manifest -- that failure is a generic\n``regolith.plugins.PluginEntryPointRaised``, folded into ``skipped``\nthe same way). Third-party pack code is a plugin boundary: its\nexceptions are OUR recoverable data (the pack is skipped loudly),\nnever a crashed build.",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "pack": {
+            "title": "Pack",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pack",
+          "message"
+        ],
+        "title": "EntryPointRaised",
+        "type": "object"
+      },
+      "Evidence": {
+        "description": "The evidence produced by discharging one obligation.",
+        "properties": {
+          "cost": {
+            "description": "Relative cost incurred.",
+            "minimum": 0.0,
+            "title": "Cost",
+            "type": "integer"
+          },
+          "coverage": {
+            "$ref": "#/components/schemas/Coverage",
+            "description": "Structured per-axis coverage (D95, sec. 8.2); `Coverage::full()` for a closed-form/full claim."
+          },
+          "eps_bits": {
+            "description": "The model error `eps`'s bits.",
+            "minimum": 0.0,
+            "title": "Eps Bits",
+            "type": "integer"
+          },
+          "hash": {
+            "description": "Content hash of this evidence (cache key component).",
+            "title": "Hash",
+            "type": "string"
+          },
+          "margin_bits": {
+            "description": "The margin after error (`limit - (value + eps)`)'s bits.",
+            "minimum": 0.0,
+            "title": "Margin Bits",
+            "type": "integer"
+          },
+          "model_id": {
+            "description": "The discharge model id that produced this.",
+            "title": "Model Id",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Status1"
+              },
+              {
+                "$ref": "#/components/schemas/Status2"
+              },
+              {
+                "$ref": "#/components/schemas/Status3"
+              }
+            ],
+            "description": "The discharge status.",
+            "title": "Status"
+          },
+          "value_bits": {
+            "description": "The computed value's bits (f64 as bits for exact serialization).",
+            "minimum": 0.0,
+            "title": "Value Bits",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cost",
+          "coverage",
+          "eps_bits",
+          "hash",
+          "margin_bits",
+          "model_id",
+          "status",
+          "value_bits"
+        ],
+        "title": "Evidence",
+        "type": "object"
+      },
+      "EvidenceChain": {
+        "description": "The content-hash chain proving a calc sheet's derivation (D221.1).\n\n``sheet_digest`` is the producer-local blake3 of the sheet's own\ncanonical bytes (``local-blake3:`` tagged, charter 38 sec. 1.4);\n``evidence_hash`` / ``subject_ref`` / ``record_pins`` are the\nCANONICAL Rust content addresses off the payload (untagged). A\nreviewer follows sheet -> evidence -> payload -> sources without\ntrusting anything but the shipped bytes.",
+        "properties": {
+          "evidence_hash": {
+            "title": "Evidence Hash",
+            "type": "string"
+          },
+          "payload_refs": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Payload Refs",
+            "type": "array"
+          },
+          "record_pins": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Record Pins",
+            "type": "array"
+          },
+          "sheet_digest": {
+            "title": "Sheet Digest",
+            "type": "string"
+          },
+          "subject_ref": {
+            "title": "Subject Ref",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sheet_digest",
+          "evidence_hash",
+          "subject_ref"
+        ],
+        "title": "EvidenceChain",
+        "type": "object"
+      },
+      "Grid": {
+        "properties": {
+          "k": {
+            "description": "Per-axis grid resolution.",
+            "items": {
+              "$ref": "#/components/schemas/KItem"
+            },
+            "title": "K",
+            "type": "array"
+          }
+        },
+        "required": [
+          "k"
+        ],
+        "title": "Grid",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "Invalid": {
+        "description": "A present-but-unverifiable attestation: INDETERMINATE, never a verdict.",
+        "properties": {
+          "detail": {
+            "title": "Detail",
+            "type": "string"
+          },
+          "kind": {
+            "const": "invalid",
+            "default": "invalid",
+            "title": "Kind",
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "bad_signature",
+              "unknown_key",
+              "algorithm_mismatch"
+            ],
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason",
+          "detail"
+        ],
+        "title": "Invalid",
+        "type": "object"
+      },
+      "KItem": {
+        "minimum": 0.0,
+        "title": "KItem",
+        "type": "integer"
+      },
+      "LockRow": {
+        "description": "One resolved pin: a slot, its value, and its resolving cause.\n\nRenders as regolith/03 sec. 2's shape::\n\n    flange.radius = 2.4mm         cause: dfm(sheet.min_bend_radius)",
+        "properties": {
+          "cause": {
+            "title": "Cause",
+            "type": "string"
+          },
+          "policy_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Note"
+          },
+          "slot": {
+            "title": "Slot",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "slot",
+          "value",
+          "cause"
+        ],
+        "title": "LockRow",
+        "type": "object"
+      },
+      "LockSection": {
+        "description": "A per-target or per-variant section of rows plus record pins.",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "record_pins": {
+            "default": [],
+            "items": {
+              "maxItems": 2,
+              "minItems": 2,
+              "prefixItems": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "type": "array"
+            },
+            "title": "Record Pins",
+            "type": "array"
+          },
+          "rows": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/LockRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "LockSection",
+        "type": "object"
+      },
+      "Lockfile": {
+        "description": "The full lockfile: tool/registry versions plus ordered sections.",
+        "properties": {
+          "sections": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/LockSection"
+            },
+            "title": "Sections",
+            "type": "array"
+          },
+          "tool_version": {
+            "title": "Tool Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tool_version"
+        ],
+        "title": "Lockfile",
+        "type": "object"
+      },
+      "MalformedPluginManifest": {
+        "description": "An entry point's target was not a :class:`PluginManifest`.",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "message"
+        ],
+        "title": "MalformedPluginManifest",
+        "type": "object"
+      },
+      "ManifestSummary": {
+        "description": "WOG1-F2 marked-provisional bridge: the ship package\n`manifest.json` shape trimmed to what the UI needs, pending a real\nregolith model (no dedicated one exists in the public surface --\nthe ship backend assembles this dict ad hoc). Extra keys in the\nreal file are read but not exposed here; `raw` carries the full\nparsed dict for a UI \"raw JSON toggle\" (04.1 detail-view floor).",
+        "properties": {
+          "raw": {
+            "additionalProperties": true,
+            "title": "Raw",
+            "type": "object"
+          },
+          "signed": {
+            "title": "Signed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "signed",
+          "raw"
+        ],
+        "title": "ManifestSummary",
+        "type": "object"
+      },
+      "MethodNamedKind": {
+        "description": "A pack declared a claim kind naming a method/tool, not WHAT is\nclaimed (D94, sec. 8.1: `mech.fea.static_stress` was a bootstrap\nerror). The whole pack is skipped, naming the offending word.",
+        "properties": {
+          "claim_kind": {
+            "title": "Claim Kind",
+            "type": "string"
+          },
+          "pack": {
+            "title": "Pack",
+            "type": "string"
+          },
+          "word": {
+            "title": "Word",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pack",
+          "claim_kind",
+          "word"
+        ],
+        "title": "MethodNamedKind",
+        "type": "object"
+      },
+      "ObligationGroup": {
+        "description": "One `group=` bucket: the key value (a disposition or a family)\nplus its member rows, in source order.",
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/AuditRow"
+            },
+            "title": "Rows",
+            "type": "array"
+          }
+        },
+        "required": [
+          "key",
+          "rows"
+        ],
+        "title": "ObligationGroup",
+        "type": "object"
+      },
+      "ObligationResult": {
+        "description": "The outcome of routing one obligation through the harness.\n\nExactly one of ``evidence`` / ``deferral`` is set: ``evidence`` when a\nmodel (or the total no-model path) produced a verdict, ``deferral``\nwhen the obligation could not even be lowered to a numeric request.\n``from_cache`` records whether this was a cache hit (observability).",
+        "properties": {
+          "attestation": {
+            "discriminator": {
+              "mapping": {
+                "invalid": "#/components/schemas/Invalid",
+                "unsigned": "#/components/schemas/Unsigned",
+                "valid": "#/components/schemas/Valid"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Valid"
+              },
+              {
+                "$ref": "#/components/schemas/Unsigned"
+              },
+              {
+                "$ref": "#/components/schemas/Invalid"
+              }
+            ],
+            "title": "Attestation"
+          },
+          "content_hash": {
+            "default": "",
+            "title": "Content Hash",
+            "type": "string"
+          },
+          "deferral": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Deferral"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Evidence"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "from_cache": {
+            "default": false,
+            "title": "From Cache",
+            "type": "boolean"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "subject_ref": {
+            "title": "Subject Ref",
+            "type": "string"
+          },
+          "trust_floor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Trust Floor"
+          }
+        },
+        "required": [
+          "key",
+          "subject_ref"
+        ],
+        "title": "ObligationResult",
+        "type": "object"
+      },
+      "ObligationsResponse": {
+        "description": "The obligations listing: the real `AuditSummary` (unmodified)\nplus either a flat `rows` array or, when `group` is given,\n`groups` -- never both, so a client always knows which shape to\nrender.",
+        "properties": {
+          "groups": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ObligationGroup"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Groups"
+          },
+          "rows": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AuditRow"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rows"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/AuditSummary"
+          }
+        },
+        "required": [
+          "summary"
+        ],
+        "title": "ObligationsResponse",
+        "type": "object"
+      },
+      "PluginEntryPointRaised": {
+        "description": "An entry point raised while loading (third-party code is a plugin\nboundary: its exceptions are our recoverable data, never a crashed\ndiscovery pass).",
+        "properties": {
+          "message": {
+            "title": "Message",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "message"
+        ],
+        "title": "PluginEntryPointRaised",
+        "type": "object"
+      },
+      "ProjectHealth": {
+        "description": "The title-block verdict summary for one project.",
+        "properties": {
+          "obligation_summary": {
+            "$ref": "#/components/schemas/AuditSummary"
+          },
+          "release_ok": {
+            "title": "Release Ok",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "release_ok",
+          "obligation_summary"
+        ],
+        "title": "ProjectHealth",
+        "type": "object"
+      },
+      "ProjectInfo": {
+        "description": "One discovered project: its manifest identity plus which report\nartifacts already exist on disk (a fresh project has none of\nthem -- that is not an error, just an empty-state signal for the\nUI's companion-audit empty state, 04.1).",
+        "properties": {
+          "has_build_report": {
+            "title": "Has Build Report",
+            "type": "boolean"
+          },
+          "has_dist": {
+            "title": "Has Dist",
+            "type": "boolean"
+          },
+          "has_lockfile": {
+            "title": "Has Lockfile",
+            "type": "boolean"
+          },
+          "manifest_path": {
+            "title": "Manifest Path",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "root": {
+            "title": "Root",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "root",
+          "manifest_path",
+          "has_build_report",
+          "has_lockfile",
+          "has_dist"
+        ],
+        "title": "ProjectInfo",
+        "type": "object"
+      },
+      "RealizedInput": {
+        "description": "One caller-resolved realized-domain IR (WO-42 deliverable 3,\nAD-25/D128): the orchestrator has already resolved ``digest`` against\nthe WO-30 content store into ``payload_bytes`` -- this facade does no\nIO of its own, only marshals the resolved content across the ONE\ncoarse FFI crossing (AD-4). ``kind`` is a D96 payload kind (e.g.\n``\"geometry.realized\"``); ``subject`` is the part/block the IR was\nrealized for (matched against a flownet edge's ``from=`` ref).",
+        "properties": {
+          "digest": {
+            "title": "Digest",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "payload_bytes": {
+            "contentMediaType": "application/octet-stream",
+            "title": "Payload Bytes",
+            "type": "string"
+          },
+          "subject": {
+            "title": "Subject",
+            "type": "string"
+          }
+        },
+        "required": [
+          "digest",
+          "kind",
+          "subject",
+          "payload_bytes"
+        ],
+        "title": "RealizedInput",
+        "type": "object"
+      },
+      "RunRecord": {
+        "description": "One persisted run: identity, the verb driven, its live/final\nstatus, timestamps, and the project root it ran against. The log\nfile and (for `--json` verbs) the stdout JSON blob live alongside\nit as sibling files (`<id>.log`, `<id>.stdout.json`), not inlined\nhere -- this record is the cheap-to-list summary row.",
+        "properties": {
+          "args": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Args",
+            "type": "array"
+          },
+          "exit_code": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Exit Code"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "project_root": {
+            "title": "Project Root",
+            "type": "string"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "string"
+          },
+          "started_at": {
+            "title": "Started At",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "running",
+              "ok",
+              "failed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "verb": {
+            "enum": [
+              "build",
+              "ship",
+              "test",
+              "optimize",
+              "check",
+              "preview"
+            ],
+            "title": "Verb",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id",
+          "verb",
+          "project_root",
+          "args",
+          "status",
+          "started_at"
+        ],
+        "title": "RunRecord",
+        "type": "object"
+      },
+      "StagedBuildReport": {
+        "description": "The outcome of WO-42 deliverable 5's staged build loop (AD-25/D128):\nlower -> realize (producing new realized-domain IRs) -> re-lower with\nthem, to a fixed point.\n\n``final`` is the last :class:`BuildReport` (the fixed-point build --\nthe one whose ``payload_json`` no longer names a realizable pending\nsubject). ``iterations`` counts how many core ``check``/``compile``\npasses ran (always >= 1: the loop always runs at least once, even\nwith no ``feature_programs`` supplied). ``realized_inputs`` is every\nrealized-domain IR supplied to the FINAL pass, and ``lock_rows`` are\ntheir INV-21 lockfile rows (:func:`realized_lock_rows`).",
+        "properties": {
+          "final": {
+            "$ref": "#/components/schemas/BuildReport"
+          },
+          "iterations": {
+            "title": "Iterations",
+            "type": "integer"
+          },
+          "lock_rows": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/LockRow"
+            },
+            "title": "Lock Rows",
+            "type": "array"
+          },
+          "realized_inputs": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/RealizedInput"
+            },
+            "title": "Realized Inputs",
+            "type": "array"
+          }
+        },
+        "required": [
+          "final",
+          "iterations"
+        ],
+        "title": "StagedBuildReport",
+        "type": "object"
+      },
+      "Status1": {
+        "description": "The claim holds with margin after the model's error.",
+        "enum": [
+          "discharged"
+        ],
+        "title": "Status1",
+        "type": "string"
+      },
+      "Status2": {
+        "description": "The claim provably fails at its worst corner.",
+        "enum": [
+          "violated"
+        ],
+        "title": "Status2",
+        "type": "string"
+      },
+      "Status3": {
+        "description": "No adequate model, coverage, or trust; neither proven nor disproven (distinct from violated).",
+        "enum": [
+          "indeterminate"
+        ],
+        "title": "Status3",
+        "type": "string"
+      },
+      "TrustTier": {
+        "description": "The total order of evidence trust (regolith/11 sec. 7).\n\nThe integer value IS the rank, so ``TrustTier.CERTIFIED > TrustTier.\nTESTED`` and floor comparison are the same fact (INV-14 totality).",
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "title": "TrustTier",
+        "type": "integer"
+      },
+      "Unsigned": {
+        "description": "No attestation present -- the honest ``community`` tier, not an error.",
+        "properties": {
+          "kind": {
+            "const": "unsigned",
+            "default": "unsigned",
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "title": "Unsigned",
+        "type": "object"
+      },
+      "Valid": {
+        "description": "A verified attestation: the evidence earns ``tier`` from a trusted key.",
+        "properties": {
+          "kind": {
+            "const": "valid",
+            "default": "valid",
+            "title": "Kind",
+            "type": "string"
+          },
+          "tier": {
+            "$ref": "#/components/schemas/TrustTier"
+          }
+        },
+        "required": [
+          "tier"
+        ],
+        "title": "Valid",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "Values": {
+        "properties": {
+          "values": {
+            "description": "The enumerated values, as text.",
+            "items": {
+              "type": "string"
+            },
+            "title": "Values",
+            "type": "array"
+          }
+        },
+        "required": [
+          "values"
+        ],
+        "title": "Values",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "graphite backend API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/ping": {
+      "get": {
+        "description": "Liveness probe (not a lithos health report -- see\n`/api/projects/{project}/health` for that).",
+        "operationId": "ping_api_ping_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Ping Api Ping Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Ping",
+        "tags": [
+          "meta"
+        ]
+      }
+    },
+    "/api/projects": {
+      "get": {
+        "description": "Every project under the server's configured scan root\n(04.1 \"ANY TABLE\" floor: the frontend adds sort/filter/count over\nthis listing -- the route itself stays a plain array, no\nserver-side pagination needed at fleet scale).",
+        "operationId": "list_projects_api_projects_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectInfo"
+                  },
+                  "title": "Response List Projects Api Projects Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Projects",
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/api/projects/{project}": {
+      "get": {
+        "description": "One project's manifest identity + artifact presence flags.",
+        "operationId": "get_project_api_projects__project__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectInfo"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Project",
+        "tags": [
+          "projects"
+        ]
+      }
+    },
+    "/api/projects/{project}/artifacts": {
+      "get": {
+        "description": "Every artifact under the project's `dist/` (GLB/SVG/PDF/STEP/\nJSON alike), each entry naming its content hash -- the only valid\nfetch key (04.1 \"ANY GRAPHIC\" floor: content-hash caption).",
+        "operationId": "list_project_artifacts_api_projects__project__artifacts_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ArtifactEntry"
+                  },
+                  "title": "Response List Project Artifacts Api Projects  Project  Artifacts Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Project Artifacts",
+        "tags": [
+          "artifacts"
+        ]
+      }
+    },
+    "/api/projects/{project}/artifacts/{content_hash}": {
+      "get": {
+        "description": "Raw bytes for one artifact, looked up by content hash ONLY --\n`content_hash` must equal an entry this project's own listing\nproduced; anything else is a 404, never a filesystem read of an\narbitrary path.",
+        "operationId": "fetch_project_artifact_api_projects__project__artifacts__content_hash__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "content_hash",
+            "required": true,
+            "schema": {
+              "title": "Content Hash",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Fetch Project Artifact",
+        "tags": [
+          "artifacts"
+        ]
+      }
+    },
+    "/api/projects/{project}/build-report": {
+      "get": {
+        "description": "The full staged build report, including the BOM/cost/schedule\nfields (`cost_profile`, `cost_record_pins`, `cost_estimates`,\n`frame_lock_rows`) verbatim from regolith -- no local recomputation\n(charter sec. 3.2).",
+        "operationId": "get_build_report_api_projects__project__build_report_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StagedBuildReport"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Build Report",
+        "tags": [
+          "build"
+        ]
+      }
+    },
+    "/api/projects/{project}/calc/audit": {
+      "get": {
+        "description": "The project's audit index (summary + rows) -- the same model\n`/obligations` filters/groups, exposed here unfiltered for a raw\nview (04.1 \"ANY DETAIL VIEW\" floor: raw-JSON toggle).",
+        "operationId": "get_audit_index_api_projects__project__calc_audit_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditIndex"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Audit Index",
+        "tags": [
+          "calc"
+        ]
+      }
+    },
+    "/api/projects/{project}/calc/sheets": {
+      "get": {
+        "description": "Every calc sheet in the project's shipped calc book (04.1 \"ANY\nTABLE\" floor: sort/filter/CSV-export are frontend concerns over\nthis same array, not a server-side feature).",
+        "operationId": "list_calc_sheets_api_projects__project__calc_sheets_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CalcSheet"
+                  },
+                  "title": "Response List Calc Sheets Api Projects  Project  Calc Sheets Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Calc Sheets",
+        "tags": [
+          "calc"
+        ]
+      }
+    },
+    "/api/projects/{project}/config": {
+      "get": {
+        "description": "Every registered config key with its effective value + source.",
+        "operationId": "list_project_config_api_projects__project__config_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConfigEntry"
+                  },
+                  "title": "Response List Project Config Api Projects  Project  Config Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Project Config",
+        "tags": [
+          "config"
+        ]
+      }
+    },
+    "/api/projects/{project}/config/{key}": {
+      "get": {
+        "description": "One key's effective value + winning source.",
+        "operationId": "get_project_config_api_projects__project__config__key__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigEntry"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Project Config",
+        "tags": [
+          "config"
+        ]
+      },
+      "put": {
+        "description": "Write one key through the real `regolith config set` (never a\nraw file poke).",
+        "operationId": "set_project_config_api_projects__project__config__key__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "key",
+            "required": true,
+            "schema": {
+              "title": "Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_set_project_config_api_projects__project__config__key__put"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfigEntry"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Project Config",
+        "tags": [
+          "config"
+        ]
+      }
+    },
+    "/api/projects/{project}/doctor": {
+      "get": {
+        "description": "Every registered optional external tool's found/missing status\n(regolith's own report -- graphite renders it verbatim, per the\nread-mostly honesty posture).",
+        "operationId": "get_doctor_api_projects__project__doctor_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {},
+                  "title": "Response Get Doctor Api Projects  Project  Doctor Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Doctor",
+        "tags": [
+          "doctor"
+        ]
+      }
+    },
+    "/api/projects/{project}/health": {
+      "get": {
+        "description": "`release_ok` from the build report + the audit index's obligation\naccounting -- both read verbatim, never recomputed.",
+        "operationId": "get_project_health_api_projects__project__health_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectHealth"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Project Health",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/projects/{project}/lockfile": {
+      "get": {
+        "description": "The resolved `regolith.lock` (every pinned slot + its cause).",
+        "operationId": "get_lockfile_api_projects__project__lockfile_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Lockfile"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Lockfile",
+        "tags": [
+          "build"
+        ]
+      }
+    },
+    "/api/projects/{project}/manifest": {
+      "get": {
+        "description": "The ship package manifest summary (WOG1-F2, provisional bridge).",
+        "operationId": "get_manifest_api_projects__project__manifest_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ManifestSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Manifest",
+        "tags": [
+          "build"
+        ]
+      }
+    },
+    "/api/projects/{project}/obligations": {
+      "get": {
+        "description": "The project's obligation rows, optionally filtered by disposition\nand/or grouped by disposition or claim family.",
+        "operationId": "get_obligations_api_projects__project__obligations_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          },
+          {
+            "description": "disposition to keep, e.g. 'violated'",
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "disposition to keep, e.g. 'violated'",
+              "title": "Filter"
+            }
+          },
+          {
+            "description": "'disposition' or 'family'",
+            "in": "query",
+            "name": "group",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "'disposition' or 'family'",
+              "title": "Group"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ObligationsResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Obligations",
+        "tags": [
+          "obligations"
+        ]
+      }
+    },
+    "/api/projects/{project}/runs": {
+      "get": {
+        "description": "This project's run history, newest first.",
+        "operationId": "list_project_runs_api_projects__project__runs_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/RunRecord"
+                  },
+                  "title": "Response List Project Runs Api Projects  Project  Runs Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Project Runs",
+        "tags": [
+          "runs"
+        ]
+      },
+      "post": {
+        "description": "Start `regolith <verb> <args>` against `project`'s root; returns\nimmediately with a `running` record (04.1 \"ANY LONG OPERATION\"\nfloor: a durable record + elapsed time via `started_at` for the\nfrontend to compute).",
+        "operationId": "start_project_run_api_projects__project__runs_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_start_project_run_api_projects__project__runs_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunRecord"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Start Project Run",
+        "tags": [
+          "runs"
+        ]
+      }
+    },
+    "/api/runs/{run_id}": {
+      "get": {
+        "description": "One run's current record (re-polls liveness when still `running`,\nsee `graphite.service.runs.get_run`).",
+        "operationId": "get_run_detail_api_runs__run_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunRecord"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Run Detail",
+        "tags": [
+          "runs"
+        ]
+      }
+    },
+    "/api/runs/{run_id}/events": {
+      "get": {
+        "description": "SSE stream of `run_id`'s log lines, closing with a `done` event\nonce the run finishes.",
+        "operationId": "run_events_api_runs__run_id__events_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Run Events",
+        "tags": [
+          "runs"
+        ]
+      }
+    }
+  }
+}

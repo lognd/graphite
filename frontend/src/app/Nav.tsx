@@ -40,9 +40,9 @@ export function Nav() {
         <span className="gr-micro-label">projects</span>
         <ul className="gr-nav__list">
           {(projects ?? []).map((p) => (
-            <li key={p.id}>
+            <li key={p.name}>
               <NavLink
-                to={`/project/${p.id}`}
+                to={`/project/${encodeURIComponent(p.name)}`}
                 className={({ isActive }) =>
                   `gr-nav__link${isActive ? ' gr-nav__link--active' : ''}`
                 }

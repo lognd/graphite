@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Nav } from './Nav';
 import { useTheme } from './theme';
-import { useFleetHealth } from '../api/hooks';
+import { useProjects } from '../api/hooks';
 import { TitleBlock } from '../components/TitleBlock/TitleBlock';
 import { StatusLine } from '../components/StatusLine/StatusLine';
 import { CommandPalette } from '../components/CommandPalette/CommandPalette';
@@ -24,7 +24,7 @@ const SHORTCUTS = [
 export function AppShell() {
   const navigate = useNavigate();
   const { preference, resolved, setPreference } = useTheme();
-  const { data: health } = useFleetHealth();
+  const { data: projects, isError: projectsError } = useProjects();
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
@@ -67,12 +67,18 @@ export function AppShell() {
   return (
     <div className="gr-app-shell">
       <header className="gr-app-shell__header">
+        {/* Fleet-level view: per-report fields (design hash, schema,
+            timestamp, verdict) belong to a single project's report and
+            render as honest placeholders here; project routes (WO-G3/G4)
+            source them from /api/projects/{p}/health + build-report. */}
         <TitleBlock
-          projectName={health ? 'fleet' : 'no project'}
-          designHash="0000000"
-          schemaVersion={26}
-          reportTimestamp={health?.generatedAt ?? '--'}
-          verdict={health && health.byVerdict.violated > 0 ? 'violated' : 'discharged'}
+          projectName={
+            projects && projects.length > 0 ? `fleet (${projects.length})` : 'no projects'
+          }
+          designHash={null}
+          schemaVersion={null}
+          reportTimestamp={null}
+          verdict={null}
         />
       </header>
       <div className="gr-app-shell__body">
@@ -83,8 +89,8 @@ export function AppShell() {
       </div>
       <footer className="gr-app-shell__footer">
         <StatusLine
-          projectName={health ? 'fleet' : null}
-          serverState={health ? 'connected' : 'connecting'}
+          projectName={projects && projects.length > 0 ? `fleet (${projects.length})` : null}
+          serverState={projectsError ? 'disconnected' : projects ? 'connected' : 'connecting'}
           lastAction={null}
           keyboardHint={`theme: ${preference} | ? for shortcuts`}
         />

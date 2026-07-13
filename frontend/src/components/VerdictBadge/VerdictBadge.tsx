@@ -2,7 +2,7 @@
 // are reserved for this component ONLY -- never reused decoratively
 // elsewhere (spec 03.2).
 
-import type { Verdict } from '../../api/api.generated';
+import type { Verdict } from './verdict';
 import './VerdictBadge.css';
 
 const LABEL: Record<Verdict, string> = {

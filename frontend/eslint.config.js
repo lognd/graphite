@@ -50,5 +50,11 @@ export default tseslint.config(
     files: ['**/*.test.{ts,tsx}', 'src/setupTests.ts', 'tests/**/*.ts'],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },
   },
+  // Node-side scripts (the WO-G1 api-drift checker runs under node, not
+  // the browser).
+  {
+    files: ['**/*.mjs'],
+    languageOptions: { globals: globals.node },
+  },
   prettierConfig,
 );

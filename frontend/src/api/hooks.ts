@@ -9,14 +9,18 @@ export function useProjects() {
   return useQuery({ queryKey: ['projects'], queryFn: api.listProjects });
 }
 
-export function useFleetHealth() {
-  return useQuery({ queryKey: ['fleet-health'], queryFn: api.getFleetHealth });
+export function useProjectHealth(project: string | undefined) {
+  return useQuery({
+    queryKey: ['project-health', project],
+    queryFn: () => api.getProjectHealth(project as string),
+    enabled: Boolean(project),
+  });
 }
 
-export function useObligations(projectId: string | undefined) {
+export function useObligations(project: string | undefined) {
   return useQuery({
-    queryKey: ['obligations', projectId],
-    queryFn: () => api.listObligations(projectId as string),
-    enabled: Boolean(projectId),
+    queryKey: ['obligations', project],
+    queryFn: () => api.getObligations(project as string),
+    enabled: Boolean(project),
   });
 }

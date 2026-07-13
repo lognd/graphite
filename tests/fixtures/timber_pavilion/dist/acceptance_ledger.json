@@ -1,0 +1,54 @@
+{
+  "accepted_deviations":[
+    {
+      "accepted":[
+        "2594cf83371265486ae8f40dcab0c1f69667b78ced5035585041ddc5ce3abca4"
+      ],
+      "basis":"footing FA reaction path not closed in the single modelled bay (WO-74 wall, frame.calx sec. 2); footing sized against a separately-computed bay reaction",
+      "evidence":"doc(memos/release-residuals.md)",
+      "evidence_digest":"blake3:2f32189789e28f0088479e890998248dff6ad60081d7600de6b47470e0089b22",
+      "expires":null,
+      "kind":"matched",
+      "match_set":[
+        "2594cf83371265486ae8f40dcab0c1f69667b78ced5035585041ddc5ce3abca4"
+      ],
+      "scope":null,
+      "target":"bearing"
+    },
+    {
+      "accepted":[
+        "ead667e9a11ae76416bbe22f3d931c6823f050424db2b90539efae28cadc0c35",
+        "ead667e9a11ae76416bbe22f3d931c6823f050424db2b90539efae28cadc0c35"
+      ],
+      "basis":"module-import conformance edge: no scalar window exists on a bare import (D195.3); addressable per D213",
+      "evidence":"doc(memos/release-residuals.md)",
+      "evidence_digest":"blake3:2f32189789e28f0088479e890998248dff6ad60081d7600de6b47470e0089b22",
+      "expires":null,
+      "kind":"matched",
+      "match_set":[
+        "ead667e9a11ae76416bbe22f3d931c6823f050424db2b90539efae28cadc0c35",
+        "ead667e9a11ae76416bbe22f3d931c6823f050424db2b90539efae28cadc0c35"
+      ],
+      "scope":null,
+      "target":"import(std.civil)"
+    },
+    {
+      "accepted":[
+        "0e929836dab7695ace513f7372595e4d0a779f7b282764bc7bb708fc988781e1"
+      ],
+      "basis":"pressure-only purlin defers alone by design (D194 ruling 3 / WO-85 wall note 4): its kPa load is a tributary source fact, not its own beam demand",
+      "evidence":"doc(memos/release-residuals.md)",
+      "evidence_digest":"blake3:2f32189789e28f0088479e890998248dff6ad60081d7600de6b47470e0089b22",
+      "expires":null,
+      "kind":"matched",
+      "match_set":[
+        "0e929836dab7695ace513f7372595e4d0a779f7b282764bc7bb708fc988781e1"
+      ],
+      "scope":null,
+      "target":"strength[Purlin]"
+    }
+  ],
+  "cli_accepts_used":[],
+  "errors":[],
+  "refusals":[]
+}

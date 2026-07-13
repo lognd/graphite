@@ -1,11 +1,12 @@
 // Dashboard route: answers "is my fleet healthy?" in one interaction
-// (charter 2.1). WO-G3 fills in the real fleet view; this is the route
-// skeleton + designed empty/loading states this WO owns.
+// (charter 2.1). WO-G3 fills in the real fleet view (per-project health
+// verdicts need N /health calls or a fleet endpoint -- WO-G3's call);
+// this WO owns the route skeleton, the projects listing, and designed
+// empty/loading/error states.
 
+import { Link } from 'react-router-dom';
 import { useProjects } from '../api/hooks';
 import { DataTable } from '../components/DataTable/DataTable';
-import { VerdictBadge } from '../components/VerdictBadge/VerdictBadge';
-import { HashChip } from '../components/HashChip/HashChip';
 import { EmptyState } from '../components/EmptyState/EmptyState';
 import { ErrorState } from '../components/ErrorState/ErrorState';
 
@@ -26,7 +27,7 @@ export function Dashboard() {
     return (
       <EmptyState
         title="No projects in this fleet yet"
-        detail="Run graphite from a directory containing a magnetite.toml, or add a project to the fleet config."
+        detail="Run graphite from a directory containing a magnetite.toml, or point the server's scan root at one."
       />
     );
   }
@@ -34,24 +35,28 @@ export function Dashboard() {
   return (
     <DataTable
       columns={[
-        { key: 'name', header: 'Project', accessor: (p) => p.name },
         {
-          key: 'hash',
-          header: 'Design hash',
-          accessor: (p) => p.designHashShort,
-          render: (p) => <HashChip full={p.designHashShort} />,
+          key: 'name',
+          header: 'Project',
+          accessor: (p) => p.name,
+          render: (p) => <Link to={`/project/${encodeURIComponent(p.name)}`}>{p.name}</Link>,
         },
-        { key: 'schema', header: 'Schema', accessor: (p) => p.schemaVersion },
-        { key: 'lastReport', header: 'Last report', accessor: (p) => p.lastReportAt },
+        { key: 'version', header: 'Version', accessor: (p) => p.version },
+        { key: 'root', header: 'Root', accessor: (p) => p.root },
         {
-          key: 'verdict',
-          header: 'Verdict',
-          accessor: (p) => p.verdict,
-          render: (p) => <VerdictBadge verdict={p.verdict} />,
+          key: 'build_report',
+          header: 'Build report',
+          accessor: (p) => (p.has_build_report ? 'present' : 'missing'),
         },
+        {
+          key: 'lockfile',
+          header: 'Lockfile',
+          accessor: (p) => (p.has_lockfile ? 'present' : 'missing'),
+        },
+        { key: 'dist', header: 'dist/', accessor: (p) => (p.has_dist ? 'present' : 'missing') },
       ]}
       rows={data ?? []}
-      rowKey={(p) => p.id}
+      rowKey={(p) => p.name}
       loading={isLoading}
       emptyTitle="No projects in this fleet yet"
     />

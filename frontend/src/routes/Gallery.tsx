@@ -68,11 +68,18 @@ export function Gallery() {
 
       <Section title="TitleBlock">
         <TitleBlock
-          projectName="flagship-printer-a"
+          projectName="examples.timber_pavilion"
           designHash="a3f9c21bc9912"
-          schemaVersion={26}
+          schemaVersion="v0.1.0"
           reportTimestamp="2026-07-12T18:32:00Z"
           verdict="discharged"
+        />
+        <TitleBlock
+          projectName="fleet (1)"
+          designHash={null}
+          schemaVersion={null}
+          reportTimestamp={null}
+          verdict={null}
         />
       </Section>
 
