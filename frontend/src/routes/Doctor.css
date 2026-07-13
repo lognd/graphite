@@ -1,0 +1,51 @@
+.gr-doctor-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--graphite-space-4);
+  height: 100%;
+}
+
+.gr-doctor-view__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--graphite-space-2);
+}
+
+.gr-doctor-view__toolbar select,
+.gr-doctor-view__toolbar button {
+  background: transparent;
+  border: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  color: var(--graphite-color-ink);
+  padding: var(--graphite-space-1) var(--graphite-space-2);
+  font-family: var(--graphite-font-family-mono);
+  font-size: var(--graphite-font-size-12);
+  cursor: pointer;
+}
+
+.gr-doctor-view__toolbar button:hover:not(:disabled) {
+  border-color: var(--graphite-color-accent);
+  color: var(--graphite-color-accent);
+}
+
+.gr-doctor-view__toolbar button:disabled {
+  color: var(--graphite-color-ink-dim);
+  cursor: default;
+}
+
+/* Deliberately NOT the verdict palette (spec 03.2: verdict colors are
+   reserved for VerdictBadge only) -- found/missing is a different
+   semantic axis, so found reads plain ink and missing reads bold ink
+   with a marker glyph, never a borrowed green/red. */
+.gr-doctor-status--found {
+  color: var(--graphite-color-ink);
+}
+
+.gr-doctor-status--missing {
+  color: var(--graphite-color-ink);
+  font-weight: 700;
+}
+
+.gr-doctor-status--missing::before {
+  content: '! ';
+  color: var(--graphite-color-accent);
+}

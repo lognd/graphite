@@ -2,9 +2,9 @@
 // server (spec 02.2). Components must not call src/api/client.ts directly;
 // they consume these hooks so caching/invalidation has one home.
 
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { useMutation, useQueries, useQueryClient, useQuery } from '@tanstack/react-query';
 import { api } from './client';
-import type { ObligationsQuery, ProjectHealth, ProjectInfo } from './client';
+import type { GraphiteSettings, ObligationsQuery, ProjectHealth, ProjectInfo } from './client';
 
 export function useProjects() {
   return useQuery({ queryKey: ['projects'], queryFn: api.listProjects });
@@ -87,6 +87,62 @@ export function useManifest(project: string | undefined) {
     queryKey: ['manifest', project],
     queryFn: () => api.getManifest(project as string),
     enabled: Boolean(project),
+  });
+}
+
+export function useConfigSchema() {
+  return useQuery({ queryKey: ['config-schema'], queryFn: api.getConfigSchema });
+}
+
+export function useProjectConfig(project: string | undefined) {
+  return useQuery({
+    queryKey: ['project-config', project],
+    queryFn: () => api.listProjectConfig(project as string),
+    enabled: Boolean(project),
+  });
+}
+
+export function useSetProjectConfig(project: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      key,
+      value,
+      level,
+    }: {
+      key: string;
+      value: string;
+      level: 'global' | 'local';
+    }) => api.setProjectConfig(project as string, key, value, level),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['project-config', project] }),
+  });
+}
+
+export function useDoctor(project: string | undefined) {
+  return useQuery({
+    queryKey: ['doctor', project],
+    queryFn: () => api.getDoctor(project as string),
+    enabled: Boolean(project),
+  });
+}
+
+export function useSettings() {
+  return useQuery({ queryKey: ['settings'], queryFn: api.getSettings });
+}
+
+export function useSetSettings() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (settings: GraphiteSettings) => api.setSettings(settings),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['settings'] }),
+  });
+}
+
+export function useResetSettings() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.resetSettings(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['settings'] }),
   });
 }
 

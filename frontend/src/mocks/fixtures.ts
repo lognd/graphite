@@ -13,7 +13,11 @@ import type {
   AuditIndex,
   AuditRow,
   CalcSheet,
+  ConfigEntry,
+  ConfigKeyDefault,
+  DoctorEntry,
   GateSummary,
+  GraphiteSettings,
   Lockfile,
   ManifestSummary,
   ObligationGroup,
@@ -592,4 +596,130 @@ export const mockManifest: ManifestSummary = {
       },
     ],
   },
+};
+
+// RECORDED from `regolith config list --project tests/fixtures/timber_pavilion`
+// -- the fixture project has no magnetite.toml [tool.regolith] overrides and
+// no REGOLITH_* env set, so every key sits at "default" (WO-G6).
+export const mockProjectConfig: ConfigEntry[] = [
+  { key: 'lint.level', value: 'warn', source: 'default' },
+  { key: 'optimize.budget_evals', value: '1000', source: 'default' },
+  { key: 'optimize.seed', value: '0', source: 'default' },
+  { key: 'records.stdlib_root', value: '', source: 'default' },
+  { key: 'ui.host', value: '127.0.0.1', source: 'default' },
+  { key: 'ui.port', value: '8765', source: 'default' },
+];
+
+// RECORDED from `regolith.config.registered_keys()` (WOG6-F1's read
+// path) -- the default/kind/doc for every key above.
+export const mockConfigSchema: ConfigKeyDefault[] = [
+  {
+    key: 'lint.level',
+    kind: 'str',
+    default: 'warn',
+    doc: 'Default lint action passthrough (allow|warn|deny) absent a [lints] entry for a given code.',
+  },
+  {
+    key: 'optimize.budget_evals',
+    kind: 'int',
+    default: 1000,
+    doc: 'Default --budget-evals for `regolith optimize` when unset.',
+  },
+  {
+    key: 'optimize.seed',
+    kind: 'int',
+    default: 0,
+    doc: 'Default --seed for `regolith optimize` when unset.',
+  },
+  {
+    key: 'records.stdlib_root',
+    kind: 'str',
+    default: '',
+    doc: 'Explicit stdlib root directory (containing std.civil/, std.cost/, etc) for CLI record resolution; empty defers to the vendored-copy then dev-walk fallback.',
+  },
+  {
+    key: 'ui.host',
+    kind: 'str',
+    default: '127.0.0.1',
+    doc: 'Bind host for `graphite serve` (must stay localhost, AD-31).',
+  },
+  {
+    key: 'ui.port',
+    kind: 'int',
+    default: 8765,
+    doc: 'Bind port for `graphite serve`.',
+  },
+];
+
+// RECORDED from `regolith doctor --json` on the dev machine (WO-G6): six
+// real tools, all found. A seventh synthetic row (`ngspice-legacy`) is
+// added below, marked clearly, to give the doctor view's "missing" state
+// and install-hint rendering something to demonstrate against -- the
+// same synthesized-row precedent as `mockProjects`' stale_bracket entry
+// (this dev machine happens to have every real catalog tool installed).
+export const mockDoctor: DoctorEntry[] = [
+  {
+    name: 'kicad-cli',
+    found: true,
+    path: '/usr/bin/kicad-cli',
+    version: '10.0.4',
+    capability: 'elec layout tier for cuprite designs (placement/routing/DRC/export)',
+    install_hint: null,
+  },
+  {
+    name: 'verilator',
+    found: true,
+    path: '/usr/local/bin/verilator',
+    version: 'Verilator 5.047 devel rev v5.046-161-g24918b83b',
+    capability: 'HDL sim-tier evidence for cuprite digital designs',
+    install_hint: null,
+  },
+  {
+    name: 'ghdl',
+    found: true,
+    path: '/usr/bin/ghdl',
+    version: 'GHDL 1.0.0 (Ubuntu 1.0.0+dfsg-6) [Dunoon edition]',
+    capability: 'VHDL sim-tier evidence for cuprite digital designs',
+    install_hint: null,
+  },
+  {
+    name: 'ngspice',
+    found: true,
+    path: '/usr/bin/ngspice',
+    version: '** ngspice-36 : Circuit level simulation program',
+    capability: 'SPICE simulation tier for cuprite analog/power designs',
+    install_hint: null,
+  },
+  {
+    name: 'ccx',
+    found: true,
+    path: '/usr/bin/ccx',
+    version: 'This is Version 2.17',
+    capability: 'FEA solve tier (CalculiX) for hematite/feldspar stress claims',
+    install_hint: null,
+  },
+  {
+    name: 'gmsh',
+    found: true,
+    path: '/home/logan/.local/bin/gmsh',
+    version: '4.15.2',
+    capability: 'FEA meshing tier for hematite/feldspar geometry-to-mesh',
+    install_hint: null,
+  },
+  // Synthesized (UI-state coverage only, not a recorded catalog entry):
+  {
+    name: 'feldspar-pack (example, missing-state coverage)',
+    found: false,
+    path: null,
+    version: null,
+    capability: 'external solver pack tier (example, not a real catalog entry)',
+    install_hint:
+      'apt: n/a; conda-forge: n/a; note: synthesized for the doctor view missing-state demo',
+  },
+];
+
+// graphite's own settings default (graphite.service.settings.GraphiteSettings()).
+export const mockSettings: GraphiteSettings = {
+  default_project_root: '',
+  run_verbosity: 'normal',
 };
