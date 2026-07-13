@@ -2,11 +2,17 @@
 build/
 dist/
 *.egg-info/
-# The committed fixture project's ship output is a deliberate exception
-# (WO-G1: pytest coverage must pass without ../lithos, so the fixture's
-# `dist/` is checked in, not regenerated on demand).
+# The committed fixture project's BUILT outputs are a deliberate
+# exception (WO-G1: pytest coverage must pass without ../lithos, so the
+# fixture's ship `dist/` AND its `.regolith/build/` report+lockfile are
+# checked in, not regenerated on demand). The `.regolith` negations are
+# needed because the repo-wide `build/` rule above otherwise swallows
+# `tests/fixtures/*/.regolith/build/` -- the exact miss that shipped
+# WO-G1 with an untracked lockfile (coordinator gate failure).
 !tests/fixtures/**/dist/
 !tests/fixtures/**/dist/**
+!tests/fixtures/**/.regolith/
+!tests/fixtures/**/.regolith/**
 
 # Node (dev-only frontend codegen tooling -- WO-G1; the real Vite app
 # lands in WO-G2)

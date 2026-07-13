@@ -1,0 +1,22 @@
+# regolith.lock tool_version=0.1.0
+
+[section ""]
+PavilionFrame.G1.section = G1=sawn_38x286         cause: optimize(mass_per_length, trace=blake3:1ed0051f835e0cbceda5cd9c50ed5a3257018c00dcad9bef1809d0d260ebd40b)
+PavilionFrame.G2.section = G2=sawn_38x235         cause: optimize(mass_per_length, trace=blake3:1d71622442e0e0d6210d8e44f54ea9e4d0eb987c091c00c7940432b01861cfad)
+cost.profile = construction         cause: cost_profile(manifest_default)
+pin rates.us_midwest_union_2026@1 = sha256:9c688933148646d3e071a73e131e9da8c6587c6c9eb7a7956c4b520c7533b677
+pin rsmeans.bldg_2026.comp_deck_140mm@1 = sha256:92dbe3a0f18905b2cfdff4da453d123a8f364a43fb924b051b81602c25b72571
+pin rsmeans.bldg_2026.footing_each@1 = sha256:c3ce256c505a1ba4683a6583e577f6e1f28f0e901b15bac319d7548c0bb041bc
+pin rsmeans.bldg_2026.steel_frame_erected@1 = sha256:3f6113d8fb98ef35e461c0c085babb34e4065dad6892cae3def47a23559c8666
+pin std.civil.material.sp_no2_treated@1 = sha256:55f4cef63d9fb39d90a25b607c67923c9eb67032a72369110f39d951d75178a7
+pin std.civil.material.spf_no1@1 = sha256:c8dac39bfe4535fd0e266d1b89cec836efd535ff053a197c4d77c8cdf9317850
+pin std.civil.material.spf_no2@1 = sha256:61f7e45449367a46b0381afd4e0923ba7c0ec0a6e4a81390f79ff6a50c59914a
+pin std.civil.section.sawn_150x150@1 = sha256:6d81b27cfd84aaca484191383fa393f126094bd6e40dd371163053e3c9dabbea
+pin std.civil.section.sawn_38x235@1 = sha256:3c72a9a9c0c428857bf1c8dec212fc862fad501a68202fedf77c099a67621f07
+pin std.civil.section.sawn_38x286@1 = sha256:e18fa4234631863589a3832afb90a1d85ceebc326dcef9f6e5969c9a4b470be6
+pin std.civil.section.sawn_50x100@1 = sha256:3ecbcded7fcd07ba5184f5bbdf1db29b712f93c2245198d17b2e4688f112d033
+
+[section "waivers"]
+bearing = 2594cf83371265486ae8f40dcab0c1f69667b78ced5035585041ddc5ce3abca4         cause: waive
+import(std.civil) = ead667e9a11ae76416bbe22f3d931c6823f050424db2b90539efae28cadc0c35         cause: waive
+strength[Purlin] = 0e929836dab7695ace513f7372595e4d0a779f7b282764bc7bb708fc988781e1         cause: waive
