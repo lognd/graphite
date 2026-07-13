@@ -45,7 +45,10 @@ These are the tells of generic generated UI; every one is banned:
   deferred `#D9B23D`, accepted-deviation `#7A8CE0`, excluded
   `#8A949D`.
 - COLOR, light theme: drawing-paper `#F4F2EC`, ink `#1A1D20`,
-  hairline `#C9C4B8`, same accent family re-tuned for contrast;
+  hairline `#C9C4B8`, same accent family re-tuned for contrast --
+  ratified AA-corrected values (WO-G2 axe audit, WOG2-F2): accent
+  `#8A5A16` (5.28:1), verdict.deferred `#7D5F14` (5.33:1),
+  verdict.excluded `#5A5F67` (5.74:1);
   the light theme reads as an engineering DRAWING (title-block
   aesthetic), not a bleached dark theme.
 - Both themes ship WCAG AA; theme follows OS with a manual
