@@ -144,10 +144,84 @@ def test_config_get_one_key(api_client: TestClient) -> None:
     assert resp.json()["source"] == "default"
 
 
+def test_config_schema(api_client: TestClient) -> None:
+    resp = api_client.get("/api/config/schema")
+    assert resp.status_code == 200
+    body = resp.json()
+    entry = next(e for e in body if e["key"] == "ui.port")
+    assert entry["default"] == 8765
+    assert entry["kind"] == "int"
+
+
+def test_config_set_and_reset_round_trip(api_client: TestClient) -> None:
+    set_resp = api_client.put(
+        f"/api/projects/{PROJECT_NAME}/config/ui.port",
+        json={"value": "9999", "level": "local"},
+    )
+    assert set_resp.status_code == 200
+    assert set_resp.json()["value"] == "9999"
+    assert set_resp.json()["source"] == "project"
+
+    default = next(
+        e["default"]
+        for e in api_client.get("/api/config/schema").json()
+        if e["key"] == "ui.port"
+    )
+    reset_resp = api_client.put(
+        f"/api/projects/{PROJECT_NAME}/config/ui.port",
+        json={"value": str(default), "level": "local"},
+    )
+    assert reset_resp.status_code == 200
+    assert reset_resp.json()["value"] == str(default)
+
+
+def test_config_set_unknown_key_is_a_real_cli_error(api_client: TestClient) -> None:
+    resp = api_client.put(
+        f"/api/projects/{PROJECT_NAME}/config/does.not.exist",
+        json={"value": "1", "level": "local"},
+    )
+    assert resp.status_code == 502
+    assert "does.not.exist" in resp.json()["detail"]["detail"]
+
+
 def test_doctor(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/doctor")
     assert resp.status_code == 200
     assert isinstance(resp.json(), list)
+
+
+def test_settings_defaults_and_round_trip(
+    api_client: TestClient, tmp_path, monkeypatch
+) -> None:
+    monkeypatch.setenv("GRAPHITE_HOME", str(tmp_path / "graphite-home"))
+
+    initial = api_client.get("/api/settings")
+    assert initial.status_code == 200
+    assert initial.json() == {"default_project_root": "", "run_verbosity": "normal"}
+
+    put = api_client.put(
+        "/api/settings",
+        json={"default_project_root": "/tmp/some-project", "run_verbosity": "verbose"},
+    )
+    assert put.status_code == 200
+    assert put.json()["run_verbosity"] == "verbose"
+
+    after = api_client.get("/api/settings")
+    assert after.json()["default_project_root"] == "/tmp/some-project"
+
+    reset = api_client.post("/api/settings/reset")
+    assert reset.status_code == 200
+    assert reset.json()["run_verbosity"] == "normal"
+
+
+def test_settings_invalid_verbosity_is_a_real_validation_error(
+    api_client: TestClient,
+) -> None:
+    resp = api_client.put(
+        "/api/settings",
+        json={"default_project_root": "", "run_verbosity": "extremely-loud"},
+    )
+    assert resp.status_code == 422
 
 
 def test_start_run_and_poll(api_client: TestClient) -> None:

@@ -18,6 +18,7 @@ from graphite.server.routes import (
     obligations,
     projects,
     runs,
+    settings,
 )
 
 _log = get_logger(__name__)
@@ -39,8 +40,10 @@ def create_app() -> FastAPI:
         artifacts.router,
         runs.router,
         config.router,
+        config.schema_router,
         doctor.router,
         health.router,
+        settings.router,
     ):
         app.include_router(router)
 

@@ -771,6 +771,48 @@
         "title": "ConfigEntry",
         "type": "object"
       },
+      "ConfigKeyDefault": {
+        "description": "One registered key's declared default + doc, for the \"reset to\ndefault\" affordance (04.1). Neither `regolith config list` nor\n`where` prints the default -- only the CURRENT winning value and\nits source (WOG1-F5's `--json` gap compounds this: there is no\nstable stdout line to parse for \"the default\" either).\n\nWOG6-F1 (escalation, placeholder): this reads `regolith.config.\nregistered_keys()` directly (a Python import of the installed\n`regolith` wheel), not a CLI subprocess -- the ONE exception to\nthis module's \"always shell out\" rule. It is a read of static,\ncompiled-in registry metadata (key/kind/default/doc), never\nproject state and never a write, so it does not violate \"edits\nwrite through the real CLI\" (that doctrine governs mutation, not\nread-only introspection of a constant table). Recorded for the\nlithos coordinator: a `regolith config list --json` (or a\n`--show-default` flag) would let this module drop the import and\ngo through the CLI uniformly like every other read here.",
+        "properties": {
+          "default": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ],
+            "title": "Default"
+          },
+          "doc": {
+            "title": "Doc",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "kind",
+          "default",
+          "doc"
+        ],
+        "title": "ConfigKeyDefault",
+        "type": "object"
+      },
       "Coverage": {
         "description": "Structured coverage (D95, sec. 8.2): per-axis coverage plus the conservative scalar collapse kept for margin notes and old consumers -- `fraction` must never overstate what `axes` states. `Evidence`/`SolverResponse` carry this instead of a bare float.",
         "properties": {
@@ -1259,6 +1301,28 @@
           "counts"
         ],
         "title": "GateSummary",
+        "type": "object"
+      },
+      "GraphiteSettings": {
+        "description": "graphite's own preferences: a default project root to land on at\nstartup and a run verbosity passthrough for driven CLI invocations.\nNever a regolith config key (that precedence ladder is a different\ndoctrine, D163/D164 -- this is graphite-local UI state).",
+        "properties": {
+          "default_project_root": {
+            "default": "",
+            "title": "Default Project Root",
+            "type": "string"
+          },
+          "run_verbosity": {
+            "default": "normal",
+            "enum": [
+              "quiet",
+              "normal",
+              "verbose"
+            ],
+            "title": "Run Verbosity",
+            "type": "string"
+          }
+        },
+        "title": "GraphiteSettings",
         "type": "object"
       },
       "Grid": {
@@ -2000,6 +2064,32 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/config/schema": {
+      "get": {
+        "description": "Every registered key's default/kind/doc, global and static (not\nper-project) -- the \"reset to default\" affordance's data source\nsince neither `config list` nor `where` prints a default.",
+        "operationId": "get_config_schema_api_config_schema_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ConfigKeyDefault"
+                  },
+                  "title": "Response Get Config Schema Api Config Schema Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Get Config Schema",
+        "tags": [
+          "config"
+        ]
+      }
+    },
     "/api/ping": {
       "get": {
         "description": "Liveness probe (not a lithos health report -- see\n`/api/projects/{project}/health` for that).",
@@ -3002,6 +3092,90 @@
         "summary": "Run Events",
         "tags": [
           "runs"
+        ]
+      }
+    },
+    "/api/settings": {
+      "get": {
+        "description": "The current graphite settings (recorded defaults on first run).",
+        "operationId": "read_settings_api_settings_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphiteSettings"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Read Settings",
+        "tags": [
+          "settings"
+        ]
+      },
+      "put": {
+        "description": "Overwrite the whole settings document.",
+        "operationId": "write_settings_api_settings_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GraphiteSettings"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphiteSettings"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Write Settings",
+        "tags": [
+          "settings"
+        ]
+      }
+    },
+    "/api/settings/reset": {
+      "post": {
+        "description": "Reset graphite's own settings to their recorded defaults.",
+        "operationId": "reset_settings_route_api_settings_reset_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphiteSettings"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Reset Settings Route",
+        "tags": [
+          "settings"
         ]
       }
     }
