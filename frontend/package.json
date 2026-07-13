@@ -1,13 +1,58 @@
 {
-  "name": "graphite-frontend-tooling",
+  "name": "graphite-frontend",
   "private": true,
   "version": "0.0.0",
-  "description": "Dev-only tooling package (WO-G1): generates frontend/src/api/api.generated.ts from the committed openapi.json. The real Vite app lands in WO-G2 -- this package.json exists only to pin openapi-typescript as a devDependency so `npm ci` is reproducible; a wheel install of graphite never needs Node (spec 02 sec. 5).",
+  "type": "module",
   "scripts": {
+    "dev": "vite",
+    "dev:mocks": "VITE_USE_MOCKS=1 vite",
+    "build": "tsc -b && vite build",
+    "build:tokens": "tsx scripts/build-tokens.ts",
+    "check:tokens": "tsx scripts/check-tokens-drift.ts",
     "gen:api": "openapi-typescript ../openapi.json -o src/api/api.generated.ts",
-    "check:api-drift": "node ./check-api-drift.mjs"
+    "check:api-drift": "node ./check-api-drift.mjs",
+    "lint": "eslint .",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:system": "playwright test",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@tanstack/react-query": "^5.101.2",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.1"
   },
   "devDependencies": {
-    "openapi-typescript": "^7.4.0"
+    "@axe-core/playwright": "^4.12.1",
+    "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.61.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/node": "^24.13.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.3",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "globals": "^17.7.0",
+    "jsdom": "^29.1.1",
+    "openapi-typescript": "^7.4.0",
+    "prettier": "^3.9.5",
+    "tsx": "^4.23.1",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.64.0",
+    "vite": "^8.1.1",
+    "vitest": "^4.1.10"
   }
 }

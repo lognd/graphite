@@ -1,0 +1,40 @@
+.gr-shortcut-sheet__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.gr-shortcut-sheet {
+  width: 24rem;
+  max-width: 90vw;
+  background: var(--graphite-color-raised);
+  border: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  box-shadow: 0 var(--graphite-space-2) var(--graphite-space-6) rgba(0, 0, 0, 0.4);
+  padding: var(--graphite-space-4);
+}
+
+.gr-shortcut-sheet__list {
+  margin: var(--graphite-space-3) 0 0 0;
+}
+
+.gr-shortcut-sheet__row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--graphite-space-1) 0;
+  border-bottom: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+}
+
+.gr-shortcut-sheet__keys {
+  font-family: var(--graphite-font-family-mono);
+  color: var(--graphite-color-accent);
+  margin: 0;
+}
+
+.gr-shortcut-sheet__desc {
+  margin: 0;
+  color: var(--graphite-color-ink-dim);
+}

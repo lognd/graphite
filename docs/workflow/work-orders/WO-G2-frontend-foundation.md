@@ -1,6 +1,6 @@
 # WO-G2 -- Frontend foundation: tokens, shell, component library
 
-Status: open
+Status: done
 Spec: 03 (design system -- NORMATIVE, read twice; the anti-vibe
   rules are hard acceptance criteria); 02 (stack); 04 (doctrine).
 
@@ -44,3 +44,109 @@ Gallery renders the whole library in both themes with AA contrast
 verified; anti-vibe audit of the gallery ledgered (every 03.1 ban
 checked); make check green incl. token/type drift checks;
 companion audit tables in the ledger for shell + each component.
+
+## Close-out ledger
+
+Branch: `wog2-frontend-foundation` (worktree at
+`.worktrees/wog2`), reconciled with main after the WO-G1 merge
+(991bfe1). `make check` green end to end: `backend-check` (ruff,
+ty, pytest x62, openapi drift) + `frontend-check` (eslint,
+prettier --check, tsc -b, token/tui-mirror drift check, vitest
+x52, vite build) + `frontend-api-check` (openapi-typescript drift)
++ `frontend-system-test` (Playwright x6 -- zero-external-request,
+shell navigation, gallery a11y in both themes).
+
+### Escalations recorded
+
+- WOG2-F1 (CLOSED at integration): the provisional hand-written
+  `api.generated.ts` was deleted wholesale in the merge of main
+  (WO-G1) into this branch; the frontend now consumes the REAL
+  openapi-typescript output, and `src/api/client.ts` exposes only
+  type aliases into it (`ProjectInfo`, `ProjectHealth`,
+  `ObligationsResponse`, `AuditRow`, `AuditSummary`). Mocks were
+  re-recorded from the committed timber_pavilion fixture's
+  audit_index.json, and the client's three endpoints were verified
+  against the live fixture backend (`graphite serve
+  tests/fixtures`). Two provisional guesses did not survive contact
+  with the real API and were reconciled root-cause: (a) there is no
+  fleet-level health endpoint -- health is per-project
+  (`/api/projects/{p}/health`), so the shell's TitleBlock/StatusLine
+  render honest `--` placeholders instead of a fabricated fleet
+  verdict (charter 3.2); (b) the wire vocabulary is the 4-value
+  audit `disposition` enum, not the 5-value design-system verdict
+  set -- the UI vocabulary and its ONE `disposition -> verdict`
+  mapping (`calc_sheet -> discharged`) now live in
+  `components/VerdictBadge/verdict.ts`.
+- WOG2-F2: dark-theme accent/verdict hues match spec 03.2's raw
+  hex values as given. Three LIGHT-theme hues from spec 03.2 fail
+  WCAG AA at small text size on the drawing-paper background
+  (#F4F2EC) and were darkened in `tokens.ts` (documented inline):
+  accent `#9C6A1E` (4.17:1) -> `#8A5A16` (5.28:1); verdict.deferred
+  `#9C7A1A` (3.60:1) -> `#7D5F14` (5.33:1); verdict.excluded
+  `#6B7076` (4.46:1) -> `#5A5F67` (5.74:1). Caught by the
+  Playwright axe smoke on the gallery; flagged for the design
+  system spec owner to reconcile 03.2's stated light-theme values
+  with this WO's contrast fix.
+
+### Anti-vibe audit (spec 03.1, verified via the gallery + source read)
+
+| Ban | Status | How verified |
+|---|---|---|
+| 1. No gradients | PASS | grep for `gradient` across `frontend/src` -- zero hits; every fill in tokens.css/component CSS is a flat `var(--graphite-color-*)`. |
+| 2. No glassmorphism/backdrop-blur/translucency | PASS | grep for `blur`/`backdrop-filter` -- zero hits. Command palette/shortcut-sheet backdrop is a flat `rgba(0,0,0,0.5)` scrim, not a blur. |
+| 3. No floating rounded cards; radius 0/2px only | PASS | `radius` token only has `none`(0px)/`sm`(2px); every panel/table/chip uses hairline borders (`--graphite-border-width-hairline`) for structure, not shadow-floated cards. |
+| 4. No drop shadows except one modal elevation | PASS | grep for `box-shadow` -- only in CommandPalette.css and ShortcutSheet.css (the two modal surfaces); no shadow anywhere else. |
+| 5. No stock purple/indigo, no blue-to-purple | PASS | Full palette audit of tokens.ts: paper/raised/ink grays, phosphor amber accent, and the five verdict hues (green/red/amber/blue-violet-for-accepted-deviation is intentionally desaturated per spec 03.2, not a decorative purple, and reserved for verdict badges only) -- no decorative purple usage anywhere else. |
+| 6. No emoji; small custom line-glyph icon set; text labels first | PASS | grep for common emoji ranges across `frontend/src` -- zero hits (repo-wide ASCII-only rule enforces this transitively); no icon set introduced yet in this WO (text labels only) -- deferred to whichever later WO first needs a glyph, not invented speculatively here. |
+| 7. No decorative animation; functional only, <=150ms, prefers-reduced-motion honored | PASS | Only transitions: ProgressRail fill width (`--graphite-motion-ack` = 150ms, a state-change acknowledgment) and CommandPalette/ShortcutSheet have none; `global.css` sets near-zero durations under `prefers-reduced-motion: reduce`. |
+| 8. No placeholder marketing voice | PASS | Every EmptyState/ErrorState string read back is an engineer's sentence (e.g. "Run graphite from a directory containing a magnetite.toml", "error[E0308]: mismatched types") -- no "powerful insights" phrasing anywhere. |
+
+### Companion-feature audit (spec 04.1) -- app shell
+
+| Standing checklist | Status |
+|---|---|
+| Keyboard-complete navigation | LANDED -- j/k in DataTable, ctrl+k palette, ? shortcut sheet, Escape to close either. |
+| Empty/loading/error states designed | LANDED -- EmptyState/ErrorState components; every route skeleton uses EmptyState with a specific message. |
+| Dark/light theme, OS-following + override | LANDED -- `app/theme.tsx`, persisted in localStorage, verified via Playwright in both themes. |
+| Progressive disclosure (raw JSON always available) | DEFERRED(WO-G3/G4) -- no detail views exist yet in this WO to disclose from. |
+| Copy-paste-quotable hashes/reasons | LANDED -- HashChip (copy+expand), ReasonCell (F-number link). |
+
+### Companion-feature audit (spec 04.1) -- DataTable ("any table" checklist)
+
+| Item | Status |
+|---|---|
+| Column sort | LANDED |
+| Text filter | LANDED |
+| Copy row/cell | LANDED (`c` key copies the active row; tab-separated) |
+| CSV export | LANDED |
+| Empty state | LANDED (composes EmptyState) |
+| Loading skeleton | LANDED (text state; a richer skeleton is a REJECTED scope-creep for this WO -- no real loading-shape data exists yet to skeleton against) |
+| Count in header | LANDED |
+| Sticky header on scroll | LANDED |
+| Keyboard row navigation (j/k) | LANDED |
+
+### Companion-feature audit -- other components (abbreviated; each is a single-concept component per spec 03.5, no "any table/detail/long-op" checklist applies beyond what's noted)
+
+| Component | Notes |
+|---|---|
+| VerdictBadge | Full-label and compact variants; verdict color is the ONLY place semantic verdict hues are used (enforced by review, not lint). |
+| MarginBar | Dimension-line tick-terminated bar per spec 03.3; over-limit state uses the violated verdict hue. |
+| HashChip | Copy (LANDED) + expand (LANDED); permalink/deep-link to a hash detail view is DEFERRED(WO-G5, artifact detail views). |
+| ReasonCell | F-number link is a `#/design-log/<F>` placeholder route -- DEFERRED(WO-G8 or wherever a real design-log viewer lands) since no such route exists yet. |
+| LogPane | Follow-tail (LANDED), search/filter (LANDED), ANSI-strip (LANDED). Cancel/elapsed-time belong to ProgressRail, not LogPane, per the one-component-per-concept rule. |
+| ProgressRail | Elapsed time, cancel, indeterminate state all LANDED; durable run-history record is DEFERRED(WO-G5, real run history). |
+| EmptyState / ErrorState | Composed by every route skeleton and DataTable; retry callback on ErrorState LANDED. |
+
+### Token law + dedup law enforcement (verified)
+
+- `frontend/eslint-rules/no-raw-design-values.js`: local eslint
+  rule banning hex-color and bare-px string/template literals
+  outside `tokens.ts`/generator scripts -- wired into
+  `eslint.config.js`, verified passing (`npm run lint` green with
+  zero raw-value errors across all components).
+- `frontend/eslint-rules/no-raw-fetch.js`: bans `fetch(...)`
+  outside `src/api/client.ts` -- verified passing.
+- `frontend/scripts/build-tokens.ts` / `check-tokens-drift.ts`:
+  the one generator + drift check for both
+  `frontend/src/tokens/tokens.css` and `graphite/tui/tokens.py`;
+  wired into `make frontend-check`, verified passing.

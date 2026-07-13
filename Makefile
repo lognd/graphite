@@ -1,8 +1,10 @@
 .PHONY: install test lint format typecheck openapi openapi-check \
-        frontend-api-gen frontend-api-check backend-check check clean
+        frontend-install frontend-api-gen frontend-api-check \
+        frontend-check frontend-test frontend-system-test \
+        backend-check check clean
 
 UV ?= uv
-NPM ?= npm
+NPM ?= npm --prefix frontend
 
 install: ## uv sync (editable path dep on ../lithos regolith wheel)
 	$(UV) sync
@@ -25,19 +27,41 @@ openapi: ## regenerate the committed openapi.json from the live FastAPI app
 openapi-check: ## drift check: committed openapi.json matches the live app
 	$(UV) run python scripts/check_openapi_drift.py
 
+frontend-install: ## npm install for the frontend (Node is a dev-only dependency, spec 02.5)
+	$(NPM) install
+
 frontend-api-gen: ## regenerate frontend/src/api/api.generated.ts from openapi.json (dev-only, needs Node)
-	cd frontend && $(NPM) install --silent && $(NPM) run gen:api
+	$(NPM) run gen:api
 
 frontend-api-check: ## drift check: api.generated.ts matches openapi.json (dev-only, needs Node)
-	cd frontend && $(NPM) install --silent && $(NPM) run check:api-drift
+	$(NPM) run check:api-drift
+
+# Cheapest-first (spec 02.6/04.2's drift + lint checks before the heavier
+# vitest/build legs), self-contained: this target alone is the full
+# frontend gate WO-G2 promises.
+frontend-check: ## lint, format, typecheck, vitest, token drift check, build
+	$(NPM) run lint
+	$(NPM) run format
+	$(NPM) run typecheck
+	$(NPM) run check:tokens
+	$(NPM) run test
+	$(NPM) run build
+
+frontend-test: ## frontend vitest unit/component suite only
+	$(NPM) run test
+
+frontend-system-test: ## Playwright system rig (zero-external-request, shell nav, gallery a11y)
+	$(NPM) run test:system
 
 backend-check: lint typecheck test openapi-check ## the WO-G1 backend leg, self-contained (no Node needed)
 
-check: backend-check frontend-api-check ## full gate, cheapest first
+check: backend-check frontend-check frontend-api-check frontend-system-test ## full gate, cheapest first
 
 clean:
 	rm -rf .pytest_cache .ruff_cache build *.egg-info
-	rm -rf frontend/node_modules
+	rm -rf frontend/node_modules frontend/dist frontend/dist-e2e
+	rm -rf frontend/coverage frontend/playwright-report frontend/test-results
+	rm -rf graphite/server/static
 	# NOTE: top-level dist/ (wheel build output) is intentionally not
 	# swept here -- tests/fixtures/**/dist is a committed fixture, and
 	# a blanket `rm -rf dist` at repo root is one keystroke away from

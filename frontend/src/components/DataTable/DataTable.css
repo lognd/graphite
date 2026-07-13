@@ -1,0 +1,101 @@
+.gr-data-table {
+  display: flex;
+  flex-direction: column;
+  gap: var(--graphite-space-2);
+  height: 100%;
+}
+
+.gr-data-table__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--graphite-space-2);
+}
+
+.gr-data-table__count {
+  white-space: nowrap;
+}
+
+.gr-data-table__filter {
+  flex: 1 1 auto;
+  background: transparent;
+  border: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  color: var(--graphite-color-ink);
+  padding: var(--graphite-space-1);
+  font-family: var(--graphite-font-family-mono);
+  font-size: var(--graphite-font-size-12);
+}
+
+.gr-data-table__export {
+  border: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  background: transparent;
+  color: var(--graphite-color-ink);
+  padding: var(--graphite-space-1) var(--graphite-space-2);
+  cursor: pointer;
+  text-transform: uppercase;
+  font-size: var(--graphite-font-size-11);
+  letter-spacing: var(--graphite-letter-spacing-micro-label);
+}
+
+.gr-data-table__export:hover {
+  border-color: var(--graphite-color-accent);
+  color: var(--graphite-color-accent);
+}
+
+.gr-data-table__scroll {
+  overflow: auto;
+  flex: 1 1 auto;
+}
+
+.gr-data-table__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.gr-data-table__thead {
+  position: sticky;
+  top: 0;
+  background: var(--graphite-color-raised);
+  z-index: 1;
+}
+
+.gr-data-table__th {
+  text-align: left;
+  border-bottom: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  padding: var(--graphite-space-1) var(--graphite-space-2);
+}
+
+.gr-data-table__sort-btn {
+  background: transparent;
+  border: none;
+  color: var(--graphite-color-ink-dim);
+  font: inherit;
+  cursor: pointer;
+  text-transform: uppercase;
+  font-size: var(--graphite-font-size-11);
+  letter-spacing: var(--graphite-letter-spacing-micro-label);
+  padding: 0;
+}
+
+.gr-data-table__unit {
+  color: var(--graphite-color-ink-dim);
+}
+
+.gr-data-table__tr {
+  border-bottom: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  cursor: pointer;
+}
+
+.gr-data-table__tr--active {
+  outline: var(--graphite-border-width-hairline) solid var(--graphite-color-accent);
+  outline-offset: -1px;
+}
+
+.gr-data-table__td {
+  padding: var(--graphite-space-1) var(--graphite-space-2);
+}
+
+.gr-data-table__loading {
+  padding: var(--graphite-space-4);
+  color: var(--graphite-color-ink-dim);
+}

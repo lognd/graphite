@@ -1,0 +1,64 @@
+.gr-command-palette__backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: var(--graphite-space-16);
+  z-index: 100;
+}
+
+.gr-command-palette {
+  width: 30rem;
+  max-width: 90vw;
+  background: var(--graphite-color-raised);
+  border: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  box-shadow: 0 var(--graphite-space-2) var(--graphite-space-6) rgba(0, 0, 0, 0.4);
+}
+
+.gr-command-palette__input {
+  width: 100%;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  border-bottom: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  color: var(--graphite-color-ink);
+  padding: var(--graphite-space-3);
+  font-family: var(--graphite-font-family-mono);
+  font-size: var(--graphite-font-size-14);
+}
+
+.gr-command-palette__input:focus {
+  outline: none;
+}
+
+.gr-command-palette__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
+.gr-command-palette__item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--graphite-color-ink);
+  padding: var(--graphite-space-2) var(--graphite-space-3);
+  cursor: pointer;
+  font: inherit;
+}
+
+.gr-command-palette__item:hover {
+  background: var(--graphite-color-paper);
+  color: var(--graphite-color-accent);
+}
+
+.gr-command-palette__empty {
+  padding: var(--graphite-space-3);
+  color: var(--graphite-color-ink-dim);
+}

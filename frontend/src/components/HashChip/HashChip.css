@@ -1,0 +1,36 @@
+.gr-hash-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--graphite-space-1);
+  border: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  border-radius: var(--graphite-radius-sm);
+  padding: 0 var(--graphite-space-1);
+  background: var(--graphite-color-raised);
+}
+
+.gr-hash-chip__value {
+  font-family: var(--graphite-font-family-mono);
+  font-size: var(--graphite-font-size-12);
+  color: var(--graphite-color-ink);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.gr-hash-chip__copy {
+  font-size: var(--graphite-font-size-11);
+  color: var(--graphite-color-ink-dim);
+  background: transparent;
+  border: none;
+  border-left: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  padding-left: var(--graphite-space-1);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: var(--graphite-letter-spacing-micro-label);
+}
+
+.gr-hash-chip__copy:hover,
+.gr-hash-chip__value:hover {
+  color: var(--graphite-color-accent);
+}

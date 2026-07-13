@@ -1,0 +1,60 @@
+/* Global reset + base typography. Values come only from tokens.css. */
+@import '../tokens/tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--graphite-color-paper);
+  color: var(--graphite-color-ink);
+  font-family: var(--graphite-font-family-mono);
+  font-size: var(--graphite-font-size-13);
+  line-height: var(--graphite-line-height-13);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Long-form prose panes opt into the humanist sans explicitly. */
+.gr-prose {
+  font-family: var(--graphite-font-family-sans);
+}
+
+.gr-micro-label {
+  font-size: var(--graphite-font-size-11);
+  letter-spacing: var(--graphite-letter-spacing-micro-label);
+  text-transform: uppercase;
+  color: var(--graphite-color-ink-dim);
+}
+
+a {
+  color: var(--graphite-color-accent);
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+:focus-visible {
+  outline: 1px solid var(--graphite-color-accent);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
