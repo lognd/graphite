@@ -84,3 +84,30 @@ lithos project (built artifacts included) so tests never need the
 sibling repo at runtime; a separate integration marker runs
 against the real `../lithos` fleet when present (the feldspar
 regolith-test precedent).
+
+## 7. Performance and WASM doctrine (owner directive, lithos D235)
+
+Compute-intensive frontend paths run as Rust compiled to
+WebAssembly, not as hot JavaScript:
+
+1. WHAT QUALIFIES: geometry processing for the 3D viewer
+   (tessellation transforms, section cuts), gerber/DXF/SVG heavy
+   parsing and rendering transforms, content hashing over large
+   artifacts, and any profiled inner loop exceeding ~16ms on the
+   fixture data. Trivial logic does NOT get WASM-ified -- the
+   threshold is a profile, recorded in the ledger of the WO that
+   crosses it.
+2. ONE TOOLING PATH: a single `wasm/` crate workspace in this
+   repo (wasm-pack/wasm-bindgen), bundled locally by Vite --
+   never fetched from a CDN (charter 3.1 unchanged); loaded
+   lazily per route so the base bundle stays lean (G8's budget).
+3. DEDUP SEAM: where the computation already exists in lithos's
+   Rust crates (outline/geometry math), prefer proposing a
+   wasm32 build of the EXISTING crate to the lithos coordinator
+   over re-implementing -- one physics/geometry home (the lithos
+   charter-39 boundary rule applied to rendering math). A local
+   re-implementation is acceptable only as a marked-provisional
+   bridge with the escalation recorded.
+4. FALLBACK HONESTY: if WASM fails to load, views degrade to a
+   labeled slower path or an honest ErrorState -- never a silent
+   hang.
