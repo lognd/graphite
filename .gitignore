@@ -20,6 +20,7 @@ graphite/server/static/
 # Node (dev dependency only, spec 02 sec. 5)
 node_modules/
 frontend/dist-e2e/
+frontend/dist-e2e-live/
 frontend/coverage/
 frontend/playwright-report/
 frontend/test-results/

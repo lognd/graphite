@@ -17,6 +17,17 @@ export default defineConfig({
       '/api': 'http://127.0.0.1:8000',
     },
   },
+  preview: {
+    proxy: {
+      // Same proxy target, for `vite preview` -- the WO-G5 live-fixture
+      // Playwright rig (playwright.live.config.ts) builds+previews the
+      // real (non-mocked) frontend against a real `graphite serve`
+      // backend on this same port, so a real `regolith build --release`
+      // is watchable end-to-end (spec 04.1's honest-failure/cancel
+      // floor needs a real subprocess, not VITE_USE_MOCKS fixtures).
+      '/api': 'http://127.0.0.1:8000',
+    },
+  },
   build: {
     outDir: '../graphite/server/static',
     emptyOutDir: true,
@@ -26,7 +37,7 @@ export default defineConfig({
     globals: false,
     setupFiles: ['./src/setupTests.ts'],
     css: true,
-    exclude: ['node_modules', 'dist', 'tests/system/**'],
+    exclude: ['node_modules', 'dist', 'tests/system/**', 'tests/system-live/**'],
     coverage: {
       reporter: ['text', 'lcov'],
     },

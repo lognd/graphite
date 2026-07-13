@@ -1,7 +1,7 @@
 .PHONY: install test lint format typecheck openapi openapi-check \
         frontend-install frontend-api-gen frontend-api-check \
         frontend-check frontend-test frontend-system-test \
-        backend-check check clean
+        frontend-system-test-live backend-check check clean
 
 UV ?= uv
 NPM ?= npm --prefix frontend
@@ -53,13 +53,16 @@ frontend-test: ## frontend vitest unit/component suite only
 frontend-system-test: ## Playwright system rig (zero-external-request, shell nav, gallery a11y)
 	$(NPM) run test:system
 
+frontend-system-test-live: ## WO-G5 live rig: real regolith CLI through a real graphite serve (needs uv + ../lithos, like pytest --run-integration)
+	$(NPM) run test:system-live
+
 backend-check: lint typecheck test openapi-check ## the WO-G1 backend leg, self-contained (no Node needed)
 
 check: backend-check frontend-check frontend-api-check frontend-system-test ## full gate, cheapest first
 
 clean:
 	rm -rf .pytest_cache .ruff_cache build *.egg-info
-	rm -rf frontend/node_modules frontend/dist frontend/dist-e2e
+	rm -rf frontend/node_modules frontend/dist frontend/dist-e2e frontend/dist-e2e-live
 	rm -rf frontend/coverage frontend/playwright-report frontend/test-results
 	rm -rf graphite/server/static
 	# NOTE: top-level dist/ (wheel build output) is intentionally not

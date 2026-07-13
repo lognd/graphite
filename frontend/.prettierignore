@@ -1,5 +1,6 @@
 dist
 dist-e2e
+dist-e2e-live
 coverage
 playwright-report
 test-results
