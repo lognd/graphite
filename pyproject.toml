@@ -22,9 +22,9 @@ dependencies = [
 graphite = "graphite.cli:app"
 
 [tool.uv.sources]
-# Editable path dependency onto this repo's wheel (dev convenience, the
-# regolith-ls precedent); `make install-graphite` wires this up.
-regolith = { path = "../..", editable = true }
+# Editable path dependency onto the sibling lithos checkout's wheel
+# (dev convenience, the feldspar posture); `make install` wires this up.
+regolith = { path = "../lithos", editable = true }
 
 [tool.hatch.build.targets.wheel]
 packages = ["graphite"]
