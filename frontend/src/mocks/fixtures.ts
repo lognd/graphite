@@ -23,6 +23,7 @@ import type {
   ProjectInfo,
   RunRecord,
   StagedBuildReport,
+  VerdictDiff,
 } from '../api/client';
 
 export const mockProjects: ProjectInfo[] = [
@@ -636,3 +637,23 @@ export const mockRuns: RunRecord[] = [
     before_health: { release_ok: false, violated: 1, total_obligations: 2 },
   },
 ];
+
+// RECORDED from a real `REGOLITH_LOG=DEBUG regolith --color never check
+// program.calx` on the fixture (trimmed to a representative tail; the
+// progress line is a verbatim D228 wire-shape record from a real
+// `build --release`, regolith.progress module docstring).
+export const mockRunLog: string[] = [
+  'check: 1 file(s)',
+  'loaded manifest examples.timber_pavilion@0.1.0 from magnetite.toml',
+  'progress v=1 phase=discharge subject=2f5a6b49526e.. done=1 total=2 elapsed=0.000',
+  'progress v=1 phase=discharge subject=b49951b61ab7.. done=2 total=2 elapsed=0.000',
+  'check: all files pass',
+];
+
+// The before side matches mockRuns[1]'s captured before_health; the
+// after side is the fixture project's real current health (10
+// obligations, 0 violated -- mockProjectHealth's recorded summary).
+export const mockVerdictDiff: VerdictDiff = {
+  before: { release_ok: false, violated: 1, total_obligations: 2 },
+  after: { release_ok: true, violated: 0, total_obligations: 10 },
+};

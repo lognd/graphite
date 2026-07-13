@@ -20,6 +20,7 @@ import { ErrorState } from '../components/ErrorState/ErrorState';
 import { HashChip } from '../components/HashChip/HashChip';
 import { TitleBlock } from '../components/TitleBlock/TitleBlock';
 import { VerdictBadge } from '../components/VerdictBadge/VerdictBadge';
+import { optimizeWinnerRows } from '../lib/optimizeRows';
 
 function familyOf(relpath: string): string {
   const slash = relpath.indexOf('/');
@@ -73,11 +74,7 @@ export function Project() {
     families.set(fam, (families.get(fam) ?? 0) + 1);
   }
 
-  const optimizeRows = (lockfile.data?.sections ?? []).flatMap((section) =>
-    section.rows
-      .filter((row) => row.cause.startsWith('optimize('))
-      .map((row) => ({ section: section.name || '(base)', ...row })),
-  );
+  const optimizeRows = optimizeWinnerRows(lockfile.data);
 
   return (
     <div className="gr-project">

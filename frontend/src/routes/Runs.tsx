@@ -10,6 +10,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   useCancelRun,
+  useLockfile,
+  useProjectArtifacts,
   useProjectConfig,
   useProjects,
   useRunLog,
@@ -25,6 +27,7 @@ import { EmptyState } from '../components/EmptyState/EmptyState';
 import { ErrorState } from '../components/ErrorState/ErrorState';
 import { LogPane } from '../components/LogPane/LogPane';
 import { ProgressRail } from '../components/ProgressRail/ProgressRail';
+import { optimizeWinnerRows } from '../lib/optimizeRows';
 
 const VERBS: RunVerb[] = ['check', 'build', 'ship', 'test', 'optimize', 'preview'];
 
@@ -75,7 +78,9 @@ export function Runs() {
   const [verb, setVerb] = useState<RunVerb>('check');
   const [argsText, setArgsText] = useState('');
   const [runId, setRunId] = useState<string | null>(null);
-  const [status, setStatus] = useState<RunRecord['status']>('running');
+  // null = no run started this session yet (the start button must be
+  // enabled then -- 'running' as the initial value would deadlock it).
+  const [status, setStatus] = useState<RunRecord['status'] | null>(null);
   const [logLines, setLogLines] = useState<string[]>([]);
   const [phases, setPhases] = useState<Record<string, PhaseProgress>>({});
   const [historyDetailId, setHistoryDetailId] = useState<string | null>(null);
@@ -94,6 +99,18 @@ export function Runs() {
   const historyLog = useRunLog(historyDetailId ?? undefined);
   const historyDiff = useVerdictDiff(historyDetailId ?? undefined);
   const historyRecord = runs.data?.find((r) => r.run_id === historyDetailId);
+
+  // Optimize-run surfacing (deliverable 5): once an optimize run leaves
+  // `running`, the lockfile's winner rows and any shipped STEP artifact
+  // are re-read from the SAME existing APIs the project view uses -- no
+  // new endpoint, no client-side recomputation.
+  const optimizeFinished = verb === 'optimize' && runId !== null && status && status !== 'running';
+  const lockfile = useLockfile(optimizeFinished ? effectiveProject : undefined);
+  const artifacts = useProjectArtifacts(optimizeFinished ? effectiveProject : undefined);
+  const winnerRows = optimizeWinnerRows(lockfile.data);
+  const stepArtifacts = (artifacts.data ?? []).filter((a) =>
+    a.relpath.toLowerCase().endsWith('.step'),
+  );
 
   function onVerbChange(nextVerb: RunVerb) {
     setVerb(nextVerb);
@@ -308,6 +325,40 @@ export function Runs() {
                 <p>{verdictLine(verdictDiff.data.before, verdictDiff.data.after)}</p>
               ) : (
                 <p role="status">loading verdict diff...</p>
+              )}
+            </div>
+          ) : null}
+          {optimizeFinished ? (
+            <div aria-label="optimize results" data-testid="optimize-results">
+              <h3 className="gr-micro-label">optimize winners</h3>
+              <DataTable
+                columns={[
+                  { key: 'section', header: 'Section', accessor: (r) => r.section },
+                  { key: 'slot', header: 'Slot', accessor: (r) => r.slot },
+                  { key: 'winner', header: 'Winner', accessor: (r) => r.value },
+                  { key: 'cause', header: 'Cause', accessor: (r) => r.cause },
+                ]}
+                rows={winnerRows}
+                rowKey={(r) => `${r.section}:${r.slot}`}
+                loading={lockfile.isLoading}
+                emptyTitle="No optimize() slots in this lockfile"
+                emptyDetail="An optimize run that pins a winner writes it to regolith.lock."
+              />
+              {stepArtifacts.length > 0 ? (
+                <p>
+                  pinned STEP:{' '}
+                  {stepArtifacts.map((a) => (
+                    <a
+                      key={a.content_hash}
+                      href={api.artifactUrl(effectiveProject, a.content_hash)}
+                      download
+                    >
+                      {a.relpath}
+                    </a>
+                  ))}
+                </p>
+              ) : (
+                <p className="gr-micro-label">no STEP shipped by this run</p>
               )}
             </div>
           ) : null}

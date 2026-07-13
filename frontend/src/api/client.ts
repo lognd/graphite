@@ -22,7 +22,9 @@ import {
   mockProjectArtifacts,
   mockProjectHealth,
   mockProjects,
+  mockRunLog,
   mockRuns,
+  mockVerdictDiff,
 } from '../mocks/fixtures';
 
 export type ProjectInfo = components['schemas']['ProjectInfo'];
@@ -192,9 +194,15 @@ export const api = {
     return (await res.json()) as RunRecord;
   },
   async getRun(runId: string): Promise<RunRecord> {
+    if (USE_MOCKS) {
+      const record = mockRuns.find((r) => r.run_id === runId);
+      if (!record) throw new Error(`graphite api mock: no run ${runId}`);
+      return record;
+    }
     return request<RunRecord>(`/runs/${encodeURIComponent(runId)}`);
   },
   async getRunLog(runId: string): Promise<string[]> {
+    if (USE_MOCKS) return [...mockRunLog];
     return request<string[]>(`/runs/${encodeURIComponent(runId)}/log`);
   },
   async cancelRun(runId: string): Promise<RunRecord> {
@@ -205,6 +213,7 @@ export const api = {
     return (await res.json()) as RunRecord;
   },
   async getVerdictDiff(runId: string): Promise<VerdictDiff> {
+    if (USE_MOCKS) return mockVerdictDiff;
     return request<VerdictDiff>(`/runs/${encodeURIComponent(runId)}/verdict-diff`);
   },
   /** Opens the SSE stream for `runId` (log lines + parsed progress events,
