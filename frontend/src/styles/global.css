@@ -36,6 +36,38 @@ body {
   color: var(--graphite-color-ink-dim);
 }
 
+/* Section heading inside a route body (WO-G4: calc book/BOM/boards each
+ * render several sub-tables under one route -- one shared heading style
+ * rather than each view hand-rolling its own <h2> rules). */
+.gr-section-title {
+  font-size: var(--graphite-font-size-14);
+  margin: var(--graphite-space-6) 0 var(--graphite-space-2);
+}
+
+/* The title-block-as-table layout used by the drawing detail view --
+ * distinct from <TitleBlock/> (the app-shell identity element) because
+ * this one is per-sheet metadata inline in the artifact body. */
+.gr-title-block-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: var(--graphite-space-4);
+}
+
+.gr-title-block-table th,
+.gr-title-block-table td {
+  border: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  padding: var(--graphite-space-1) var(--graphite-space-2);
+  text-align: left;
+}
+
+.gr-title-block-table th {
+  font-size: var(--graphite-font-size-11);
+  letter-spacing: var(--graphite-letter-spacing-micro-label);
+  text-transform: uppercase;
+  color: var(--graphite-color-ink-dim);
+  font-weight: normal;
+}
+
 a {
   color: var(--graphite-color-accent);
 }
