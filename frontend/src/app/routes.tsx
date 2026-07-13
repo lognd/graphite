@@ -8,6 +8,8 @@ import { AppShell } from './AppShell';
 import { Dashboard } from '../routes/Dashboard';
 import { Project } from '../routes/Project';
 import { Obligations } from '../routes/Obligations';
+import { ObligationExplorer } from '../routes/ObligationExplorer';
+import { ClaimDetail } from '../routes/ClaimDetail';
 import { Artifacts } from '../routes/Artifacts';
 import { Runs } from '../routes/Runs';
 import { Config } from '../routes/Config';
@@ -15,6 +17,8 @@ import { Config } from '../routes/Config';
 const children = [
   { index: true, element: <Dashboard /> },
   { path: 'project/:projectId', element: <Project /> },
+  { path: 'project/:projectId/obligations', element: <ObligationExplorer /> },
+  { path: 'project/:projectId/claim/:claimKey', element: <ClaimDetail /> },
   { path: 'obligations', element: <Obligations /> },
   { path: 'artifacts', element: <Artifacts /> },
   { path: 'runs', element: <Runs /> },

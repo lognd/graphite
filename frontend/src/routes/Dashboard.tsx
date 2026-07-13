@@ -1,17 +1,111 @@
-// Dashboard route: answers "is my fleet healthy?" in one interaction
-// (charter 2.1). WO-G3 fills in the real fleet view (per-project health
-// verdicts need N /health calls or a fleet endpoint -- WO-G3's call);
-// this WO owns the route skeleton, the projects listing, and designed
-// empty/loading/error states.
+// Fleet dashboard: answers "is my fleet healthy?" in one interaction
+// (charter 2.1). Per-project census rows (obligations/discharged/
+// accepted/deferred/violated) as a hairline DataTable with a MarginBar
+// rigor ratio (discharged+accepted over obligations -- no fleet health
+// endpoint exists, WOG2-F1, so this fans out one /health call per
+// project via useFleetHealth); stale-report detection surfaces as a
+// flagged column (sourced from ProjectInfo.build_report_stale, never
+// recomputed here); every count and the project name link through to
+// its filtered obligation explorer / project view (04.1 "ANY TABLE"
+// deep-through floor).
 
 import { Link } from 'react-router-dom';
-import { useProjects } from '../api/hooks';
+import { useFleetHealth, useProjects } from '../api/hooks';
+import type { FleetHealthEntry } from '../api/hooks';
 import { DataTable } from '../components/DataTable/DataTable';
+import type { DataTableColumn } from '../components/DataTable/DataTable';
 import { EmptyState } from '../components/EmptyState/EmptyState';
 import { ErrorState } from '../components/ErrorState/ErrorState';
+import { MarginBar } from '../components/MarginBar/MarginBar';
+
+function obligationLink(project: string, filter?: string): string {
+  const base = `/project/${encodeURIComponent(project)}/obligations`;
+  return filter ? `${base}?filter=${encodeURIComponent(filter)}` : base;
+}
+
+function countCell(entry: FleetHealthEntry, filter: string | undefined, count: number | undefined) {
+  if (count === undefined) return entry.isError ? '--' : 'loading';
+  return <Link to={obligationLink(entry.project.name, filter)}>{count}</Link>;
+}
+
+const COLUMNS: DataTableColumn<FleetHealthEntry>[] = [
+  {
+    key: 'name',
+    header: 'Project',
+    accessor: (e) => e.project.name,
+    render: (e) => (
+      <Link to={`/project/${encodeURIComponent(e.project.name)}`}>{e.project.name}</Link>
+    ),
+  },
+  {
+    key: 'stale',
+    header: 'Report',
+    accessor: (e) =>
+      !e.project.has_build_report ? 'missing' : e.project.build_report_stale ? 'STALE' : 'fresh',
+  },
+  {
+    key: 'obligations',
+    header: 'Obligations',
+    accessor: (e) => e.health?.obligation_summary.obligations ?? null,
+    render: (e) => countCell(e, undefined, e.health?.obligation_summary.obligations),
+  },
+  {
+    key: 'discharged',
+    header: 'Discharged',
+    accessor: (e) => e.health?.obligation_summary.discharged ?? null,
+    render: (e) => countCell(e, 'calc_sheet', e.health?.obligation_summary.discharged),
+  },
+  {
+    key: 'accepted',
+    header: 'Accepted',
+    accessor: (e) => e.health?.obligation_summary.accepted_deviation ?? null,
+    render: (e) =>
+      countCell(e, 'accepted_deviation', e.health?.obligation_summary.accepted_deviation),
+  },
+  {
+    key: 'deferred',
+    header: 'Deferred',
+    accessor: (e) => e.health?.obligation_summary.deferred ?? null,
+    render: (e) => countCell(e, 'deferred', e.health?.obligation_summary.deferred),
+  },
+  {
+    key: 'violated',
+    header: 'Violated',
+    accessor: (e) => e.health?.obligation_summary.violated ?? null,
+    render: (e) => countCell(e, 'violated', e.health?.obligation_summary.violated),
+  },
+  {
+    key: 'rigor',
+    header: 'Rigor',
+    sortable: false,
+    accessor: (e) => {
+      const s = e.health?.obligation_summary;
+      if (!s || s.obligations === 0) return null;
+      return s.discharged + s.accepted_deviation;
+    },
+    render: (e) => {
+      const s = e.health?.obligation_summary;
+      if (!s || s.obligations === 0) return e.isError ? '--' : 'loading';
+      return (
+        <MarginBar
+          value={s.discharged + s.accepted_deviation}
+          limit={s.obligations}
+          unit=""
+          label="discharged+accepted / obligations"
+        />
+      );
+    },
+  },
+  {
+    key: 'release',
+    header: 'Release gate',
+    accessor: (e) => (e.health ? (e.health.release_ok ? 'OK' : 'BLOCKED') : null),
+  },
+];
 
 export function Dashboard() {
-  const { data, isLoading, isError, error, refetch } = useProjects();
+  const { data: projects, isLoading, isError, error, refetch } = useProjects();
+  const { entries } = useFleetHealth(projects);
 
   if (isError) {
     return (
@@ -23,7 +117,7 @@ export function Dashboard() {
     );
   }
 
-  if (!isLoading && (data ?? []).length === 0) {
+  if (!isLoading && (projects ?? []).length === 0) {
     return (
       <EmptyState
         title="No projects in this fleet yet"
@@ -34,29 +128,9 @@ export function Dashboard() {
 
   return (
     <DataTable
-      columns={[
-        {
-          key: 'name',
-          header: 'Project',
-          accessor: (p) => p.name,
-          render: (p) => <Link to={`/project/${encodeURIComponent(p.name)}`}>{p.name}</Link>,
-        },
-        { key: 'version', header: 'Version', accessor: (p) => p.version },
-        { key: 'root', header: 'Root', accessor: (p) => p.root },
-        {
-          key: 'build_report',
-          header: 'Build report',
-          accessor: (p) => (p.has_build_report ? 'present' : 'missing'),
-        },
-        {
-          key: 'lockfile',
-          header: 'Lockfile',
-          accessor: (p) => (p.has_lockfile ? 'present' : 'missing'),
-        },
-        { key: 'dist', header: 'dist/', accessor: (p) => (p.has_dist ? 'present' : 'missing') },
-      ]}
-      rows={data ?? []}
-      rowKey={(p) => p.name}
+      columns={COLUMNS}
+      rows={entries}
+      rowKey={(e) => e.project.name}
       loading={isLoading}
       emptyTitle="No projects in this fleet yet"
     />
