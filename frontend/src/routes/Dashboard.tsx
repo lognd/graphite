@@ -59,9 +59,14 @@ const COLUMNS: DataTableColumn<FleetHealthEntry>[] = [
   {
     key: 'accepted',
     header: 'Accepted',
-    accessor: (e) => e.health?.obligation_summary.accepted_deviation ?? null,
-    render: (e) =>
-      countCell(e, 'accepted_deviation', e.health?.obligation_summary.accepted_deviation),
+    // accepted_rows, not accepted_deviation: the deep link filters the
+    // explorer BY ROW, and forall-expanded obligation instances share one
+    // accepted content address (D221.2's two denominators) -- the count a
+    // header shows must be the count its drill-down lists (WO-G8
+    // coherence sweep). The unique-deviation census count stays visible
+    // on the project view and calc book.
+    accessor: (e) => e.health?.obligation_summary.accepted_rows ?? null,
+    render: (e) => countCell(e, 'accepted_deviation', e.health?.obligation_summary.accepted_rows),
   },
   {
     key: 'deferred',
@@ -82,14 +87,17 @@ const COLUMNS: DataTableColumn<FleetHealthEntry>[] = [
     accessor: (e) => {
       const s = e.health?.obligation_summary;
       if (!s || s.obligations === 0) return null;
-      return s.discharged + s.accepted_deviation;
+      return s.discharged + s.accepted_rows;
     },
     render: (e) => {
       const s = e.health?.obligation_summary;
       if (!s || s.obligations === 0) return e.isError ? '--' : 'loading';
       return (
         <MarginBar
-          value={s.discharged + s.accepted_deviation}
+          // Row partition (D221.2): discharged + accepted_rows + deferred
+          // + violated == obligations, so this ratio's numerator and
+          // denominator share one shape (WO-G8 coherence sweep).
+          value={s.discharged + s.accepted_rows}
           limit={s.obligations}
           unit=""
           label="discharged+accepted / obligations"

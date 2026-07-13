@@ -74,8 +74,13 @@ class ObligationsScreen(Screen[None]):
 
         index = result.danger_ok
         s = index.summary
+        # Both D221.2 denominators, each under its own exact name
+        # (accepted_rows is the count the row table below actually lists)
+        # -- WO-G8 coherence sweep: a summary count must agree with its
+        # drill-down.
         summary.update(
             f"obligations={s.obligations}  discharged={s.discharged}  "
+            f"accepted_rows={s.accepted_rows}  "
             f"accepted_deviation={s.accepted_deviation}  deferred={s.deferred}  "
             f"violated={s.violated}  balanced={s.balanced()}"
         )

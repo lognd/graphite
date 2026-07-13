@@ -100,8 +100,14 @@ export function Project() {
           <Link
             to={`/project/${encodeURIComponent(projectId)}/obligations?filter=accepted_deviation`}
           >
-            {summary.accepted_deviation} accepted
+            {/* accepted_rows: the linked drill-down lists ROWS (D221.2 row
+                partition); the unique-deviation census count rides along so
+                neither denominator is ever confused. */}
+            {summary.accepted_rows} accepted
           </Link>
+          {summary.accepted_rows !== summary.accepted_deviation
+            ? ` (${summary.accepted_deviation} unique)`
+            : ''}
           ,{' '}
           <Link to={`/project/${encodeURIComponent(projectId)}/obligations?filter=deferred`}>
             {summary.deferred} deferred
