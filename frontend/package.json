@@ -1,0 +1,13 @@
+{
+  "name": "graphite-frontend-tooling",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Dev-only tooling package (WO-G1): generates frontend/src/api/api.generated.ts from the committed openapi.json. The real Vite app lands in WO-G2 -- this package.json exists only to pin openapi-typescript as a devDependency so `npm ci` is reproducible; a wheel install of graphite never needs Node (spec 02 sec. 5).",
+  "scripts": {
+    "gen:api": "openapi-typescript ../openapi.json -o src/api/api.generated.ts",
+    "check:api-drift": "node ./check-api-drift.mjs"
+  },
+  "devDependencies": {
+    "openapi-typescript": "^7.4.0"
+  }
+}
