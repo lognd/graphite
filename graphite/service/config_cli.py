@@ -12,6 +12,9 @@ paper over with a small regex parser instead of a JSON round-trip.
 Recorded for the lithos coordinator (a `--json` flag on `config`
 mirroring `doctor`'s would remove this module's only text-parsing
 code).
+
+`key_defaults()` (WO-G6) is the one read that does NOT shell out --
+see `ConfigKeyDefault`'s docstring for why.
 """
 
 from __future__ import annotations
@@ -44,6 +47,45 @@ class ConfigEntry(BaseModel):
     key: str
     value: str
     source: str
+
+
+class ConfigKeyDefault(BaseModel):
+    """One registered key's declared default + doc, for the "reset to
+    default" affordance (04.1). Neither `regolith config list` nor
+    `where` prints the default -- only the CURRENT winning value and
+    its source (WOG1-F5's `--json` gap compounds this: there is no
+    stable stdout line to parse for "the default" either).
+
+    WOG6-F1 (escalation, placeholder): this reads `regolith.config.
+    registered_keys()` directly (a Python import of the installed
+    `regolith` wheel), not a CLI subprocess -- the ONE exception to
+    this module's "always shell out" rule. It is a read of static,
+    compiled-in registry metadata (key/kind/default/doc), never
+    project state and never a write, so it does not violate "edits
+    write through the real CLI" (that doctrine governs mutation, not
+    read-only introspection of a constant table). Recorded for the
+    lithos coordinator: a `regolith config list --json` (or a
+    `--show-default` flag) would let this module drop the import and
+    go through the CLI uniformly like every other read here.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    key: str
+    kind: str
+    default: str | int | float | bool
+    doc: str
+
+
+def key_defaults() -> tuple[ConfigKeyDefault, ...]:
+    """Every registered key's default/kind/doc (WOG6-F1: read directly
+    off `regolith.config.registered_keys()`, see `ConfigKeyDefault`)."""
+    from regolith.config import registered_keys
+
+    return tuple(
+        ConfigKeyDefault(key=s.key, kind=s.kind, default=s.default, doc=s.doc)
+        for s in registered_keys()
+    )
 
 
 def _run(argv: list[str], cwd: Path) -> Result[str, ServiceError]:

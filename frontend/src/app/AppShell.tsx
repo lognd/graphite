@@ -52,6 +52,8 @@ export function AppShell() {
     { id: 'artifacts', label: 'go to artifacts', run: () => navigate('/artifacts') },
     { id: 'runs', label: 'go to runs', run: () => navigate('/runs') },
     { id: 'config', label: 'go to config', run: () => navigate('/config') },
+    { id: 'doctor', label: 'go to doctor', run: () => navigate('/doctor') },
+    { id: 'settings', label: 'go to settings', run: () => navigate('/settings') },
     {
       id: 'theme',
       label: `switch to ${resolved === 'dark' ? 'light' : 'dark'} theme`,

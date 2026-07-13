@@ -11,6 +11,8 @@ const ROUTES = [
   { path: '/artifacts', label: 'artifacts' },
   { path: '/runs', label: 'runs' },
   { path: '/config', label: 'config' },
+  { path: '/doctor', label: 'doctor' },
+  { path: '/settings', label: 'settings' },
 ];
 
 export function Nav() {
