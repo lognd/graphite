@@ -2,12 +2,16 @@
 // answers "why did this claim defer/fail?" (charter 2.1).
 
 import { EmptyState } from '../components/EmptyState/EmptyState';
+import { PageTitle } from '../components/PageTitle/PageTitle';
 
 export function Obligations() {
   return (
-    <EmptyState
-      title="Select a project to see its obligations"
-      detail="Obligation detail (verdicts, margins, deferral reasons) lands with WO-G4."
-    />
+    <>
+      <PageTitle text="Obligations" />
+      <EmptyState
+        title="Select a project to see its obligations"
+        detail="Obligation detail (verdicts, margins, deferral reasons) lands with WO-G4."
+      />
+    </>
   );
 }

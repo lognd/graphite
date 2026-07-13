@@ -27,6 +27,7 @@ import { EmptyState } from '../components/EmptyState/EmptyState';
 import { ErrorState } from '../components/ErrorState/ErrorState';
 import { LogPane } from '../components/LogPane/LogPane';
 import { ProgressRail } from '../components/ProgressRail/ProgressRail';
+import { PageTitle } from '../components/PageTitle/PageTitle';
 import { optimizeWinnerRows } from '../lib/optimizeRows';
 
 const VERBS: RunVerb[] = ['check', 'build', 'ship', 'test', 'optimize', 'preview'];
@@ -248,6 +249,7 @@ export function Runs() {
 
   return (
     <div className="gr-runs">
+      <PageTitle text="Runs" />
       <section aria-label="run form">
         <h2 className="gr-micro-label">start a run</h2>
         <label>

@@ -90,3 +90,18 @@ button {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Visually hidden but screen-reader-visible text (WO-G8 a11y pass): for
+   table headers and other controls whose visible content is intentionally
+   empty/iconic but still need a discernible accessible name. */
+.gr-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

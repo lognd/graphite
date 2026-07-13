@@ -8,6 +8,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useProjects } from '../api/hooks';
 import { EmptyState } from '../components/EmptyState/EmptyState';
 import { ErrorState } from '../components/ErrorState/ErrorState';
+import { PageTitle } from '../components/PageTitle/PageTitle';
 import './artifacts/artifacts.css';
 
 const FAMILIES = [
@@ -43,6 +44,7 @@ export function Artifacts() {
 
   return (
     <div className="gr-artifacts-hub">
+      <PageTitle text="Artifacts" />
       <label className="gr-micro-label" htmlFor="artifacts-project-select">
         project
       </label>

@@ -13,6 +13,7 @@ import { useResetSettings, useSetSettings, useSettings } from '../api/hooks';
 import type { RunVerbosity } from '../api/client';
 import { useTheme } from '../app/theme';
 import type { ThemePreference } from '../app/theme';
+import { PageTitle } from '../components/PageTitle/PageTitle';
 import './Settings.css';
 
 const DEFAULT_PROJECT_ROOT = '';
@@ -40,6 +41,7 @@ export function Settings() {
 
   return (
     <div className="gr-settings-view">
+      <PageTitle text="Settings" />
       <div className="gr-config-field">
         <div className="gr-config-field__head">
           <span className="gr-config-field__label">theme</span>

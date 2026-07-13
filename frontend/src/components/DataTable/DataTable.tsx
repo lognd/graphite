@@ -156,15 +156,26 @@ export function DataTable<T>({
                         : 'none'
                     }
                   >
-                    <button
-                      type="button"
-                      className="gr-data-table__sort-btn"
-                      onClick={() => col.sortable !== false && toggleSort(col.key)}
-                    >
-                      {col.header}
-                      {col.unit ? <span className="gr-data-table__unit"> ({col.unit})</span> : null}
-                      {sortKey === col.key ? (sortDir === 'asc' ? ' ^' : ' v') : ''}
-                    </button>
+                    {col.header ? (
+                      <button
+                        type="button"
+                        className="gr-data-table__sort-btn"
+                        onClick={() => col.sortable !== false && toggleSort(col.key)}
+                      >
+                        {col.header}
+                        {col.unit ? (
+                          <span className="gr-data-table__unit"> ({col.unit})</span>
+                        ) : null}
+                        {sortKey === col.key ? (sortDir === 'asc' ? ' ^' : ' v') : ''}
+                      </button>
+                    ) : (
+                      // Action-only columns (no header text, e.g. "open sheet"
+                      // links) are never sortable -- a plain, screen-reader-only
+                      // label keeps every <th> discernible without rendering an
+                      // empty interactive control (axe: empty-table-header /
+                      // button-name).
+                      <span className="gr-sr-only">{col.key}</span>
+                    )}
                   </th>
                 ))}
               </tr>

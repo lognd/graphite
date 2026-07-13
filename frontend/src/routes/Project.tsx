@@ -18,6 +18,7 @@ import { DataTable } from '../components/DataTable/DataTable';
 import { EmptyState } from '../components/EmptyState/EmptyState';
 import { ErrorState } from '../components/ErrorState/ErrorState';
 import { HashChip } from '../components/HashChip/HashChip';
+import { PageTitle } from '../components/PageTitle/PageTitle';
 import { TitleBlock } from '../components/TitleBlock/TitleBlock';
 import { VerdictBadge } from '../components/VerdictBadge/VerdictBadge';
 import { optimizeWinnerRows } from '../lib/optimizeRows';
@@ -78,6 +79,7 @@ export function Project() {
 
   return (
     <div className="gr-project">
+      <PageTitle text={`Project: ${projectId}`} />
       <TitleBlock
         projectName={projectId}
         designHash={manifest.data?.design_hash ?? null}

@@ -66,7 +66,7 @@ export function CalcSheetView() {
   return (
     <article className="gr-calc-sheet">
       <header className="gr-calc-sheet__header">
-        <h2>{sheet.claim_text}</h2>
+        <h1>{sheet.claim_text}</h1>
         <VerdictBadge verdict={asVerdict(sheet.verdict)} />
       </header>
 
@@ -99,7 +99,7 @@ export function CalcSheetView() {
         </p>
       )}
 
-      <h3 className="gr-section-title">Inputs</h3>
+      <h2 className="gr-section-title">Inputs</h2>
       <table className="gr-calc-sheet__inputs">
         <thead>
           <tr>
@@ -123,7 +123,7 @@ export function CalcSheetView() {
         </tbody>
       </table>
 
-      <h3 className="gr-section-title">Evidence chain</h3>
+      <h2 className="gr-section-title">Evidence chain</h2>
       <ul className="gr-calc-sheet__chain">
         <li>
           sheet digest <HashChip full={sheet.chain.sheet_digest} />

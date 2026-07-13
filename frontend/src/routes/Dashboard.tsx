@@ -17,6 +17,7 @@ import type { DataTableColumn } from '../components/DataTable/DataTable';
 import { EmptyState } from '../components/EmptyState/EmptyState';
 import { ErrorState } from '../components/ErrorState/ErrorState';
 import { MarginBar } from '../components/MarginBar/MarginBar';
+import { PageTitle } from '../components/PageTitle/PageTitle';
 
 function obligationLink(project: string, filter?: string): string {
   const base = `/project/${encodeURIComponent(project)}/obligations`;
@@ -127,12 +128,15 @@ export function Dashboard() {
   }
 
   return (
-    <DataTable
-      columns={COLUMNS}
-      rows={entries}
-      rowKey={(e) => e.project.name}
-      loading={isLoading}
-      emptyTitle="No projects in this fleet yet"
-    />
+    <>
+      <PageTitle text="Fleet dashboard" />
+      <DataTable
+        columns={COLUMNS}
+        rows={entries}
+        rowKey={(e) => e.project.name}
+        loading={isLoading}
+        emptyTitle="No projects in this fleet yet"
+      />
+    </>
   );
 }
