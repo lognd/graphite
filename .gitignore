@@ -2,6 +2,15 @@
 build/
 dist/
 *.egg-info/
+# The committed fixture project's ship output is a deliberate exception
+# (WO-G1: pytest coverage must pass without ../lithos, so the fixture's
+# `dist/` is checked in, not regenerated on demand).
+!tests/fixtures/**/dist/
+!tests/fixtures/**/dist/**
+
+# Node (dev-only frontend codegen tooling -- WO-G1; the real Vite app
+# lands in WO-G2)
+node_modules/
 
 # Python
 .venv/

@@ -1,0 +1,18 @@
+drawing audit: PavilionFrame
+sheet PLN-PavilionFrame rev A
+  dimensions:
+    member.length:G1 = 3.0m <- record:local-blake3:6860f6e3a7e45d126ff428f3370bcfcb7bb85578cd7390fcdaececfe8378720b
+    member.length:G2 = 3.0m <- record:local-blake3:6860f6e3a7e45d126ff428f3370bcfcb7bb85578cd7390fcdaececfe8378720b
+    member.length:P_A = 3.0m <- record:local-blake3:6860f6e3a7e45d126ff428f3370bcfcb7bb85578cd7390fcdaececfe8378720b
+    member.length:P_B = 3.0m <- record:local-blake3:6860f6e3a7e45d126ff428f3370bcfcb7bb85578cd7390fcdaececfe8378720b
+    member.length:Purlin = 3.0m <- record:local-blake3:6860f6e3a7e45d126ff428f3370bcfcb7bb85578cd7390fcdaececfe8378720b
+rules:
+  [PASS] title-block-completeness (per: ASME Y14.1 title block content) sheet=PLN-PavilionFrame: all title-block fields populated
+  [PASS] view-scale-sanity (per: ASME Y14.5 4.2 (scale designation)) sheet=PLN-PavilionFrame: every view scale is positive
+  [PASS] minimum-text-height (per: ASME Y14.2 (min 2.5mm lettering)) sheet=PLN-PavilionFrame: every annotation meets minimum text height
+  [PASS] no-overlapping-annotations (per: ISO 128-24 (legibility, non-overlapping text)) sheet=PLN-PavilionFrame: no two annotations share an anchor
+  [PASS] gdt-datum-discipline (per: ASME Y14.5 sec. 4 (datum reference frames)) sheet=PLN-PavilionFrame: every GD&T frame cites a datum
+  [PASS] dimension-completeness (per: ASME Y14.5 1.4 (each feature dimensioned exactly once)) sheet=PLN-PavilionFrame: no feature is over-dimensioned
+coverage:
+  covered: (none)
+  missing: (none)

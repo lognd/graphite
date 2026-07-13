@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="431.8000mm" height="279.4000mm" viewBox="0 0 431.8000 279.4000">
+<g class="sheet" transform="translate(0,0.0000)">
+<rect class="frame" x="10.0000" y="10.0000" width="411.8000" height="259.4000" fill="none" stroke="black"/>
+<rect class="title-block-frame" x="341.8000" y="241.4000" width="80.0000" height="28.0000" fill="none" stroke="black"/>
+<text class="title-block-title" x="343.8000" y="246.4000">contract_graph contract graph</text>
+<text class="title-block-drawing_number" x="343.8000" y="251.4000">CGR-contract_graph</text>
+<text class="title-block-revision" x="343.8000" y="256.4000">rev A</text>
+<text class="title-block-scale_label" x="343.8000" y="261.4000">scale NTS</text>
+<text class="title-block-subject" x="343.8000" y="266.4000">contract_graph</text>
+<g class="view" data-view="contract_graph" transform="translate(215.9000,123.2000) scale(21.4400)">
+<use class="symbol" x="0.0000" y="0.0000" data-record="local-blake3:ee1906c70cc669fb4d4adae4025e69658ec5853dee61942a7f1c46225a881476"/>
+</g>
+<text class="annotation" x="215.9000" y="-5.4400" font-size="3.0000">MemberEnd (interface, 0 slot(s))</text>
+</g>
+</svg>

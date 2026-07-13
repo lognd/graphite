@@ -1,0 +1,130 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [4 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 792.0000 612.0000] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 1503 >>
+stream
+28.3465 28.3465 735.3071 555.3071 re
+S
+536.8819 28.3465 226.7717 79.3701 re
+S
+BT
+/F1 9.9213 Tf
+542.5512 93.5433 Td
+(Calc: strength[P_A]) Tj
+ET
+BT
+/F1 9.9213 Tf
+542.5512 79.3701 Td
+(CALC-strength_P_A___afc15fc09a7f) Tj
+ET
+BT
+/F1 9.9213 Tf
+542.5512 65.1969 Td
+(rev A) Tj
+ET
+BT
+/F1 9.9213 Tf
+542.5512 51.0236 Td
+(scale NTS) Tj
+ET
+BT
+/F1 9.9213 Tf
+542.5512 36.8504 Td
+(afc15fc09a7f) Tj
+ET
+BT
+/F1 14.1732 Tf
+28.3465 107.7165 Td
+(Calculation) Tj
+ET
+BT
+/F1 14.1732 Tf
+28.3465 93.5433 Td
+(claim|strength[P_A] require civil.utilization\(PavilionFrame.members.P_A, under=combo\) <= 1.0) Tj
+ET
+BT
+/F1 14.1732 Tf
+28.3465 79.3701 Td
+(subject|afc15fc09a7f) Tj
+ET
+BT
+/F1 14.1732 Tf
+28.3465 65.1969 Td
+(model|beam_utilization_interaction@1) Tj
+ET
+BT
+/F1 14.1732 Tf
+28.3465 51.0236 Td
+(citation|uncited built-in) Tj
+ET
+BT
+/F1 14.1732 Tf
+28.3465 36.8504 Td
+(solver|beam_utilization_interaction) Tj
+ET
+BT
+/F1 14.1732 Tf
+28.3465 22.6772 Td
+(tier|release) Tj
+ET
+BT
+/F1 14.1732 Tf
+28.3465 8.5039 Td
+(attestation|unsigned) Tj
+ET
+BT
+/F1 14.1732 Tf
+28.3465 -5.6693 Td
+(value|0.0411851) Tj
+ET
+BT
+/F1 14.1732 Tf
+28.3465 -19.8425 Td
+(margin|0.95552) Tj
+ET
+BT
+/F1 14.1732 Tf
+28.3465 -34.0157 Td
+(verdict|discharged) Tj
+ET
+BT
+/F1 14.1732 Tf
+28.3465 -48.1890 Td
+(evidence|e9b36553533641797d11650a5afde06b6404f4a380db41a1728fed8e2cff7f1e) Tj
+ET
+BT
+/F1 14.1732 Tf
+28.3465 -62.3622 Td
+(sheet_digest|local-blake3:dd9e4e5ff71b642ac981d8d432d0d7f22a31be20704e40ff5ee77bf3d2d11fd2) Tj
+ET
+BT
+/F1 14.1732 Tf
+28.3465 -76.5354 Td
+(Inputs) Tj
+ET
+endstream
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000185 00000 n 
+0000000321 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1875
+%%EOF
