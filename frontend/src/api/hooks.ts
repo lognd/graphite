@@ -24,3 +24,43 @@ export function useObligations(project: string | undefined) {
     enabled: Boolean(project),
   });
 }
+
+export function useCalcSheets(project: string | undefined) {
+  return useQuery({
+    queryKey: ['calc-sheets', project],
+    queryFn: () => api.getCalcSheets(project as string),
+    enabled: Boolean(project),
+  });
+}
+
+export function useAuditIndex(project: string | undefined) {
+  return useQuery({
+    queryKey: ['calc-audit', project],
+    queryFn: () => api.getAuditIndex(project as string),
+    enabled: Boolean(project),
+  });
+}
+
+export function useProjectArtifacts(project: string | undefined) {
+  return useQuery({
+    queryKey: ['artifacts', project],
+    queryFn: () => api.listArtifacts(project as string),
+    enabled: Boolean(project),
+  });
+}
+
+export function useBuildReport(project: string | undefined) {
+  return useQuery({
+    queryKey: ['build-report', project],
+    queryFn: () => api.getBuildReport(project as string),
+    enabled: Boolean(project),
+  });
+}
+
+export function useManifest(project: string | undefined) {
+  return useQuery({
+    queryKey: ['manifest', project],
+    queryFn: () => api.getManifest(project as string),
+    enabled: Boolean(project),
+  });
+}
