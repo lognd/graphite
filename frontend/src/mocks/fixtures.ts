@@ -24,7 +24,9 @@ import type {
   ObligationsResponse,
   ProjectHealth,
   ProjectInfo,
+  RunRecord,
   StagedBuildReport,
+  VerdictDiff,
 } from '../api/client';
 
 export const mockProjects: ProjectInfo[] = [
@@ -596,6 +598,57 @@ export const mockManifest: ManifestSummary = {
       },
     ],
   },
+};
+
+// Two synthesized run-history rows (WO-G5 deliverable 2 mock mode --
+// there is no real subprocess to record from in VITE_USE_MOCKS=1 dev
+// mode; shapes are the real RunRecord wire shape, values are honest
+// placeholders, not a recorded run).
+export const mockRuns: RunRecord[] = [
+  {
+    run_id: 'a1b2c3d4e5f6',
+    verb: 'check',
+    project_root: '/tmp/examples.timber_pavilion',
+    args: ['program.calx'],
+    status: 'ok',
+    started_at: '2026-07-13T10:00:00+00:00',
+    finished_at: '2026-07-13T10:00:03+00:00',
+    exit_code: 0,
+    pid: null,
+    before_health: { release_ok: null, violated: null, total_obligations: null },
+  },
+  {
+    run_id: 'f6e5d4c3b2a1',
+    verb: 'build',
+    project_root: '/tmp/examples.timber_pavilion',
+    args: ['--release', 'program.calx'],
+    status: 'failed',
+    started_at: '2026-07-13T09:55:00+00:00',
+    finished_at: '2026-07-13T09:55:05+00:00',
+    exit_code: 1,
+    pid: null,
+    before_health: { release_ok: false, violated: 1, total_obligations: 2 },
+  },
+];
+
+// RECORDED from a real `REGOLITH_LOG=DEBUG regolith --color never check
+// program.calx` on the fixture (trimmed to a representative tail; the
+// progress line is a verbatim D228 wire-shape record from a real
+// `build --release`, regolith.progress module docstring).
+export const mockRunLog: string[] = [
+  'check: 1 file(s)',
+  'loaded manifest examples.timber_pavilion@0.1.0 from magnetite.toml',
+  'progress v=1 phase=discharge subject=2f5a6b49526e.. done=1 total=2 elapsed=0.000',
+  'progress v=1 phase=discharge subject=b49951b61ab7.. done=2 total=2 elapsed=0.000',
+  'check: all files pass',
+];
+
+// The before side matches mockRuns[1]'s captured before_health; the
+// after side is the fixture project's real current health (10
+// obligations, 0 violated -- mockProjectHealth's recorded summary).
+export const mockVerdictDiff: VerdictDiff = {
+  before: { release_ok: false, violated: 1, total_obligations: 2 },
+  after: { release_ok: true, violated: 0, total_obligations: 10 },
 };
 
 // RECORDED from `regolith config list --project tests/fixtures/timber_pavilion`

@@ -1355,6 +1355,46 @@
         "title": "HTTPValidationError",
         "type": "object"
       },
+      "HealthSnapshot": {
+        "description": "A best-effort project-health reading (same two reports\n`graphite.server.routes.health.get_project_health` combines), taken\nonce before a run starts and once after it finishes, so the exit\nsummary can render a real before -> after verdict diff (deliverable\n1) instead of a client-computed one. `None` fields mean the report\nwas not present/parseable at that moment (e.g. no prior build) --\nan honest gap, not a zero.",
+        "properties": {
+          "release_ok": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Release Ok"
+          },
+          "total_obligations": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Obligations"
+          },
+          "violated": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Violated"
+          }
+        },
+        "title": "HealthSnapshot",
+        "type": "object"
+      },
       "Invalid": {
         "description": "A present-but-unverifiable attestation: INDETERMINATE, never a verdict.",
         "properties": {
@@ -1823,7 +1863,7 @@
         "type": "object"
       },
       "RunRecord": {
-        "description": "One persisted run: identity, the verb driven, its live/final\nstatus, timestamps, and the project root it ran against. The log\nfile and (for `--json` verbs) the stdout JSON blob live alongside\nit as sibling files (`<id>.log`, `<id>.stdout.json`), not inlined\nhere -- this record is the cheap-to-list summary row.",
+        "description": "One persisted run: identity, the verb driven, its live/final\nstatus, timestamps, and the project root it ran against. The log\nfile and (for `--json` verbs) the stdout JSON blob live alongside\nit as sibling files (`<id>.log`, `<id>.stdout.json`), not inlined\nhere -- this record is the cheap-to-list summary row. `before_health`\nis captured at `start_run` time (deliverable 1's diff baseline).",
         "properties": {
           "args": {
             "items": {
@@ -1831,6 +1871,16 @@
             },
             "title": "Args",
             "type": "array"
+          },
+          "before_health": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/HealthSnapshot"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "exit_code": {
             "anyOf": [
@@ -1854,6 +1904,17 @@
             ],
             "title": "Finished At"
           },
+          "pid": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pid"
+          },
           "project_root": {
             "title": "Project Root",
             "type": "string"
@@ -1870,7 +1931,8 @@
             "enum": [
               "running",
               "ok",
-              "failed"
+              "failed",
+              "cancelled"
             ],
             "title": "Status",
             "type": "string"
@@ -2054,6 +2116,23 @@
           "values"
         ],
         "title": "Values",
+        "type": "object"
+      },
+      "VerdictDiff": {
+        "description": "The before/after health-snapshot pair for one run's exit summary\n(deliverable 1) -- both sides real reports, never a recomputed\nverdict.",
+        "properties": {
+          "after": {
+            "$ref": "#/components/schemas/HealthSnapshot"
+          },
+          "before": {
+            "$ref": "#/components/schemas/HealthSnapshot"
+          }
+        },
+        "required": [
+          "before",
+          "after"
+        ],
+        "title": "VerdictDiff",
         "type": "object"
       }
     }
@@ -3054,9 +3133,52 @@
         ]
       }
     },
+    "/api/runs/{run_id}/cancel": {
+      "post": {
+        "description": "Stop a running run (deliverable 1's cancel affordance; WOG1-F6\nclosed -- no kill route existed before WO-G5).",
+        "operationId": "cancel_project_run_api_runs__run_id__cancel_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunRecord"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Cancel Project Run",
+        "tags": [
+          "runs"
+        ]
+      }
+    },
     "/api/runs/{run_id}/events": {
       "get": {
-        "description": "SSE stream of `run_id`'s log lines, closing with a `done` event\nonce the run finishes.",
+        "description": "SSE stream of `run_id`'s log lines + parsed progress events,\nclosing with a `done` event once the run finishes.",
         "operationId": "run_events_api_runs__run_id__events_get",
         "parameters": [
           {
@@ -3090,6 +3212,96 @@
           }
         },
         "summary": "Run Events",
+        "tags": [
+          "runs"
+        ]
+      }
+    },
+    "/api/runs/{run_id}/log": {
+      "get": {
+        "description": "The full captured log for `run_id` as a plain array -- run-\nhistory detail replay (deliverable 2), no SSE subscription needed\nfor a run that has already finished (or is still running; this\nstill returns whatever has been captured so far).",
+        "operationId": "get_run_log_api_runs__run_id__log_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Response Get Run Log Api Runs  Run Id  Log Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Run Log",
+        "tags": [
+          "runs"
+        ]
+      }
+    },
+    "/api/runs/{run_id}/verdict-diff": {
+      "get": {
+        "description": "The before/after health-snapshot pair for `run_id`'s exit summary\n(deliverable 1) -- both real report reads, never a recomputed\nverdict (charter sec. 3.2).",
+        "operationId": "get_run_verdict_diff_api_runs__run_id__verdict_diff_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VerdictDiff"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Run Verdict Diff",
         "tags": [
           "runs"
         ]

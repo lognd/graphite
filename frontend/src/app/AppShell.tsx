@@ -6,9 +6,11 @@ import { useEffect, useState } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { Nav } from './Nav';
 import { useTheme } from './theme';
-import { useProjects } from '../api/hooks';
+import { useRunContext } from './RunContext';
+import { useCancelRun, useProjects } from '../api/hooks';
 import { TitleBlock } from '../components/TitleBlock/TitleBlock';
 import { StatusLine } from '../components/StatusLine/StatusLine';
+import { ProgressRail } from '../components/ProgressRail/ProgressRail';
 import { CommandPalette } from '../components/CommandPalette/CommandPalette';
 import type { Command } from '../components/CommandPalette/CommandPalette';
 import { ShortcutSheet } from '../components/ShortcutSheet/ShortcutSheet';
@@ -25,6 +27,8 @@ export function AppShell() {
   const navigate = useNavigate();
   const { preference, resolved, setPreference } = useTheme();
   const { data: projects, isError: projectsError } = useProjects();
+  const { activeRun } = useRunContext();
+  const cancelRun = useCancelRun();
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
@@ -90,10 +94,24 @@ export function AppShell() {
         </main>
       </div>
       <footer className="gr-app-shell__footer">
+        {activeRun && activeRun.status === 'running' ? (
+          <ProgressRail
+            step={`${activeRun.verb} ${activeRun.project} -- ${activeRun.phase ?? 'starting'}`}
+            percent={
+              activeRun.done !== null && activeRun.total !== null && activeRun.total > 0
+                ? Math.round((activeRun.done / activeRun.total) * 100)
+                : null
+            }
+            elapsedSeconds={activeRun.elapsedSeconds}
+            onCancel={() => cancelRun.mutate(activeRun.runId)}
+          />
+        ) : null}
         <StatusLine
           projectName={projects && projects.length > 0 ? `fleet (${projects.length})` : null}
           serverState={projectsError ? 'disconnected' : projects ? 'connected' : 'connecting'}
-          lastAction={null}
+          lastAction={
+            activeRun ? `${activeRun.verb} (${activeRun.status}) on ${activeRun.project}` : null
+          }
           keyboardHint={`theme: ${preference} | ? for shortcuts`}
         />
       </footer>

@@ -50,7 +50,7 @@ frontend-check: ## lint, format, typecheck, vitest, token drift check, build
 frontend-test: ## frontend vitest unit/component suite only
 	$(NPM) run test
 
-frontend-system-test: ## Playwright system rig (zero-external-request, shell nav, gallery a11y)
+frontend-system-test: ## Playwright system rig (mocked specs + the ONE real-backend rig: config/doctor round-trip, run-console live)
 	$(NPM) run test:system
 
 backend-check: lint typecheck test openapi-check ## the WO-G1 backend leg, self-contained (no Node needed)

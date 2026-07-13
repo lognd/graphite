@@ -2,9 +2,15 @@
 // server (spec 02.2). Components must not call src/api/client.ts directly;
 // they consume these hooks so caching/invalidation has one home.
 
-import { useMutation, useQueries, useQueryClient, useQuery } from '@tanstack/react-query';
+import { useMutation, useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from './client';
-import type { GraphiteSettings, ObligationsQuery, ProjectHealth, ProjectInfo } from './client';
+import type {
+  GraphiteSettings,
+  ObligationsQuery,
+  ProjectHealth,
+  ProjectInfo,
+  RunVerb,
+} from './client';
 
 export function useProjects() {
   return useQuery({ queryKey: ['projects'], queryFn: api.listProjects });
@@ -94,6 +100,10 @@ export function useConfigSchema() {
   return useQuery({ queryKey: ['config-schema'], queryFn: api.getConfigSchema });
 }
 
+// The ONE project-config listing hook (WO-G5/WO-G6 merge: both WOs
+// declared one; WO-G6's -- keyed 'project-config' over listProjectConfig
+// -- survived, and the run console consumes it for its config-aware
+// default flags).
 export function useProjectConfig(project: string | undefined) {
   return useQuery({
     queryKey: ['project-config', project],
@@ -123,6 +133,59 @@ export function useDoctor(project: string | undefined) {
     queryKey: ['doctor', project],
     queryFn: () => api.getDoctor(project as string),
     enabled: Boolean(project),
+  });
+}
+
+export function useRuns(project: string | undefined) {
+  return useQuery({
+    queryKey: ['runs', project],
+    queryFn: () => api.listRuns(project as string),
+    enabled: Boolean(project),
+  });
+}
+
+export function useRunDetail(runId: string | undefined) {
+  return useQuery({
+    queryKey: ['run', runId],
+    queryFn: () => api.getRun(runId as string),
+    enabled: Boolean(runId),
+  });
+}
+
+export function useRunLog(runId: string | undefined) {
+  return useQuery({
+    queryKey: ['run-log', runId],
+    queryFn: () => api.getRunLog(runId as string),
+    enabled: Boolean(runId),
+  });
+}
+
+export function useVerdictDiff(runId: string | undefined) {
+  return useQuery({
+    queryKey: ['run-verdict-diff', runId],
+    queryFn: () => api.getVerdictDiff(runId as string),
+    enabled: Boolean(runId),
+  });
+}
+
+export function useStartRun() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ project, verb, args }: { project: string; verb: RunVerb; args: string[] }) =>
+      api.startRun(project, verb, args),
+    onSuccess: (_record, variables) => {
+      void queryClient.invalidateQueries({ queryKey: ['runs', variables.project] });
+    },
+  });
+}
+
+export function useCancelRun() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (runId: string) => api.cancelRun(runId),
+    onSuccess: (record) => {
+      void queryClient.invalidateQueries({ queryKey: ['run', record.run_id] });
+    },
   });
 }
 

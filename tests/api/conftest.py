@@ -17,6 +17,9 @@ def api_client(
 ) -> TestClient:
     monkeypatch.setenv("GRAPHITE_SCAN_ROOT", str(fixture_scan_root))
     monkeypatch.setenv("GRAPHITE_RUNS_HOME", str(tmp_path / "runs-home"))
+    # Settings isolation (WO-G6 merge): start_run reads run_verbosity,
+    # so the dev machine's real ~/.graphite must never leak in.
+    monkeypatch.setenv("GRAPHITE_HOME", str(tmp_path / "graphite-home"))
     return TestClient(create_app())
 
 

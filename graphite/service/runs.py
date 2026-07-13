@@ -11,11 +11,33 @@ polls `get_run`/`list_runs` or subscribes to `tail_log_lines` for live
 output. This module owns NO asyncio/FastAPI concerns -- `graphite.
 server.routes.runs` is the only place that wraps this in an SSE
 response.
+
+WOG5 decision (the -v toggle, deliverable 3), amended at the WO-G6
+merge: every run is spawned with `REGOLITH_LOG=DEBUG` in its env, and
+WO-G6's `GraphiteSettings.run_verbosity` ("a run verbosity passthrough
+for driven CLI invocations", its own docstring -- WO-G5 is the intended
+consumer) maps onto the CLI's OWN global flags, which win over the env
+per lithos D163 (explicit flag strongest):
+
+  normal  -> no flag; the env alone yields DEBUG-level stderr, so the
+             D228 progress channel flows on a user's FIRST run (the
+             original WO-G5 rationale: never a "re-run verbose" lap),
+             while WO-107's default presentation (dedup, truncation)
+             stays intact.
+  verbose -> `-v`: the full verbatim firehose (no dedup/truncation).
+  quiet   -> `-q`: WARNING+ only. This KNOWINGLY silences the progress
+             channel (DEBUG records) -- the user explicitly traded
+             progress for quiet, so the rail stays indeterminate.
+
+There is still no per-run "-v" control in the run-start form (the
+setting is app-level, WO-G6's Settings view); a `-v`/`-q` typed into
+the free-form args field passes through to the CLI unchanged.
 """
 
 from __future__ import annotations
 
 import os
+import signal
 import subprocess
 import sys
 import uuid
@@ -29,8 +51,18 @@ from typani.result import Err, Ok, Result
 
 from graphite.logging_setup import get_logger
 from graphite.service.errors import ServiceError
+from graphite.service.reports import read_audit_index, read_staged_build_report
+from graphite.service.settings import RunVerbosity, get_settings
 
 _log = get_logger(__name__)
+
+# run_verbosity -> the regolith CLI's own global flag (D163: an explicit
+# flag beats the REGOLITH_LOG env we always set). ONE mapping table.
+_VERBOSITY_FLAGS: dict[RunVerbosity, tuple[str, ...]] = {
+    "quiet": ("-q",),
+    "normal": (),
+    "verbose": ("-v",),
+}
 
 
 def runs_home() -> Path:
@@ -48,7 +80,53 @@ def runs_home() -> Path:
 _LIVE: dict[str, subprocess.Popen[bytes]] = {}
 
 RunVerb = Literal["build", "ship", "test", "optimize", "check", "preview"]
-RunStatus = Literal["running", "ok", "failed"]
+RunStatus = Literal["running", "ok", "failed", "cancelled"]
+
+
+class HealthSnapshot(BaseModel):
+    """A best-effort project-health reading (same two reports
+    `graphite.server.routes.health.get_project_health` combines), taken
+    once before a run starts and once after it finishes, so the exit
+    summary can render a real before -> after verdict diff (deliverable
+    1) instead of a client-computed one. `None` fields mean the report
+    was not present/parseable at that moment (e.g. no prior build) --
+    an honest gap, not a zero."""
+
+    model_config = ConfigDict(frozen=True)
+
+    release_ok: bool | None = None
+    violated: int | None = None
+    total_obligations: int | None = None
+
+
+def _capture_health(project_root: Path) -> HealthSnapshot:
+    """Read the current build report + audit index, best-effort (a
+    missing/unparseable report yields `None` fields, never an
+    exception -- this runs opportunistically around a CLI invocation
+    that may itself be about to create those very files)."""
+    release_ok: bool | None = None
+    violated: int | None = None
+    total: int | None = None
+    build = read_staged_build_report(project_root / ".regolith" / "build" / "build_report.json")
+    if build.is_ok:
+        release_ok = build.danger_ok.final.release_ok
+    audit = read_audit_index(project_root / "dist" / "calc" / "audit_index.json")
+    if audit.is_ok:
+        summary = audit.danger_ok.summary
+        violated = summary.violated
+        total = summary.obligations
+    return HealthSnapshot(release_ok=release_ok, violated=violated, total_obligations=total)
+
+
+class VerdictDiff(BaseModel):
+    """The before/after health-snapshot pair for one run's exit summary
+    (deliverable 1) -- both sides real reports, never a recomputed
+    verdict."""
+
+    model_config = ConfigDict(frozen=True)
+
+    before: HealthSnapshot
+    after: HealthSnapshot
 
 
 class RunRecord(BaseModel):
@@ -56,7 +134,8 @@ class RunRecord(BaseModel):
     status, timestamps, and the project root it ran against. The log
     file and (for `--json` verbs) the stdout JSON blob live alongside
     it as sibling files (`<id>.log`, `<id>.stdout.json`), not inlined
-    here -- this record is the cheap-to-list summary row."""
+    here -- this record is the cheap-to-list summary row. `before_health`
+    is captured at `start_run` time (deliverable 1's diff baseline)."""
 
     model_config = ConfigDict(frozen=True)
 
@@ -68,6 +147,8 @@ class RunRecord(BaseModel):
     started_at: str
     finished_at: str | None = None
     exit_code: int | None = None
+    before_health: HealthSnapshot | None = None
+    pid: int | None = None
 
 
 def _record_path(run_id: str) -> Path:
@@ -90,23 +171,37 @@ def start_run(
     *,
     regolith_argv: tuple[str, ...] | None = None,
 ) -> Result[RunRecord, ServiceError]:
-    """Launch `regolith --color never <verb> <extra_args>` as a
+    """Launch `regolith --color never [-v|-q] <verb> <extra_args>` as a
     detached subprocess (cwd=`project_root`), stdout+stderr redirected
     to the run's log file, and persist a `running` record immediately.
-    `regolith_argv` overrides the executable invocation for tests
-    (defaults to `[sys.executable, "-m", "regolith.cli"]`, the same
-    pattern lithos's own test suite uses to invoke the console entry
-    point in-process without requiring a `regolith` binary on PATH)."""
+    The `[-v|-q]` comes from WO-G6's `run_verbosity` setting (module
+    docstring); a missing/unreadable settings file falls back to
+    `normal`, never blocks a run. `regolith_argv` overrides the
+    executable invocation for tests (defaults to `[sys.executable,
+    "-m", "regolith.cli"]`, the same pattern lithos's own test suite
+    uses to invoke the console entry point in-process without requiring
+    a `regolith` binary on PATH)."""
     if not project_root.is_dir():
         return Err(
             ServiceError(kind="not_found", message=f"no project root at {project_root}")
         )
     run_id = uuid.uuid4().hex
     runs_home().mkdir(parents=True, exist_ok=True)
+    settings = get_settings()
+    verbosity: RunVerbosity = (
+        settings.danger_ok.run_verbosity if settings.is_ok else "normal"
+    )
+    if settings.is_err:
+        _log.warning(
+            "runs: unreadable settings (%s), falling back to normal verbosity",
+            settings.danger_err.message,
+        )
     argv = list(regolith_argv or (sys.executable, "-m", "regolith.cli"))
-    full_args = [*argv, "--color", "never", verb, *extra_args]
+    full_args = [*argv, "--color", "never", *_VERBOSITY_FLAGS[verbosity], verb, *extra_args]
+    _log.debug("runs: verbosity=%s flags=%s", verbosity, _VERBOSITY_FLAGS[verbosity])
     started_at = datetime.now(timezone.utc).isoformat()
     log_path = _log_path(run_id)
+    before_health = _capture_health(project_root)
     record = RunRecord(
         run_id=run_id,
         verb=verb,
@@ -114,8 +209,13 @@ def start_run(
         args=tuple(extra_args),
         status="running",
         started_at=started_at,
+        before_health=before_health,
     )
     _write_record(record)
+    # WOG5 decision (see module docstring): DEBUG-level stderr via env so
+    # the D228 progress channel flows by default; the verbosity FLAG above
+    # (if any) wins over this env per lithos D163.
+    env = {**os.environ, "REGOLITH_LOG": "DEBUG"}
     try:
         with log_path.open("wb") as log_file:
             process = subprocess.Popen(  # noqa: S603 -- argv is server-constructed, never client string
@@ -123,6 +223,7 @@ def start_run(
                 cwd=project_root,
                 stdout=log_file,
                 stderr=subprocess.STDOUT,
+                env=env,
             )
     except OSError as exc:
         _log.error("runs: failed to launch %s: %s", full_args, exc)
@@ -144,8 +245,10 @@ def start_run(
 
     _log.info("runs: started run=%s verb=%s pid=%d", run_id, verb, process.pid)
     _LIVE[run_id] = process
+    record = record.model_copy(update={"pid": process.pid})
+    _write_record(record)
     _poll_and_finalize(run_id)
-    return Ok(record)
+    return Ok(_read_record(run_id).danger_ok)
 
 
 def _poll_and_finalize(run_id: str) -> None:
@@ -243,25 +346,71 @@ def tail_log_lines(run_id: str) -> Iterator[str]:
             yield line.rstrip("\n")
 
 
-# -- D228 progress-event shape (provisional; lithos WO-119 gate) --------
-#
-# WOG1-F4 (escalation, placeholder): lithos WO-119 has not landed the
-# progress-event PRODUCER yet (spec 01 sec. 5 / WO-G1 deliverable 2).
-# The shape below is graphite's own forward-declared consumer contract
-# for that channel -- ONE place, marked provisional -- so `runs.py`'s
-# SSE route can upgrade from plain log lines to typed progress events
-# the moment WO-119 lands without a second design pass. Do not
-# construct one of these from graphite today; it exists only as the
-# documented target shape.
-class ProgressEventProvisional(BaseModel):
-    """PROVISIONAL (WOG1-F4): the D228 progress-event shape graphite
-    will consume once lithos WO-119 lands. Not emitted by anything in
-    this codebase yet -- log-line streaming is the whole SSE payload
-    until then."""
+def get_full_log(run_id: str) -> tuple[str, ...]:
+    """Every captured log line for `run_id`, as a plain tuple -- the
+    non-streaming counterpart to `tail_log_lines`, used by run-history
+    detail replay (deliverable 2) where there is no SSE subscription,
+    just a finished run's full captured stream."""
+    return tuple(tail_log_lines(run_id))
 
-    model_config = ConfigDict(frozen=True)
 
-    kind: Literal["progress"] = "progress"
-    phase: str
-    fraction_done: float | None = None
-    message: str
+def cancel_run(run_id: str) -> Result[RunRecord, ServiceError]:
+    """Stop a running run (deliverable 1's cancel affordance -- WOG1-F6:
+    no kill route existed before WO-G5). Prefers the in-process `Popen`
+    handle (SIGTERM, escalating to SIGKILL after a short grace period);
+    falls back to `os.kill` on the persisted `pid` for a run started by
+    a since-restarted server process (the same honest cross-restart
+    posture as `get_run`). A run that has already finished, or an
+    unknown run id, is reported as such rather than silently no-op'd."""
+    record_result = _read_record(run_id)
+    if record_result.is_err:
+        return record_result
+    record = record_result.danger_ok
+    if record.status != "running":
+        return Ok(record)
+
+    process = _LIVE.get(run_id)
+    if process is not None:
+        process.terminate()
+        try:
+            exit_code = process.wait(timeout=5.0)
+        except subprocess.TimeoutExpired:
+            _log.warning("runs: run=%s did not exit on SIGTERM, killing", run_id)
+            process.kill()
+            exit_code = process.wait(timeout=5.0)
+        del _LIVE[run_id]
+    elif record.pid is not None:
+        try:
+            os.kill(record.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            _log.info("runs: run=%s pid=%d already gone", run_id, record.pid)
+        exit_code = None
+    else:
+        exit_code = None
+
+    _log.info("runs: cancelled run=%s exit_code=%s", run_id, exit_code)
+    updated = record.model_copy(
+        update={
+            "status": "cancelled",
+            "finished_at": datetime.now(timezone.utc).isoformat(),
+            "exit_code": exit_code,
+        }
+    )
+    _write_record(updated)
+    return Ok(updated)
+
+
+def compute_verdict_diff(run_id: str) -> Result[VerdictDiff, ServiceError]:
+    """`before_health` (captured at `start_run`) paired with a fresh
+    `_capture_health` read of the project's CURRENT reports -- the exit
+    summary's verdict-count diff (deliverable 1). Callable at any time
+    (not just after completion); a still-`running` run's "after" simply
+    reflects whatever is on disk right now, same honesty posture as the
+    rest of this module."""
+    record_result = _read_record(run_id)
+    if record_result.is_err:
+        return Err(record_result.danger_err)
+    record = record_result.danger_ok
+    before = record.before_health or HealthSnapshot()
+    after = _capture_health(Path(record.project_root))
+    return Ok(VerdictDiff(before=before, after=after))

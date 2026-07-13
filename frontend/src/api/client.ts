@@ -24,7 +24,10 @@ import {
   mockProjectConfig,
   mockProjectHealth,
   mockProjects,
+  mockRunLog,
+  mockRuns,
   mockSettings,
+  mockVerdictDiff,
 } from '../mocks/fixtures';
 
 export type ProjectInfo = components['schemas']['ProjectInfo'];
@@ -48,6 +51,37 @@ export type ConfigEntry = components['schemas']['ConfigEntry'];
 export type ConfigKeyDefault = components['schemas']['ConfigKeyDefault'];
 export type GraphiteSettings = components['schemas']['GraphiteSettings'];
 export type RunVerbosity = GraphiteSettings['run_verbosity'];
+export type RunRecord = components['schemas']['RunRecord'];
+export type RunVerb = RunRecord['verb'];
+export type HealthSnapshot = components['schemas']['HealthSnapshot'];
+export type VerdictDiff = components['schemas']['VerdictDiff'];
+
+// The two SSE event kinds `/api/runs/{id}/events` emits (graphite/routes/
+// runs.py): `log` is the raw captured stderr+stdout, unconditionally;
+// `progress` is the D228 typed event lithos's own regolith.progress.
+// parse_line already parsed server-side -- the frontend NEVER re-parses
+// the wire-shape text itself (ONE parser, dedup law 04.2).
+export interface RunLogEvent {
+  kind: 'log';
+  line: string;
+}
+
+export interface RunProgressEvent {
+  kind: 'progress';
+  v: number;
+  phase: string;
+  subject: string;
+  done: number | null;
+  total: number | null;
+  elapsed: number;
+}
+
+export interface RunDoneEvent {
+  kind: 'done';
+  status: RunRecord['status'];
+}
+
+export type RunStreamEvent = RunLogEvent | RunProgressEvent | RunDoneEvent;
 
 // `regolith doctor --json`'s hand-written shape (regolith/cli/app.py's
 // `doctor` command, toolenv.py's ToolSpec/ToolStatus): the ONE type in
@@ -206,6 +240,65 @@ export const api = {
   async getManifest(project: string): Promise<ManifestSummary> {
     if (USE_MOCKS) return mockManifest;
     return request<ManifestSummary>(`/projects/${encodeURIComponent(project)}/manifest`);
+  },
+  async listRuns(project: string): Promise<RunRecord[]> {
+    if (USE_MOCKS) return [...mockRuns];
+    return request<RunRecord[]>(`/projects/${encodeURIComponent(project)}/runs`);
+  },
+  async startRun(project: string, verb: RunVerb, args: string[] = []): Promise<RunRecord> {
+    return requestJson<RunRecord>('POST', `/projects/${encodeURIComponent(project)}/runs`, {
+      verb,
+      args,
+    });
+  },
+  async getRun(runId: string): Promise<RunRecord> {
+    if (USE_MOCKS) {
+      const record = mockRuns.find((r) => r.run_id === runId);
+      if (!record) throw new Error(`graphite api mock: no run ${runId}`);
+      return record;
+    }
+    return request<RunRecord>(`/runs/${encodeURIComponent(runId)}`);
+  },
+  async getRunLog(runId: string): Promise<string[]> {
+    if (USE_MOCKS) return [...mockRunLog];
+    return request<string[]>(`/runs/${encodeURIComponent(runId)}/log`);
+  },
+  async cancelRun(runId: string): Promise<RunRecord> {
+    return requestJson<RunRecord>('POST', `/runs/${encodeURIComponent(runId)}/cancel`);
+  },
+  async getVerdictDiff(runId: string): Promise<VerdictDiff> {
+    if (USE_MOCKS) return mockVerdictDiff;
+    return request<VerdictDiff>(`/runs/${encodeURIComponent(runId)}/verdict-diff`);
+  },
+  /** Opens the SSE stream for `runId` (log lines + parsed progress events,
+   * closing on a `done` event) -- the ONE place graphite subscribes to a
+   * live run, mirroring the fetch/request wrapper's role for the
+   * request/response calls above. Returns the raw `EventSource` so the
+   * caller can close it early (cancel path). */
+  subscribeRunEvents(
+    runId: string,
+    handlers: {
+      onLog?: (e: RunLogEvent) => void;
+      onProgress?: (e: RunProgressEvent) => void;
+      onDone?: (e: RunDoneEvent) => void;
+    },
+  ): EventSource {
+    const source = new EventSource(`/api/runs/${encodeURIComponent(runId)}/events`);
+    if (handlers.onLog) {
+      source.addEventListener('log', (evt) => {
+        handlers.onLog?.(JSON.parse((evt as MessageEvent).data) as RunLogEvent);
+      });
+    }
+    if (handlers.onProgress) {
+      source.addEventListener('progress', (evt) => {
+        handlers.onProgress?.(JSON.parse((evt as MessageEvent).data) as RunProgressEvent);
+      });
+    }
+    source.addEventListener('done', (evt) => {
+      handlers.onDone?.(JSON.parse((evt as MessageEvent).data) as RunDoneEvent);
+      source.close();
+    });
+    return source;
   },
   async getConfigSchema(): Promise<ConfigKeyDefault[]> {
     if (USE_MOCKS) return mockConfigSchema;

@@ -1,11 +1,17 @@
 """`/api/projects/{project}/runs`: start a driving action, list run
-history, fetch one run's detail, and stream its log as SSE.
+history, fetch one run's detail/full log, stream its log+progress as
+SSE, cancel it mid-run, and diff its before/after verdict.
 
-The SSE event shape is plain log lines TODAY (`{"kind": "log", "line":
-...}`); `graphite.service.runs.ProgressEventProvisional` documents,
-in ONE place, the D228 typed-progress shape this stream upgrades to
-once lithos WO-119 lands (WOG1-F4) -- this route does not construct
-that shape yet."""
+The SSE stream carries two event kinds: `log` (`{"kind": "log", "line":
+...}`, the raw captured stderr+stdout, unconditionally) and `progress`
+(`{"kind": "progress", ...ProgressEvent fields}`) for every line that
+parses as a D228 typed progress record. Parsing is done with
+`regolith.progress.parse_line` -- the ONE parser (dedup law): this
+route never re-implements the wire-shape regex, it imports lithos's
+own (WO-119 landed the producer; that module's docstring is the wire-
+shape stability contract WO-G5/WO-120 both read). The frontend
+therefore never parses progress text itself -- it only ever consumes
+this route's typed JSON."""
 
 from __future__ import annotations
 
@@ -14,6 +20,7 @@ import json
 from collections.abc import AsyncIterator
 
 from fastapi import APIRouter, Body
+from regolith.progress import parse_line
 from sse_starlette.sse import EventSourceResponse
 
 from graphite.server.deps import project_root_path
@@ -21,6 +28,10 @@ from graphite.server.errors import raise_for_error
 from graphite.service.runs import (
     RunRecord,
     RunVerb,
+    VerdictDiff,
+    cancel_run,
+    compute_verdict_diff,
+    get_full_log,
     get_run,
     list_runs,
     start_run,
@@ -66,8 +77,56 @@ def get_run_detail(run_id: str) -> RunRecord:
     return result.danger_ok
 
 
+@router.get("/api/runs/{run_id}/log", response_model=tuple[str, ...])
+def get_run_log(run_id: str) -> tuple[str, ...]:
+    """The full captured log for `run_id` as a plain array -- run-
+    history detail replay (deliverable 2), no SSE subscription needed
+    for a run that has already finished (or is still running; this
+    still returns whatever has been captured so far)."""
+    return get_full_log(run_id)
+
+
+@router.post("/api/runs/{run_id}/cancel", response_model=RunRecord)
+def cancel_project_run(run_id: str) -> RunRecord:
+    """Stop a running run (deliverable 1's cancel affordance; WOG1-F6
+    closed -- no kill route existed before WO-G5)."""
+    result = cancel_run(run_id)
+    if result.is_err:
+        raise_for_error(result.danger_err)
+    return result.danger_ok
+
+
+@router.get("/api/runs/{run_id}/verdict-diff", response_model=VerdictDiff)
+def get_run_verdict_diff(run_id: str) -> VerdictDiff:
+    """The before/after health-snapshot pair for `run_id`'s exit summary
+    (deliverable 1) -- both real report reads, never a recomputed
+    verdict (charter sec. 3.2)."""
+    result = compute_verdict_diff(run_id)
+    if result.is_err:
+        raise_for_error(result.danger_err)
+    return result.danger_ok
+
+
+def _progress_event_payload(line: str) -> dict[str, object] | None:
+    """`line` -> the JSON-safe `progress` SSE payload, or `None` when
+    the line carries no progress record (the overwhelming majority)."""
+    event = parse_line(line)
+    if event is None:
+        return None
+    return {
+        "kind": "progress",
+        "v": event.v,
+        "phase": event.phase,
+        "subject": event.subject,
+        "done": event.done,
+        "total": event.total,
+        "elapsed": event.elapsed,
+    }
+
+
 async def _log_event_stream(run_id: str) -> AsyncIterator[dict[str, str]]:
-    """Yield every log line for `run_id` as an SSE event, then keep
+    """Yield every log line for `run_id` as an SSE `log` event (plus a
+    `progress` event alongside any line that parses as one), then keep
     polling for new lines until the run's record leaves `running` --
     an honest close (04.1: "failure state with the actual stderr tail,
     not a sad-face illustration")."""
@@ -76,6 +135,9 @@ async def _log_event_stream(run_id: str) -> AsyncIterator[dict[str, str]]:
         lines = list(tail_log_lines(run_id))
         for line in lines[seen:]:
             yield {"event": "log", "data": json.dumps({"kind": "log", "line": line})}
+            progress = _progress_event_payload(line)
+            if progress is not None:
+                yield {"event": "progress", "data": json.dumps(progress)}
         seen = len(lines)
         record = get_run(run_id)
         if record.is_err or record.danger_ok.status != "running":
@@ -90,6 +152,6 @@ async def _log_event_stream(run_id: str) -> AsyncIterator[dict[str, str]]:
 
 @router.get("/api/runs/{run_id}/events")
 async def run_events(run_id: str) -> EventSourceResponse:
-    """SSE stream of `run_id`'s log lines, closing with a `done` event
-    once the run finishes."""
+    """SSE stream of `run_id`'s log lines + parsed progress events,
+    closing with a `done` event once the run finishes."""
     return EventSourceResponse(_log_event_stream(run_id))

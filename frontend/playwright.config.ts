@@ -40,15 +40,21 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
     },
     {
-      // WO-G6's real-backend project: config/doctor round-trip specs
-      // need an actual `regolith` subprocess underneath (not the static
-      // mocks), so this spins up a REAL `graphite serve` over a
-      // throwaway COPY of the fixture project (never the committed
-      // tests/fixtures/ tree -- config set/reset must not dirty the
-      // working tree) on its own port.
+      // The ONE real-backend rig (WO-G6 + WO-G5 merge: WO-G5's separate
+      // playwright.live.config.ts was folded into this pair, dedup law):
+      // config/doctor round-trip AND run-console live specs both need an
+      // actual `regolith` subprocess underneath (not the static mocks),
+      // so this spins up a REAL `graphite serve` over a throwaway COPY
+      // of the fixture project (never the committed tests/fixtures/
+      // tree -- config set/reset and driven builds must not dirty the
+      // working tree) on its own port. GRAPHITE_RUNS_HOME/GRAPHITE_HOME
+      // are isolated too (WO-G5): driven runs and settings reads must
+      // never touch the dev machine's real ~/.graphite.
       command:
         'rm -rf /tmp/graphite-pw-fixture && cp -r ../tests/fixtures /tmp/graphite-pw-fixture ' +
-        '&& cd .. && uv run python -m graphite.cli serve /tmp/graphite-pw-fixture --port 8766',
+        '&& cd .. && GRAPHITE_RUNS_HOME=/tmp/graphite-pw-fixture/.graphite-runs ' +
+        'GRAPHITE_HOME=/tmp/graphite-pw-fixture/.graphite-home ' +
+        'uv run python -m graphite.cli serve /tmp/graphite-pw-fixture --port 8766',
       url: 'http://127.0.0.1:8766/api/ping',
       reuseExistingServer: !process.env.CI,
     },
