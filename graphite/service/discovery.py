@@ -52,6 +52,11 @@ class ProjectInfo(BaseModel):
     has_build_report: bool
     has_lockfile: bool
     has_dist: bool
+    build_report_stale: bool = False  # true when a source file is newer
+    # than the build report (WOG3 fleet-dashboard "stale-report
+    # detection" deliverable) -- False (not "unknown") whenever there
+    # is no build report to compare against, since the TitleBlock's
+    # honest signal in that case is "missing", not "stale".
 
 
 def _read_manifest_identity(
@@ -76,6 +81,49 @@ def _read_manifest_identity(
     name = str(package.get("name", manifest_path.parent.name))
     version = str(package.get("version", "0.0.0"))
     return Ok((name, version))
+
+
+# Directories a build report's own OUTPUT lives under (or that never
+# hold design sources): excluded from the "is a source newer than the
+# report" scan so a build's own artifacts never mark themselves stale.
+# Extension strings are deliberately NOT enumerated here (CLAUDE.md
+# tripwire: those live in exactly one place, lithos's
+# `crates/regolith-syntax` registry) -- this scan is extension-agnostic
+# by design, comparing mtimes over every file outside the known output
+# dirs instead of naming `.hema`/`.cupr`/`.fluo`/`.calx` here.
+_EXCLUDED_DIR_NAMES = frozenset(
+    {".regolith", "dist", ".git", "node_modules", ".venv", "__pycache__"}
+)
+
+
+def _newest_source_mtime(root: Path) -> float | None:
+    """The newest mtime among files under `root` that are NOT build
+    output (dist/.regolith) or VCS/tooling noise -- None if the project
+    has no source files at all (an empty scaffold, not an error)."""
+    newest: float | None = None
+    for path in root.rglob("*"):
+        if not path.is_file():
+            continue
+        if any(part in _EXCLUDED_DIR_NAMES for part in path.relative_to(root).parts):
+            continue
+        mtime = path.stat().st_mtime
+        if newest is None or mtime > newest:
+            newest = mtime
+    return newest
+
+
+def _is_build_report_stale(root: Path, build_report_path: Path) -> bool:
+    """True when a source file's mtime is newer than the build report's
+    own mtime -- the TitleBlock's stale-report flag (WOG3 fleet-
+    dashboard deliverable 1). False (never "unknown") when there is no
+    build report, since `has_build_report` already carries that signal."""
+    if not build_report_path.is_file():
+        return False
+    report_mtime = build_report_path.stat().st_mtime
+    newest_source = _newest_source_mtime(root)
+    if newest_source is None:
+        return False
+    return newest_source > report_mtime
 
 
 def project_info(root: Path) -> Result[ProjectInfo, ServiceError]:
@@ -104,6 +152,7 @@ def project_info(root: Path) -> Result[ProjectInfo, ServiceError]:
             has_build_report=(root / BUILD_REPORT_REL).is_file(),
             has_lockfile=(root / LOCKFILE_REL).is_file(),
             has_dist=(root / DIST_REL).is_dir(),
+            build_report_stale=_is_build_report_stale(root, root / BUILD_REPORT_REL),
         )
     )
 

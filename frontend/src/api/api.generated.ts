@@ -68,6 +68,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/projects/{project}/acceptance-ledger": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Acceptance Ledger
+         * @description The accepted-deviation ledger (waiver/memo panel, project-view
+         *     deliverable 2): every accepted deviation with its memo evidence
+         *     digest and basis text, read verbatim (WOG1-F3 provisional bridge).
+         */
+        get: operations["get_acceptance_ledger_api_projects__project__acceptance_ledger_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/projects/{project}/artifacts": {
         parameters: {
             query?: never;
@@ -247,6 +269,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/projects/{project}/gate-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Gate Summary
+         * @description The release-gate summary panel (WOG3-F1, provisional bridge --
+         *     project-view deliverable 2).
+         */
+        get: operations["get_gate_summary_api_projects__project__gate_summary_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/projects/{project}/health": {
         parameters: {
             query?: never;
@@ -403,6 +446,42 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /**
+         * AcceptanceLedgerSummary
+         * @description WOG1-F3 marked-provisional bridge: the ON-DISK
+         *     `acceptance_ledger.json` (written by
+         *     `acceptance.acceptance_ledger_bytes`) is a DIFFERENT shape than the
+         *     in-memory `regolith.orchestrator.acceptance.AcceptanceOutcome`
+         *     model it is rendered from (no `accepted_hashes` field on disk, and
+         *     `accepted_deviations` replaces `deviations`) -- there is no
+         *     regolith model that round-trips this file directly, so
+         *     `AcceptanceOutcome.model_validate_json` fails against it. This is a
+         *     graphite-local shape mirroring exactly what ships to disk, escalated
+         *     to the lithos coordinator as a gap (a `LedgerDocument` model in
+         *     `regolith.orchestrator.acceptance` would close it).
+         */
+        AcceptanceLedgerSummary: {
+            /**
+             * Accepted Deviations
+             * @default []
+             */
+            accepted_deviations: components["schemas"]["AcceptedDeviation"][];
+            /**
+             * Cli Accepts Used
+             * @default []
+             */
+            cli_accepts_used: string[];
+            /**
+             * Errors
+             * @default []
+             */
+            errors: string[];
+            /**
+             * Refusals
+             * @default []
+             */
+            refusals: string[];
+        };
+        /**
          * AcceptanceOutcome
          * @description The release gate's read of the ledger (WO-98).
          *
@@ -446,6 +525,38 @@ export interface components {
              * @default []
              */
             refusals: string[];
+        };
+        /**
+         * AcceptedDeviation
+         * @description One row of `dist/acceptance_ledger.json`'s `accepted_deviations`
+         *     array (WOG1-F3 below) -- field-for-field what
+         *     `regolith.orchestrator.acceptance.acceptance_ledger_bytes` writes.
+         */
+        AcceptedDeviation: {
+            /**
+             * Accepted
+             * @default []
+             */
+            accepted: string[];
+            /** Basis */
+            basis: string;
+            /** Evidence */
+            evidence?: string | null;
+            /** Evidence Digest */
+            evidence_digest?: string | null;
+            /** Expires */
+            expires?: string | null;
+            /** Kind */
+            kind: string;
+            /**
+             * Match Set
+             * @default []
+             */
+            match_set: string[];
+            /** Scope */
+            scope?: string | null;
+            /** Target */
+            target: string;
         };
         /**
          * ArtifactEntry
@@ -1030,6 +1141,40 @@ export interface components {
             /** Subject Ref */
             subject_ref: string;
         };
+        /**
+         * GateCounts
+         * @description `dist/gate_summary.json`'s `counts` object verbatim (WOG3-F1
+         *     marked-provisional bridge, same posture as `ManifestSummary`/
+         *     `AcceptanceLedgerSummary`: no dedicated regolith model for this
+         *     on-disk shape exists yet in the public surface).
+         */
+        GateCounts: {
+            /** Accepted Deviation */
+            accepted_deviation: number;
+            /** Below Trust Floor */
+            below_trust_floor: number;
+            /** Indeterminate */
+            indeterminate: number;
+            /** Ledger Blocked */
+            ledger_blocked: boolean;
+            /** Violated */
+            violated: number;
+        };
+        /**
+         * GateSummary
+         * @description `dist/gate_summary.json` -> the release-gate summary panel (04.1
+         *     project-view release-gate deliverable): tier + ok + release_ok +
+         *     per-kind counts, read verbatim, never recomputed (charter 3.2).
+         */
+        GateSummary: {
+            counts: components["schemas"]["GateCounts"];
+            /** Ok */
+            ok: boolean;
+            /** Release Ok */
+            release_ok: boolean;
+            /** Tier */
+            tier: string;
+        };
         /** Grid */
         Grid: {
             /**
@@ -1135,6 +1280,8 @@ export interface components {
          *     parsed dict for a UI "raw JSON toggle" (04.1 detail-view floor).
          */
         ManifestSummary: {
+            /** Design Hash */
+            design_hash?: string | null;
             /** Raw */
             raw: {
                 [key: string]: unknown;
@@ -1241,6 +1388,11 @@ export interface components {
          *     UI's companion-audit empty state, 04.1).
          */
         ProjectInfo: {
+            /**
+             * Build Report Stale
+             * @default false
+             */
+            build_report_stale: boolean;
             /** Has Build Report */
             has_build_report: boolean;
             /** Has Dist */
@@ -1477,6 +1629,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProjectInfo"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_acceptance_ledger_api_projects__project__acceptance_ledger_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AcceptanceLedgerSummary"];
                 };
             };
             /** @description Validation Error */
@@ -1763,6 +1946,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_gate_summary_api_projects__project__gate_summary_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GateSummary"];
                 };
             };
             /** @description Validation Error */

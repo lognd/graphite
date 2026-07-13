@@ -1,6 +1,45 @@
 {
   "components": {
     "schemas": {
+      "AcceptanceLedgerSummary": {
+        "description": "WOG1-F3 marked-provisional bridge: the ON-DISK\n`acceptance_ledger.json` (written by\n`acceptance.acceptance_ledger_bytes`) is a DIFFERENT shape than the\nin-memory `regolith.orchestrator.acceptance.AcceptanceOutcome`\nmodel it is rendered from (no `accepted_hashes` field on disk, and\n`accepted_deviations` replaces `deviations`) -- there is no\nregolith model that round-trips this file directly, so\n`AcceptanceOutcome.model_validate_json` fails against it. This is a\ngraphite-local shape mirroring exactly what ships to disk, escalated\nto the lithos coordinator as a gap (a `LedgerDocument` model in\n`regolith.orchestrator.acceptance` would close it).",
+        "properties": {
+          "accepted_deviations": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/AcceptedDeviation"
+            },
+            "title": "Accepted Deviations",
+            "type": "array"
+          },
+          "cli_accepts_used": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Cli Accepts Used",
+            "type": "array"
+          },
+          "errors": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Errors",
+            "type": "array"
+          },
+          "refusals": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Refusals",
+            "type": "array"
+          }
+        },
+        "title": "AcceptanceLedgerSummary",
+        "type": "object"
+      },
       "AcceptanceOutcome": {
         "description": "The release gate's read of the ledger (WO-98).\n\n``accepted_hashes`` are the obligation content hashes an\nevidence-carrying, trust-floor-meeting, unexpired waiver accepted --\nthe gate removes them from the refusing counts (kept DISTINCT as\n``GateCounts.accepted_deviation``, never folded into ``discharged``).\n``ledger_blocked`` is set when the ledger itself carries a hole that\nrefuses independent of the results (a ``todo!``/``assume!`` that\nemitted no obligation of its own). ``refusals``/``errors`` are the\nhuman-readable reasons the gate reports.",
         "properties": {
@@ -51,6 +90,90 @@
           }
         },
         "title": "AcceptanceOutcome",
+        "type": "object"
+      },
+      "AcceptedDeviation": {
+        "description": "One row of `dist/acceptance_ledger.json`'s `accepted_deviations`\narray (WOG1-F3 below) -- field-for-field what\n`regolith.orchestrator.acceptance.acceptance_ledger_bytes` writes.",
+        "properties": {
+          "accepted": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Accepted",
+            "type": "array"
+          },
+          "basis": {
+            "title": "Basis",
+            "type": "string"
+          },
+          "evidence": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence"
+          },
+          "evidence_digest": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Evidence Digest"
+          },
+          "expires": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "match_set": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Match Set",
+            "type": "array"
+          },
+          "scope": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Scope"
+          },
+          "target": {
+            "title": "Target",
+            "type": "string"
+          }
+        },
+        "required": [
+          "target",
+          "basis",
+          "kind"
+        ],
+        "title": "AcceptedDeviation",
         "type": "object"
       },
       "ArtifactEntry": {
@@ -1076,6 +1199,68 @@
         "title": "EvidenceChain",
         "type": "object"
       },
+      "GateCounts": {
+        "description": "`dist/gate_summary.json`'s `counts` object verbatim (WOG3-F1\nmarked-provisional bridge, same posture as `ManifestSummary`/\n`AcceptanceLedgerSummary`: no dedicated regolith model for this\non-disk shape exists yet in the public surface).",
+        "properties": {
+          "accepted_deviation": {
+            "title": "Accepted Deviation",
+            "type": "integer"
+          },
+          "below_trust_floor": {
+            "title": "Below Trust Floor",
+            "type": "integer"
+          },
+          "indeterminate": {
+            "title": "Indeterminate",
+            "type": "integer"
+          },
+          "ledger_blocked": {
+            "title": "Ledger Blocked",
+            "type": "boolean"
+          },
+          "violated": {
+            "title": "Violated",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "violated",
+          "indeterminate",
+          "below_trust_floor",
+          "accepted_deviation",
+          "ledger_blocked"
+        ],
+        "title": "GateCounts",
+        "type": "object"
+      },
+      "GateSummary": {
+        "description": "`dist/gate_summary.json` -> the release-gate summary panel (04.1\nproject-view release-gate deliverable): tier + ok + release_ok +\nper-kind counts, read verbatim, never recomputed (charter 3.2).",
+        "properties": {
+          "counts": {
+            "$ref": "#/components/schemas/GateCounts"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          },
+          "release_ok": {
+            "title": "Release Ok",
+            "type": "boolean"
+          },
+          "tier": {
+            "title": "Tier",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tier",
+          "ok",
+          "release_ok",
+          "counts"
+        ],
+        "title": "GateSummary",
+        "type": "object"
+      },
       "Grid": {
         "properties": {
           "k": {
@@ -1260,6 +1445,17 @@
       "ManifestSummary": {
         "description": "WOG1-F2 marked-provisional bridge: the ship package\n`manifest.json` shape trimmed to what the UI needs, pending a real\nregolith model (no dedicated one exists in the public surface --\nthe ship backend assembles this dict ad hoc). Extra keys in the\nreal file are read but not exposed here; `raw` carries the full\nparsed dict for a UI \"raw JSON toggle\" (04.1 detail-view floor).",
         "properties": {
+          "design_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Design Hash"
+          },
           "raw": {
             "additionalProperties": true,
             "title": "Raw",
@@ -1486,6 +1682,11 @@
       "ProjectInfo": {
         "description": "One discovered project: its manifest identity plus which report\nartifacts already exist on disk (a fresh project has none of\nthem -- that is not an error, just an empty-state signal for the\nUI's companion-audit empty state, 04.1).",
         "properties": {
+          "build_report_stale": {
+            "default": false,
+            "title": "Build Report Stale",
+            "type": "boolean"
+          },
           "has_build_report": {
             "title": "Has Build Report",
             "type": "boolean"
@@ -1891,6 +2092,49 @@
         "summary": "Get Project",
         "tags": [
           "projects"
+        ]
+      }
+    },
+    "/api/projects/{project}/acceptance-ledger": {
+      "get": {
+        "description": "The accepted-deviation ledger (waiver/memo panel, project-view\ndeliverable 2): every accepted deviation with its memo evidence\ndigest and basis text, read verbatim (WOG1-F3 provisional bridge).",
+        "operationId": "get_acceptance_ledger_api_projects__project__acceptance_ledger_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcceptanceLedgerSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Acceptance Ledger",
+        "tags": [
+          "calc"
         ]
       }
     },
@@ -2325,6 +2569,49 @@
         "summary": "Get Doctor",
         "tags": [
           "doctor"
+        ]
+      }
+    },
+    "/api/projects/{project}/gate-summary": {
+      "get": {
+        "description": "The release-gate summary panel (WOG3-F1, provisional bridge --\nproject-view deliverable 2).",
+        "operationId": "get_gate_summary_api_projects__project__gate_summary_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GateSummary"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Gate Summary",
+        "tags": [
+          "build"
         ]
       }
     },
