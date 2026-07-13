@@ -48,24 +48,35 @@ companion audit tables in the ledger for shell + each component.
 ## Close-out ledger
 
 Branch: `wog2-frontend-foundation` (worktree at
-`.worktrees/wog2`). `make check` green (backend pytest/ruff/ty legs
-unchanged + `frontend-check`: eslint, prettier --check, tsc -b,
-token/tui-mirror drift check, vitest x51, vite build; +
-`frontend-system-test`: Playwright x6 -- zero-external-request,
+`.worktrees/wog2`), reconciled with main after the WO-G1 merge
+(991bfe1). `make check` green end to end: `backend-check` (ruff,
+ty, pytest x62, openapi drift) + `frontend-check` (eslint,
+prettier --check, tsc -b, token/tui-mirror drift check, vitest
+x52, vite build) + `frontend-api-check` (openapi-typescript drift)
++ `frontend-system-test` (Playwright x6 -- zero-external-request,
 shell navigation, gallery a11y in both themes).
 
 ### Escalations recorded
 
-- WOG2-F1: `frontend/src/api/api.generated.ts` is a hand-written,
-  clearly-marked PROVISIONAL stand-in for the real
-  regolith -> FastAPI -> openapi.json -> openapi-typescript chain
-  (WO-G1, parallel root per docs/workflow/README.md's dependency
-  graph). Covers only `ProjectSummary`, `FleetHealthSummary`,
-  `ObligationRow` -- the shapes the shell/dashboard/project routes
-  need. Delete wholesale and replace with the generated file at
-  integration; `src/mocks/fixtures.ts` (VITE_USE_MOCKS=1 data) is
-  representative, not copied from a real WO-G1 fixture since none
-  existed yet.
+- WOG2-F1 (CLOSED at integration): the provisional hand-written
+  `api.generated.ts` was deleted wholesale in the merge of main
+  (WO-G1) into this branch; the frontend now consumes the REAL
+  openapi-typescript output, and `src/api/client.ts` exposes only
+  type aliases into it (`ProjectInfo`, `ProjectHealth`,
+  `ObligationsResponse`, `AuditRow`, `AuditSummary`). Mocks were
+  re-recorded from the committed timber_pavilion fixture's
+  audit_index.json, and the client's three endpoints were verified
+  against the live fixture backend (`graphite serve
+  tests/fixtures`). Two provisional guesses did not survive contact
+  with the real API and were reconciled root-cause: (a) there is no
+  fleet-level health endpoint -- health is per-project
+  (`/api/projects/{p}/health`), so the shell's TitleBlock/StatusLine
+  render honest `--` placeholders instead of a fabricated fleet
+  verdict (charter 3.2); (b) the wire vocabulary is the 4-value
+  audit `disposition` enum, not the 5-value design-system verdict
+  set -- the UI vocabulary and its ONE `disposition -> verdict`
+  mapping (`calc_sheet -> discharged`) now live in
+  `components/VerdictBadge/verdict.ts`.
 - WOG2-F2: dark-theme accent/verdict hues match spec 03.2's raw
   hex values as given. Three LIGHT-theme hues from spec 03.2 fail
   WCAG AA at small text size on the drawing-paper background
