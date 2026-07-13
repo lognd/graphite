@@ -1,7 +1,7 @@
 .PHONY: install test lint format typecheck openapi openapi-check \
         frontend-install frontend-api-gen frontend-api-check \
         frontend-check frontend-test frontend-system-test \
-        backend-check check clean
+        backend-check check clean build size-check
 
 UV ?= uv
 NPM ?= npm --prefix frontend
@@ -55,7 +55,18 @@ frontend-system-test: ## Playwright system rig (mocked specs + the ONE real-back
 
 backend-check: lint typecheck test openapi-check ## the WO-G1 backend leg, self-contained (no Node needed)
 
-check: backend-check frontend-check frontend-api-check frontend-system-test ## full gate, cheapest first
+build: ## full release build: vite bundle into graphite/server/static/, then the wheel (WO-G8)
+	$(NPM) run build
+	$(UV) build --wheel
+
+# Checks the build output frontend-check just produced (its last leg is
+# `npm run build`, which writes graphite/server/static/) -- no second
+# build here (dedup); run `make frontend-check` or `make build` first
+# when invoking this standalone.
+size-check: ## bundle budget gate (WO-G8): main chunk must stay under its recorded budget
+	$(UV) run python scripts/check_bundle_size.py
+
+check: backend-check frontend-check frontend-api-check size-check frontend-system-test ## full gate, cheapest first
 
 clean:
 	rm -rf .pytest_cache .ruff_cache build *.egg-info

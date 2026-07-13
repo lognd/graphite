@@ -5,7 +5,13 @@ project on disk (route handlers only touch disk when actually called)."""
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException
+from starlette.types import Scope
+from starlette.responses import Response
 
 from graphite.logging_setup import get_logger
 from graphite.server.routes import (
@@ -25,6 +31,33 @@ _log = get_logger(__name__)
 
 API_TITLE = "graphite backend API"
 API_VERSION = "1.0.0"
+
+# The vite build output (frontend/vite.config.ts outDir) bundled into the
+# wheel (pyproject [tool.hatch.build.targets.wheel] artifacts) -- WO-G8
+# deliverable 6: `graphite serve` serves the full app, no Node required
+# at runtime (spec 02.5).
+_STATIC_DIR = Path(__file__).parent / "static"
+
+
+class _SpaStaticFiles(StaticFiles):
+    """Static file app with the SPA fallback: any non-API path that does
+    not match a real bundled file serves index.html so client-side routes
+    (/project/..., /runs, ...) deep-link correctly on a hard reload."""
+
+    async def get_response(self, path: str, scope: Scope) -> Response:
+        try:
+            response = await super().get_response(path, scope)
+        except HTTPException as exc:
+            # starlette's StaticFiles RAISES 404 for missing paths (it
+            # does not return a 404 response), so the fallback must catch.
+            if exc.status_code == 404 and not path.startswith("api/"):
+                _log.debug("static: SPA fallback to index.html for %r", path)
+                return await super().get_response("index.html", scope)
+            raise
+        if response.status_code == 404 and not path.startswith("api/"):
+            _log.debug("static: SPA fallback to index.html for %r", path)
+            return await super().get_response("index.html", scope)
+        return response
 
 
 def create_app() -> FastAPI:
@@ -52,6 +85,18 @@ def create_app() -> FastAPI:
         """Liveness probe (not a lithos health report -- see
         `/api/projects/{project}/health` for that)."""
         return {"status": "ok"}
+
+    if _STATIC_DIR.is_dir():
+        # Mounted LAST so every /api route (and /api 404s -- the guard in
+        # _SpaStaticFiles keeps them JSON, never index.html) wins first.
+        app.mount("/", _SpaStaticFiles(directory=_STATIC_DIR, html=True), name="static")
+        _log.info("server: serving bundled frontend from %s", _STATIC_DIR)
+    else:
+        _log.info(
+            "server: no bundled frontend at %s (API-only mode -- run "
+            "`make build` or install the wheel for the full app)",
+            _STATIC_DIR,
+        )
 
     _log.info("server: app assembled, %d route(s)", len(app.routes))
     return app
