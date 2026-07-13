@@ -89,6 +89,22 @@ def test_manifest(api_client: TestClient) -> None:
     assert resp.json()["signed"] is False
 
 
+def test_gate_summary(api_client: TestClient) -> None:
+    resp = api_client.get(f"/api/projects/{PROJECT_NAME}/gate-summary")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["release_ok"] is True
+    assert body["counts"]["accepted_deviation"] == 4
+
+
+def test_acceptance_ledger(api_client: TestClient) -> None:
+    resp = api_client.get(f"/api/projects/{PROJECT_NAME}/acceptance-ledger")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert len(body["accepted_deviations"]) == 3
+    assert body["accepted_deviations"][0]["target"] == "bearing"
+
+
 def test_artifacts_list_and_fetch(api_client: TestClient) -> None:
     listing = api_client.get(f"/api/projects/{PROJECT_NAME}/artifacts")
     assert listing.status_code == 200

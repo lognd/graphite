@@ -221,11 +221,14 @@ class ManifestSummary(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     signed: bool
+    design_hash: str | None = None
     raw: dict[str, object]
 
 
 def read_manifest(path: Path) -> Result[ManifestSummary, ServiceError]:
-    """`dist/manifest.json` -> `ManifestSummary` (WOG1-F2)."""
+    """`dist/manifest.json` -> `ManifestSummary` (WOG1-F2). `design_hash`
+    is lifted out of `raw` for the TitleBlock's identity element (03
+    sec. 3.1) -- still read verbatim, never recomputed."""
     text = _read_text(path)
     if text.is_err:
         return Err(text.danger_err)
@@ -241,4 +244,57 @@ def read_manifest(path: Path) -> Result[ManifestSummary, ServiceError]:
             )
         )
     signed = bool(raw.get("signature")) if isinstance(raw, dict) else False
-    return Ok(ManifestSummary(signed=signed, raw=raw if isinstance(raw, dict) else {}))
+    design_hash = raw.get("design_hash") if isinstance(raw, dict) else None
+    return Ok(
+        ManifestSummary(
+            signed=signed,
+            design_hash=design_hash if isinstance(design_hash, str) else None,
+            raw=raw if isinstance(raw, dict) else {},
+        )
+    )
+
+
+class GateCounts(BaseModel):
+    """`dist/gate_summary.json`'s `counts` object verbatim (WOG3-F1
+    marked-provisional bridge, same posture as `ManifestSummary`/
+    `AcceptanceLedgerSummary`: no dedicated regolith model for this
+    on-disk shape exists yet in the public surface)."""
+
+    model_config = ConfigDict(frozen=True)
+
+    violated: int
+    indeterminate: int
+    below_trust_floor: int
+    accepted_deviation: int
+    ledger_blocked: bool
+
+
+class GateSummary(BaseModel):
+    """`dist/gate_summary.json` -> the release-gate summary panel (04.1
+    project-view release-gate deliverable): tier + ok + release_ok +
+    per-kind counts, read verbatim, never recomputed (charter 3.2)."""
+
+    model_config = ConfigDict(frozen=True)
+
+    tier: str
+    ok: bool
+    release_ok: bool
+    counts: GateCounts
+
+
+def read_gate_summary(path: Path) -> Result[GateSummary, ServiceError]:
+    """`dist/gate_summary.json` -> `GateSummary` (WOG3-F1)."""
+    text = _read_text(path)
+    if text.is_err:
+        return Err(text.danger_err)
+    try:
+        return Ok(GateSummary.model_validate_json(text.danger_ok))
+    except ValidationError as exc:
+        _log.warning("reports: cannot parse gate summary %s: %s", path, exc)
+        return Err(
+            ServiceError(
+                kind="parse_error",
+                message=f"cannot parse gate summary {path}",
+                detail=str(exc),
+            )
+        )

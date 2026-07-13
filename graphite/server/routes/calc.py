@@ -8,7 +8,12 @@ from regolith.backends.calc import AuditIndex, CalcSheet
 
 from graphite.server.deps import project_root_path
 from graphite.server.errors import raise_for_error
-from graphite.service.reports import read_audit_index, read_calc_book
+from graphite.service.reports import (
+    AcceptanceLedgerSummary,
+    read_acceptance_ledger,
+    read_audit_index,
+    read_calc_book,
+)
 
 router = APIRouter(prefix="/api/projects", tags=["calc"])
 
@@ -32,6 +37,20 @@ def get_audit_index(project: str) -> AuditIndex:
     view (04.1 "ANY DETAIL VIEW" floor: raw-JSON toggle)."""
     root = project_root_path(project)
     result = read_audit_index(root / "dist" / "calc" / "audit_index.json")
+    if result.is_err:
+        raise_for_error(result.danger_err)
+    return result.danger_ok
+
+
+@router.get(
+    "/{project}/acceptance-ledger", response_model=AcceptanceLedgerSummary
+)
+def get_acceptance_ledger(project: str) -> AcceptanceLedgerSummary:
+    """The accepted-deviation ledger (waiver/memo panel, project-view
+    deliverable 2): every accepted deviation with its memo evidence
+    digest and basis text, read verbatim (WOG1-F3 provisional bridge)."""
+    root = project_root_path(project)
+    result = read_acceptance_ledger(root / "dist" / "acceptance_ledger.json")
     if result.is_err:
         raise_for_error(result.danger_err)
     return result.danger_ok

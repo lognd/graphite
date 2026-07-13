@@ -14,7 +14,9 @@ from regolith.orchestrator.orchestrate import StagedBuildReport
 from graphite.server.deps import project_root_path
 from graphite.server.errors import raise_for_error
 from graphite.service.reports import (
+    GateSummary,
     ManifestSummary,
+    read_gate_summary,
     read_lockfile,
     read_manifest,
     read_staged_build_report,
@@ -53,6 +55,17 @@ def get_manifest(project: str) -> ManifestSummary:
     """The ship package manifest summary (WOG1-F2, provisional bridge)."""
     root = project_root_path(project)
     result = read_manifest(root / "dist" / "manifest.json")
+    if result.is_err:
+        raise_for_error(result.danger_err)
+    return result.danger_ok
+
+
+@router.get("/{project}/gate-summary", response_model=GateSummary)
+def get_gate_summary(project: str) -> GateSummary:
+    """The release-gate summary panel (WOG3-F1, provisional bridge --
+    project-view deliverable 2)."""
+    root = project_root_path(project)
+    result = read_gate_summary(root / "dist" / "gate_summary.json")
     if result.is_err:
         raise_for_error(result.danger_err)
     return result.danger_ok
