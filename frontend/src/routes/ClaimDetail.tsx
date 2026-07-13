@@ -2,11 +2,10 @@
 // defer/fail?" down to the evidence (charter 2.1). Claim source text,
 // verdict + margin, inputs with provenance pins, the evidence hash
 // chain (HashChips), a raw-JSON toggle, and prev/next through the
-// project's obligation order. Links to the calc-sheet PDF and shipped
-// artifacts route through the existing artifact-by-hash endpoint;
-// WO-G4's calc-sheet viewer route does not exist yet, so that link
-// renders as an honest disabled affordance rather than a dead link
-// (charter 3.2/04.1 detail-view floor).
+// project's obligation order. "Open calc sheet" links straight into
+// WO-G4's calc-sheet viewer route (/artifacts/:projectId/calc/:sheetId,
+// cross-wired at the WO-G3/WO-G4 merge); artifact bytes stay behind the
+// content-hash endpoint (charter 3.2/04.1 detail-view floor).
 
 import { Fragment, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -189,9 +188,13 @@ export function ClaimDetail() {
           </section>
 
           <p>
-            <span aria-disabled="true" title="the calc-sheet viewer route lands with WO-G4">
-              open calc sheet (WO-G4)
-            </span>
+            <Link
+              to={`/artifacts/${encodeURIComponent(projectId ?? '')}/calc/${encodeURIComponent(
+                sheet.sheet_id,
+              )}`}
+            >
+              open calc sheet
+            </Link>
           </p>
         </>
       ) : (

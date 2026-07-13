@@ -34,6 +34,30 @@ export function useCalcSheets(project: string | undefined) {
   });
 }
 
+export function useAuditIndex(project: string | undefined) {
+  return useQuery({
+    queryKey: ['calc-audit', project],
+    queryFn: () => api.getAuditIndex(project as string),
+    enabled: Boolean(project),
+  });
+}
+
+export function useProjectArtifacts(project: string | undefined) {
+  return useQuery({
+    queryKey: ['artifacts', project],
+    queryFn: () => api.listArtifacts(project as string),
+    enabled: Boolean(project),
+  });
+}
+
+export function useBuildReport(project: string | undefined) {
+  return useQuery({
+    queryKey: ['build-report', project],
+    queryFn: () => api.getBuildReport(project as string),
+    enabled: Boolean(project),
+  });
+}
+
 export function useLockfile(project: string | undefined) {
   return useQuery({
     queryKey: ['lockfile', project],
@@ -62,14 +86,6 @@ export function useManifest(project: string | undefined) {
   return useQuery({
     queryKey: ['manifest', project],
     queryFn: () => api.getManifest(project as string),
-    enabled: Boolean(project),
-  });
-}
-
-export function useArtifacts(project: string | undefined) {
-  return useQuery({
-    queryKey: ['artifacts', project],
-    queryFn: () => api.getArtifacts(project as string),
     enabled: Boolean(project),
   });
 }

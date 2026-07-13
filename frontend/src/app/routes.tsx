@@ -11,6 +11,13 @@ import { Obligations } from '../routes/Obligations';
 import { ObligationExplorer } from '../routes/ObligationExplorer';
 import { ClaimDetail } from '../routes/ClaimDetail';
 import { Artifacts } from '../routes/Artifacts';
+import { CalcBook } from '../routes/artifacts/CalcBook';
+import { CalcSheetView } from '../routes/artifacts/CalcSheetView';
+import { Drawings } from '../routes/artifacts/Drawings';
+import { DrawingView } from '../routes/artifacts/DrawingView';
+import { Model3D } from '../routes/artifacts/Model3D';
+import { Bom } from '../routes/artifacts/Bom';
+import { Boards } from '../routes/artifacts/Boards';
 import { Runs } from '../routes/Runs';
 import { Config } from '../routes/Config';
 
@@ -21,6 +28,13 @@ const children = [
   { path: 'project/:projectId/claim/:claimKey', element: <ClaimDetail /> },
   { path: 'obligations', element: <Obligations /> },
   { path: 'artifacts', element: <Artifacts /> },
+  { path: 'artifacts/:projectId/calc', element: <CalcBook /> },
+  { path: 'artifacts/:projectId/calc/:sheetId', element: <CalcSheetView /> },
+  { path: 'artifacts/:projectId/drawings', element: <Drawings /> },
+  { path: 'artifacts/:projectId/drawings/:name', element: <DrawingView /> },
+  { path: 'artifacts/:projectId/model', element: <Model3D /> },
+  { path: 'artifacts/:projectId/bom', element: <Bom /> },
+  { path: 'artifacts/:projectId/boards', element: <Boards /> },
   { path: 'runs', element: <Runs /> },
   { path: 'config', element: <Config /> },
 ];

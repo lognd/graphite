@@ -1,14 +1,16 @@
 // Committed fixture data for VITE_USE_MOCKS=1 dev mode and for vitest
-// component tests (spec 02.5). RECORDED from the WO-G1/WO-G3 fixture
-// project (tests/fixtures/timber_pavilion: dist/calc/audit_index.json,
-// dist/calc/calc_book.json, .regolith/build/regolith.lock,
-// dist/gate_summary.json, dist/acceptance_ledger.json, dist/manifest.json)
+// component tests (spec 02.5). RECORDED from the WO-G1/WO-G3/WO-G4
+// fixture project (tests/fixtures/timber_pavilion: dist/calc/
+// audit_index.json, dist/calc/calc_book.json, .regolith/build/
+// regolith.lock, .regolith/build/build_report.json, dist/
+// gate_summary.json, dist/acceptance_ledger.json, dist/manifest.json)
 // so the mock shapes are the real wire shapes and the real project data,
 // never invented (charter 3.2).
 
 import type {
   AcceptanceLedgerSummary,
   ArtifactEntry,
+  AuditIndex,
   AuditRow,
   CalcSheet,
   GateSummary,
@@ -18,6 +20,7 @@ import type {
   ObligationsResponse,
   ProjectHealth,
   ProjectInfo,
+  StagedBuildReport,
 } from '../api/client';
 
 export const mockProjects: ProjectInfo[] = [
@@ -170,7 +173,18 @@ export function mockObligationsGrouped(group: 'disposition' | 'family'): Obligat
   return { summary: mockProjectHealth.obligation_summary, groups, rows: null };
 }
 
-// dist/calc/calc_book.json's 6 sheets, verbatim.
+// RECORDED from tests/fixtures/timber_pavilion/dist/calc/audit_index.json --
+// same rows as mockObligations (both routes read the same underlying
+// calc-book accounting), unfiltered/ungrouped (04.1 "raw" detail view).
+export const mockAuditIndex: AuditIndex = {
+  project: 'frame.calx',
+  rows: AUDIT_ROWS,
+  summary: mockProjectHealth.obligation_summary,
+};
+
+// dist/calc/calc_book.json's 6 sheets, verbatim (the ONE mockCalcSheets --
+// WO-G3 and WO-G4 each recorded one on their parallel branches; the merge
+// keeps the full recorded book, dedup law 04.2).
 export const mockCalcSheets: CalcSheet[] = [
   {
     attestation: 'unsigned',
@@ -338,6 +352,43 @@ export const mockCalcSheets: CalcSheet[] = [
   },
 ];
 
+// RECORDED from tests/fixtures/timber_pavilion/dist listing (relpaths +
+// content types only -- hashes shortened/synthesized for the mock since
+// component tests never fetch real bytes behind them; VITE_USE_MOCKS mode
+// never calls api.fetchArtifact for this reason, honesty rule 04.3).
+export const mockProjectArtifacts: ArtifactEntry[] = [
+  {
+    content_hash: 'sha256:mock0calc0book0000000000000000000000000000000000000000000000',
+    relpath: 'calc/calc_book.json',
+    size: 4096,
+    content_type: 'application/json',
+  },
+  {
+    content_hash: 'sha256:mock0constructionpdf000000000000000000000000000000000000000000',
+    relpath: 'calc/construction__.pdf',
+    size: 2048,
+    content_type: 'application/pdf',
+  },
+  {
+    content_hash: 'sha256:mock0pavilionsvg00000000000000000000000000000000000000000000000',
+    relpath: 'drawings/drawings/PavilionFrame.svg',
+    size: 8192,
+    content_type: 'image/svg+xml',
+  },
+  {
+    content_hash: 'sha256:mock0pavilionpdf00000000000000000000000000000000000000000000000',
+    relpath: 'drawings/drawings/PavilionFrame.pdf',
+    size: 16384,
+    content_type: 'application/pdf',
+  },
+  {
+    content_hash: 'sha256:mock0paviliondrawingjson0000000000000000000000000000000000000000',
+    relpath: 'drawings/drawings/PavilionFrame.drawing.json',
+    size: 2048,
+    content_type: 'application/json',
+  },
+];
+
 // .regolith/build/regolith.lock, both sections.
 export const mockLockfile: Lockfile = {
   tool_version: '0.1.0',
@@ -469,72 +520,76 @@ export const mockAcceptanceLedger: AcceptanceLedgerSummary = {
   errors: [],
 };
 
-// dist/ tree relpaths, real (WOG1's artifact registry listing); content
-// hashes here are placeholders (WOG3-F2: the real registry computes a
-// live sha256 per file, not reproducible as a static literal) -- the
-// family-presence view only groups by relpath, never fetches by these.
-export const mockArtifacts: ArtifactEntry[] = [
-  {
-    content_hash: 'sha256:mock0',
-    relpath: 'acceptance_ledger.json',
-    size: 1200,
-    content_type: 'application/json',
+// RECORDED from tests/fixtures/timber_pavilion/.regolith/build/build_report.json
+// (`final` section) -- civil fixture carries cost/frame lock data but no
+// GLB/gerber-bearing mech/cuprite products, per the WO's fixture note.
+export const mockBuildReport: StagedBuildReport = {
+  final: {
+    tier: 3,
+    ok: true,
+    results: [],
+    unresolved: [],
+    cache_stats: { hits: 0, misses: 0 },
+    release_ok: true,
+    loop_iterations: 1,
+    plugin_errors: [],
+    payload_json: '',
+    rendered: '',
+    cost_profile: 'construction',
+    cost_record_pins: [],
+    cost_estimates: [
+      [
+        'all/construction',
+        'blake3:93c10d695933fd2d9307c94b6fa53739d6524156327eee85c421084148057f8a',
+      ],
+    ],
+    frame_record_pins: [],
+    frame_lock_rows: [
+      {
+        slot: 'PavilionFrame.G1.section',
+        value: 'G1=sawn_38x286',
+        cause:
+          'optimize(mass_per_length, trace=blake3:1ed0051f835e0cbceda5cd9c50ed5a3257018c00dcad9bef1809d0d260ebd40b)',
+        policy_note: null,
+      },
+      {
+        slot: 'PavilionFrame.G2.section',
+        value: 'G2=sawn_38x235',
+        cause:
+          'optimize(mass_per_length, trace=blake3:1d71622442e0e0d6210d8e44f54ea9e4d0eb987c091c00c7940432b01861cfad)',
+        policy_note: null,
+      },
+    ],
+    plan_record_pins: [],
+    material_record_pins: [],
+    fluid_record_pins: [],
+    acceptance: {
+      accepted_hashes: [],
+      cli_accepts_used: [],
+      deviations: [],
+      errors: [],
+      ledger_blocked: false,
+      refusals: [],
+    },
   },
-  {
-    content_hash: 'sha256:mock1',
-    relpath: 'calc/audit_index.json',
-    size: 2100,
-    content_type: 'application/json',
-  },
-  {
-    content_hash: 'sha256:mock2',
-    relpath: 'calc/calc_book.json',
-    size: 5400,
-    content_type: 'application/json',
-  },
-  {
-    content_hash: 'sha256:mock3',
-    relpath: 'calc/construction__.pdf',
-    size: 34000,
-    content_type: 'application/pdf',
-  },
-  {
-    content_hash: 'sha256:mock4',
-    relpath: 'calc/deflect__afc15fc09a7f.pdf',
-    size: 31000,
-    content_type: 'application/pdf',
-  },
-  {
-    content_hash: 'sha256:mock5',
-    relpath: 'drawings/drawings/PavilionFrame.dxf',
-    size: 8900,
-    content_type: 'application/dxf',
-  },
-  {
-    content_hash: 'sha256:mock6',
-    relpath: 'drawings/drawings/PavilionFrame.svg',
-    size: 6200,
-    content_type: 'image/svg+xml',
-  },
-  {
-    content_hash: 'sha256:mock7',
-    relpath: 'gate_summary.json',
-    size: 220,
-    content_type: 'application/json',
-  },
-  {
-    content_hash: 'sha256:mock8',
-    relpath: 'manifest.json',
-    size: 4300,
-    content_type: 'application/json',
-  },
-];
+  iterations: 1,
+  realized_inputs: [],
+  lock_rows: [],
+};
 
-// dist/manifest.json, trimmed to the ManifestSummary shape.
+// RECORDED from tests/fixtures/timber_pavilion/dist/manifest.json;
+// design_hash is lifted top-level for the TitleBlock (WO-G3's
+// ManifestSummary field), the raw dict carries the file rows verbatim.
 export const mockManifest: ManifestSummary = {
   signed: false,
   design_hash: 'blake3:80a706376d7b10ce2a2b286febea61acd7879e5334de8bdb730a978ea0f420c5',
   raw: {
     design_hash: 'blake3:80a706376d7b10ce2a2b286febea61acd7879e5334de8bdb730a978ea0f420c5',
+    files: [
+      {
+        relpath: 'calc/audit_index.json',
+        sha256: '5e6749c1ff59a41e1c8dc58c8caa22d4201e0094df0a3f45861c97c31a97eed2',
+      },
+    ],
   },
 };

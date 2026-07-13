@@ -103,7 +103,7 @@ Claim detail (ANY DETAIL VIEW):
 | copyable content hash | LANDED (HashChip on evidence hash, sheet digest, record pins) |
 | permalink (URL state) | LANDED (`claimKey` is fully derived from the URL) |
 | prev/next sibling nav | LANDED (within the project's current obligation order) |
-| "open in files" pointer | DEFERRED to WO-G5 (artifact viewer route not built yet; the calc-sheet/artifact links render as honest disabled affordances, not dead links) |
+| "open in files" pointer | LANDED at the WO-G4 merge: "open calc sheet" links into WO-G4's real viewer route (/artifacts/:projectId/calc/:sheetId), and the project view's family chips link into the WO-G4 viewers (calc/drawings) or the artifacts hub -- the pre-merge disabled affordance is gone |
 
 ### UX definition-of-done (04.3)
 

@@ -8,10 +8,10 @@
 import { Link, useParams } from 'react-router-dom';
 import {
   useAcceptanceLedger,
-  useArtifacts,
   useGateSummary,
   useLockfile,
   useManifest,
+  useProjectArtifacts,
   useProjectHealth,
 } from '../api/hooks';
 import { DataTable } from '../components/DataTable/DataTable';
@@ -26,11 +26,26 @@ function familyOf(relpath: string): string {
   return slash === -1 ? '(root)' : relpath.slice(0, slash);
 }
 
+// dist/ family directory -> its WO-G4 viewer route segment, where one
+// exists (calc book, drawings); other families (root files, future
+// dirs) fall through to the artifacts hub, which lists every viewer.
+const FAMILY_VIEWER_SEGMENT: Record<string, string> = {
+  calc: 'calc',
+  drawings: 'drawings',
+};
+
+function familyLink(projectId: string, fam: string): string {
+  const segment = FAMILY_VIEWER_SEGMENT[fam];
+  return segment
+    ? `/artifacts/${encodeURIComponent(projectId)}/${segment}`
+    : `/artifacts?project=${encodeURIComponent(projectId)}`;
+}
+
 export function Project() {
   const { projectId } = useParams<{ projectId: string }>();
   const health = useProjectHealth(projectId);
   const manifest = useManifest(projectId);
-  const artifacts = useArtifacts(projectId);
+  const artifacts = useProjectArtifacts(projectId);
   const lockfile = useLockfile(projectId);
   const ledger = useAcceptanceLedger(projectId);
   const gate = useGateSummary(projectId);
@@ -121,7 +136,8 @@ export function Project() {
           <ul className="gr-family-list">
             {[...families.entries()].sort().map(([fam, count]) => (
               <li key={fam}>
-                {fam} <span className="gr-micro-label">({count})</span>
+                <Link to={familyLink(projectId, fam)}>{fam}</Link>{' '}
+                <span className="gr-micro-label">({count})</span>
               </li>
             ))}
           </ul>
