@@ -183,3 +183,59 @@ def test_run_events_streams_and_closes(api_client: TestClient) -> None:
                     saw_done = True
                     break
     assert saw_done
+
+
+def test_run_started_captures_before_health(api_client: TestClient) -> None:
+    started = api_client.post(
+        f"/api/projects/{PROJECT_NAME}/runs",
+        json={"verb": "check", "args": ["program.calx"]},
+    )
+    assert started.status_code == 200
+    assert "before_health" in started.json()
+
+
+def test_run_full_log_replay(api_client: TestClient) -> None:
+    started = api_client.post(
+        f"/api/projects/{PROJECT_NAME}/runs",
+        json={"verb": "check", "args": ["program.calx"]},
+    )
+    run_id = started.json()["run_id"]
+    # Drain the SSE stream to completion so the log file is fully written.
+    with api_client.stream("GET", f"/api/runs/{run_id}/events") as resp:
+        for raw_line in resp.iter_lines():
+            if raw_line.startswith("data: ") and json.loads(
+                raw_line[len("data: ") :]
+            ).get("kind") == "done":
+                break
+    log_resp = api_client.get(f"/api/runs/{run_id}/log")
+    assert log_resp.status_code == 200
+    assert isinstance(log_resp.json(), list)
+    assert any("check" in line for line in log_resp.json())
+
+
+def test_run_verdict_diff(api_client: TestClient) -> None:
+    started = api_client.post(
+        f"/api/projects/{PROJECT_NAME}/runs",
+        json={"verb": "check", "args": ["program.calx"]},
+    )
+    run_id = started.json()["run_id"]
+    resp = api_client.get(f"/api/runs/{run_id}/verdict-diff")
+    assert resp.status_code == 200
+    body = resp.json()
+    assert "before" in body and "after" in body
+
+
+def test_run_cancel_running_process(api_client: TestClient) -> None:
+    started = api_client.post(
+        f"/api/projects/{PROJECT_NAME}/runs",
+        json={"verb": "check", "args": ["program.calx"]},
+    )
+    run_id = started.json()["run_id"]
+    resp = api_client.post(f"/api/runs/{run_id}/cancel")
+    assert resp.status_code == 200
+    assert resp.json()["status"] in ("cancelled", "ok", "failed")
+
+
+def test_run_cancel_unknown_run_404(api_client: TestClient) -> None:
+    resp = api_client.post("/api/runs/no-such-run/cancel")
+    assert resp.status_code == 404
