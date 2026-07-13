@@ -1,0 +1,26 @@
+.gr-config-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--graphite-space-4);
+}
+
+.gr-config-view__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--graphite-space-2);
+}
+
+.gr-config-view__toolbar select {
+  background: transparent;
+  border: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  color: var(--graphite-color-ink);
+  padding: var(--graphite-space-1);
+  font-family: var(--graphite-font-family-mono);
+  font-size: var(--graphite-font-size-12);
+}
+
+.gr-config-view__fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--graphite-space-2);
+}

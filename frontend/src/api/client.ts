@@ -12,7 +12,8 @@ import {
   mockAuditIndex,
   mockBuildReport,
   mockCalcSheets,
-  mockConfigEntries,
+  mockConfigSchema,
+  mockDoctor,
   mockGateSummary,
   mockLockfile,
   mockManifest,
@@ -20,10 +21,12 @@ import {
   mockObligationsFiltered,
   mockObligationsGrouped,
   mockProjectArtifacts,
+  mockProjectConfig,
   mockProjectHealth,
   mockProjects,
   mockRunLog,
   mockRuns,
+  mockSettings,
   mockVerdictDiff,
 } from '../mocks/fixtures';
 
@@ -45,6 +48,9 @@ export type ManifestSummary = components['schemas']['ManifestSummary'];
 export type AcceptanceLedgerSummary = components['schemas']['AcceptanceLedgerSummary'];
 export type AcceptedDeviation = components['schemas']['AcceptedDeviation'];
 export type ConfigEntry = components['schemas']['ConfigEntry'];
+export type ConfigKeyDefault = components['schemas']['ConfigKeyDefault'];
+export type GraphiteSettings = components['schemas']['GraphiteSettings'];
+export type RunVerbosity = GraphiteSettings['run_verbosity'];
 export type RunRecord = components['schemas']['RunRecord'];
 export type RunVerb = RunRecord['verb'];
 export type HealthSnapshot = components['schemas']['HealthSnapshot'];
@@ -77,6 +83,21 @@ export interface RunDoneEvent {
 
 export type RunStreamEvent = RunLogEvent | RunProgressEvent | RunDoneEvent;
 
+// `regolith doctor --json`'s hand-written shape (regolith/cli/app.py's
+// `doctor` command, toolenv.py's ToolSpec/ToolStatus): the ONE type in
+// this file that is NOT a generated alias, because the backend route
+// itself is untyped (`response_model=list[object]`, api.generated.ts
+// says `unknown[]`) -- there is no generated shape to duplicate here,
+// so this is not a dedup-law (04.2) violation, just the one honest gap.
+export interface DoctorEntry {
+  name: string;
+  found: boolean;
+  path: string | null;
+  version: string | null;
+  capability: string;
+  install_hint: string | null;
+}
+
 export interface ObligationsQuery {
   filter?: string;
   group?: 'disposition' | 'family';
@@ -84,10 +105,56 @@ export interface ObligationsQuery {
 
 const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === '1';
 
+/** The service-layer `ServiceError` shape (graphite.service.errors),
+ * carried verbatim so callers can render the real CLI/validation
+ * message (04.1's "real validation errors" floor) instead of a
+ * generic "request failed". */
+export interface ApiErrorBody {
+  kind: string;
+  message: string;
+  detail?: string | null;
+}
+
+export class ApiError extends Error {
+  status: number;
+  body: ApiErrorBody | null;
+
+  constructor(status: number, body: ApiErrorBody | null) {
+    super(body?.detail || body?.message || `request failed: ${status}`);
+    this.name = 'ApiError';
+    this.status = status;
+    this.body = body;
+  }
+}
+
+async function parseErrorBody(res: Response): Promise<ApiErrorBody | null> {
+  try {
+    const json = (await res.json()) as { detail?: ApiErrorBody };
+    return json.detail ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function request<T>(path: string): Promise<T> {
   const res = await fetch(`/api${path}`);
   if (!res.ok) {
-    throw new Error(`graphite api ${path} failed: ${res.status} ${res.statusText}`);
+    throw new ApiError(res.status, await parseErrorBody(res));
+  }
+  return (await res.json()) as T;
+}
+
+/** POST/PUT with a JSON body -- every write in the app (config set,
+ * settings save/reset) goes through this ONE function, never a raw
+ * `fetch` at the call site (dedup law 04.2 / graphite/no-raw-fetch). */
+async function requestJson<T>(method: 'POST' | 'PUT', path: string, body?: unknown): Promise<T> {
+  const res = await fetch(`/api${path}`, {
+    method,
+    headers: body !== undefined ? { 'Content-Type': 'application/json' } : undefined,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  });
+  if (!res.ok) {
+    throw new ApiError(res.status, await parseErrorBody(res));
   }
   return (await res.json()) as T;
 }
@@ -174,24 +241,15 @@ export const api = {
     if (USE_MOCKS) return mockManifest;
     return request<ManifestSummary>(`/projects/${encodeURIComponent(project)}/manifest`);
   },
-  async listConfig(project: string): Promise<ConfigEntry[]> {
-    if (USE_MOCKS) return [...mockConfigEntries];
-    return request<ConfigEntry[]>(`/projects/${encodeURIComponent(project)}/config`);
-  },
   async listRuns(project: string): Promise<RunRecord[]> {
     if (USE_MOCKS) return [...mockRuns];
     return request<RunRecord[]>(`/projects/${encodeURIComponent(project)}/runs`);
   },
   async startRun(project: string, verb: RunVerb, args: string[] = []): Promise<RunRecord> {
-    const res = await fetch(`/api/projects/${encodeURIComponent(project)}/runs`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ verb, args }),
+    return requestJson<RunRecord>('POST', `/projects/${encodeURIComponent(project)}/runs`, {
+      verb,
+      args,
     });
-    if (!res.ok) {
-      throw new Error(`graphite api start run failed: ${res.status} ${res.statusText}`);
-    }
-    return (await res.json()) as RunRecord;
   },
   async getRun(runId: string): Promise<RunRecord> {
     if (USE_MOCKS) {
@@ -206,11 +264,7 @@ export const api = {
     return request<string[]>(`/runs/${encodeURIComponent(runId)}/log`);
   },
   async cancelRun(runId: string): Promise<RunRecord> {
-    const res = await fetch(`/api/runs/${encodeURIComponent(runId)}/cancel`, { method: 'POST' });
-    if (!res.ok) {
-      throw new Error(`graphite api cancel run failed: ${res.status} ${res.statusText}`);
-    }
-    return (await res.json()) as RunRecord;
+    return requestJson<RunRecord>('POST', `/runs/${encodeURIComponent(runId)}/cancel`);
   },
   async getVerdictDiff(runId: string): Promise<VerdictDiff> {
     if (USE_MOCKS) return mockVerdictDiff;
@@ -245,5 +299,39 @@ export const api = {
       source.close();
     });
     return source;
+  },
+  async getConfigSchema(): Promise<ConfigKeyDefault[]> {
+    if (USE_MOCKS) return mockConfigSchema;
+    return request<ConfigKeyDefault[]>('/config/schema');
+  },
+  async listProjectConfig(project: string): Promise<ConfigEntry[]> {
+    if (USE_MOCKS) return mockProjectConfig;
+    return request<ConfigEntry[]>(`/projects/${encodeURIComponent(project)}/config`);
+  },
+  async setProjectConfig(
+    project: string,
+    key: string,
+    value: string,
+    level: 'global' | 'local',
+  ): Promise<ConfigEntry> {
+    return requestJson<ConfigEntry>(
+      'PUT',
+      `/projects/${encodeURIComponent(project)}/config/${encodeURIComponent(key)}`,
+      { value, level },
+    );
+  },
+  async getDoctor(project: string): Promise<DoctorEntry[]> {
+    if (USE_MOCKS) return mockDoctor;
+    return request<DoctorEntry[]>(`/projects/${encodeURIComponent(project)}/doctor`);
+  },
+  async getSettings(): Promise<GraphiteSettings> {
+    if (USE_MOCKS) return mockSettings;
+    return request<GraphiteSettings>('/settings');
+  },
+  async setSettings(settings: GraphiteSettings): Promise<GraphiteSettings> {
+    return requestJson<GraphiteSettings>('PUT', '/settings', settings);
+  },
+  async resetSettings(): Promise<GraphiteSettings> {
+    return requestJson<GraphiteSettings>('POST', '/settings/reset');
   },
 };

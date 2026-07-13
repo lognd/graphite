@@ -16,6 +16,7 @@ import { ProgressRail } from '../components/ProgressRail/ProgressRail';
 import { EmptyState } from '../components/EmptyState/EmptyState';
 import { ErrorState } from '../components/ErrorState/ErrorState';
 import { DataTable } from '../components/DataTable/DataTable';
+import { ConfigField } from '../components/ConfigField/ConfigField';
 import './Gallery.css';
 
 const VERDICTS = ['discharged', 'violated', 'deferred', 'accepted-deviation', 'excluded'] as const;
@@ -166,6 +167,27 @@ export function Gallery() {
             loading
           />
         </div>
+      </Section>
+
+      <Section title="ConfigField">
+        <ConfigField
+          label="ui.port"
+          doc="Bind port for `graphite serve`."
+          value="8765"
+          source="default"
+          isDefault
+          onSave={() => Promise.resolve()}
+          onReset={() => Promise.resolve()}
+        />
+        <ConfigField
+          label="ui.host"
+          doc="Bind host for `graphite serve` (must stay localhost, AD-31)."
+          value="0.0.0.0"
+          source="project"
+          isDefault={false}
+          onSave={() => Promise.resolve()}
+          onReset={() => Promise.reject(new Error('unknown config key ui.hostx'))}
+        />
       </Section>
     </div>
   );

@@ -20,6 +20,8 @@ import { Bom } from '../routes/artifacts/Bom';
 import { Boards } from '../routes/artifacts/Boards';
 import { Runs } from '../routes/Runs';
 import { Config } from '../routes/Config';
+import { Doctor } from '../routes/Doctor';
+import { Settings } from '../routes/Settings';
 
 const children = [
   { index: true, element: <Dashboard /> },
@@ -37,6 +39,8 @@ const children = [
   { path: 'artifacts/:projectId/boards', element: <Boards /> },
   { path: 'runs', element: <Runs /> },
   { path: 'config', element: <Config /> },
+  { path: 'doctor', element: <Doctor /> },
+  { path: 'settings', element: <Settings /> },
 ];
 
 // The gallery is dev-only: never part of the shipped production route

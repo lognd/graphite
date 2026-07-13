@@ -13,19 +13,11 @@ export default defineConfig({
   server: {
     proxy: {
       // dev-time proxy to the FastAPI server (make dev); unused when
-      // VITE_USE_MOCKS=1.
-      '/api': 'http://127.0.0.1:8000',
-    },
-  },
-  preview: {
-    proxy: {
-      // Same proxy target, for `vite preview` -- the WO-G5 live-fixture
-      // Playwright rig (playwright.live.config.ts) builds+previews the
-      // real (non-mocked) frontend against a real `graphite serve`
-      // backend on this same port, so a real `regolith build --release`
-      // is watchable end-to-end (spec 04.1's honest-failure/cancel
-      // floor needs a real subprocess, not VITE_USE_MOCKS fixtures).
-      '/api': 'http://127.0.0.1:8000',
+      // VITE_USE_MOCKS=1. VITE_API_PROXY_TARGET overrides the port for
+      // the WO-G6 real-backend Playwright project (config/doctor round-
+      // trip specs need a real `regolith` subprocess underneath, so
+      // they run un-mocked against a second `graphite serve` instance).
+      '/api': process.env.VITE_API_PROXY_TARGET || 'http://127.0.0.1:8000',
     },
   },
   build: {
@@ -37,7 +29,7 @@ export default defineConfig({
     globals: false,
     setupFiles: ['./src/setupTests.ts'],
     css: true,
-    exclude: ['node_modules', 'dist', 'tests/system/**', 'tests/system-live/**'],
+    exclude: ['node_modules', 'dist', 'tests/system/**'],
     coverage: {
       reporter: ['text', 'lcov'],
     },

@@ -9,15 +9,7 @@ import graphiteFetchRules from './eslint-rules/no-raw-fetch.js';
 
 export default tseslint.config(
   {
-    ignores: [
-      'dist',
-      'dist-e2e',
-      'dist-e2e-live',
-      'coverage',
-      'playwright-report',
-      'test-results',
-      'node_modules',
-    ],
+    ignores: ['dist', 'dist-e2e', 'coverage', 'playwright-report', 'test-results', 'node_modules'],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,

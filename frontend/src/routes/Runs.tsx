@@ -31,26 +31,35 @@ import { optimizeWinnerRows } from '../lib/optimizeRows';
 
 const VERBS: RunVerb[] = ['check', 'build', 'ship', 'test', 'optimize', 'preview'];
 
-// Which config key (if any) supplies a verb's default flags, and how its
-// value maps to a flag string -- the "config-aware defaults with
-// where-attribution" deliverable. Kept as ONE small table rather than
-// scattered per-verb conditionals (dedup law).
-const VERB_DEFAULT_CONFIG_KEY: Partial<Record<RunVerb, string>> = {
-  build: 'build.release',
+// Which config keys (if any) supply a verb's default flags -- the
+// "config-aware defaults with where-attribution" deliverable, corrected
+// at the WO-G6 merge: the registry's REAL keys (WO-G6's recorded
+// schema; the drafted `build.release` key does not exist) are the
+// optimize passthroughs. Kept as ONE small table rather than scattered
+// per-verb conditionals (dedup law).
+const VERB_DEFAULT_CONFIG_FLAGS: Partial<Record<RunVerb, { key: string; flag: string }[]>> = {
+  optimize: [
+    { key: 'optimize.seed', flag: '--seed' },
+    { key: 'optimize.budget_evals', flag: '--budget-evals' },
+  ],
 };
 
 function defaultArgsFor(
   verb: RunVerb,
   configEntries: { key: string; value: string; source: string }[] | undefined,
 ) {
-  const key = VERB_DEFAULT_CONFIG_KEY[verb];
-  if (!key || !configEntries) return { args: '', attribution: null as string | null };
-  const entry = configEntries.find((e) => e.key === key);
-  if (!entry) return { args: '', attribution: null as string | null };
-  if (key === 'build.release' && entry.value === 'true') {
-    return { args: '--release', attribution: `${key}=${entry.value} (source: ${entry.source})` };
+  const mappings = VERB_DEFAULT_CONFIG_FLAGS[verb];
+  if (!mappings || !configEntries) return { args: '', attribution: null as string | null };
+  const parts: string[] = [];
+  const attributions: string[] = [];
+  for (const { key, flag } of mappings) {
+    const entry = configEntries.find((e) => e.key === key);
+    if (!entry) continue;
+    parts.push(`${flag} ${entry.value}`);
+    attributions.push(`${key}=${entry.value} (source: ${entry.source})`);
   }
-  return { args: '', attribution: `${key}=${entry.value} (source: ${entry.source})` };
+  if (parts.length === 0) return { args: '', attribution: null as string | null };
+  return { args: parts.join(' '), attribution: attributions.join(', ') };
 }
 
 interface PhaseProgress {

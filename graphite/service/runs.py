@@ -12,21 +12,26 @@ output. This module owns NO asyncio/FastAPI concerns -- `graphite.
 server.routes.runs` is the only place that wraps this in an SSE
 response.
 
-WOG5 decision (the -v toggle, deliverable 3): every run is spawned with
-`REGOLITH_LOG=DEBUG` ALWAYS ON, never a second "verbose re-run" mode.
-Rationale -- the D228 progress channel (lithos WO-119) is an ordinary
-DEBUG record on the dedicated `regolith.progress` logger; the ONLY way
-to see it from a subprocess is DEBUG-level stderr, and a graphite user
-should get live phase/percent progress on their FIRST run of a verb,
-not a slower "sorry, re-run with -v" second lap. The captured log
-stream is the full DEBUG stderr text either way (charter: stderr is
-data) -- the LogPane's search/follow already lets a user find the
-signal in it, and the ProgressRail consumes only the typed `progress`
-records the server parses out (see `graphite.server.routes.runs`),
-never the raw noise. There is therefore no client-visible "-v" control
-in the run-start form; a `--verbose`/`-v` flag typed into the free-form
-args field still passes through unchanged to the CLI, it just is not
-needed for progress to flow.
+WOG5 decision (the -v toggle, deliverable 3), amended at the WO-G6
+merge: every run is spawned with `REGOLITH_LOG=DEBUG` in its env, and
+WO-G6's `GraphiteSettings.run_verbosity` ("a run verbosity passthrough
+for driven CLI invocations", its own docstring -- WO-G5 is the intended
+consumer) maps onto the CLI's OWN global flags, which win over the env
+per lithos D163 (explicit flag strongest):
+
+  normal  -> no flag; the env alone yields DEBUG-level stderr, so the
+             D228 progress channel flows on a user's FIRST run (the
+             original WO-G5 rationale: never a "re-run verbose" lap),
+             while WO-107's default presentation (dedup, truncation)
+             stays intact.
+  verbose -> `-v`: the full verbatim firehose (no dedup/truncation).
+  quiet   -> `-q`: WARNING+ only. This KNOWINGLY silences the progress
+             channel (DEBUG records) -- the user explicitly traded
+             progress for quiet, so the rail stays indeterminate.
+
+There is still no per-run "-v" control in the run-start form (the
+setting is app-level, WO-G6's Settings view); a `-v`/`-q` typed into
+the free-form args field passes through to the CLI unchanged.
 """
 
 from __future__ import annotations
@@ -47,8 +52,17 @@ from typani.result import Err, Ok, Result
 from graphite.logging_setup import get_logger
 from graphite.service.errors import ServiceError
 from graphite.service.reports import read_audit_index, read_staged_build_report
+from graphite.service.settings import RunVerbosity, get_settings
 
 _log = get_logger(__name__)
+
+# run_verbosity -> the regolith CLI's own global flag (D163: an explicit
+# flag beats the REGOLITH_LOG env we always set). ONE mapping table.
+_VERBOSITY_FLAGS: dict[RunVerbosity, tuple[str, ...]] = {
+    "quiet": ("-q",),
+    "normal": (),
+    "verbose": ("-v",),
+}
 
 
 def runs_home() -> Path:
@@ -157,21 +171,34 @@ def start_run(
     *,
     regolith_argv: tuple[str, ...] | None = None,
 ) -> Result[RunRecord, ServiceError]:
-    """Launch `regolith --color never <verb> <extra_args>` as a
+    """Launch `regolith --color never [-v|-q] <verb> <extra_args>` as a
     detached subprocess (cwd=`project_root`), stdout+stderr redirected
     to the run's log file, and persist a `running` record immediately.
-    `regolith_argv` overrides the executable invocation for tests
-    (defaults to `[sys.executable, "-m", "regolith.cli"]`, the same
-    pattern lithos's own test suite uses to invoke the console entry
-    point in-process without requiring a `regolith` binary on PATH)."""
+    The `[-v|-q]` comes from WO-G6's `run_verbosity` setting (module
+    docstring); a missing/unreadable settings file falls back to
+    `normal`, never blocks a run. `regolith_argv` overrides the
+    executable invocation for tests (defaults to `[sys.executable,
+    "-m", "regolith.cli"]`, the same pattern lithos's own test suite
+    uses to invoke the console entry point in-process without requiring
+    a `regolith` binary on PATH)."""
     if not project_root.is_dir():
         return Err(
             ServiceError(kind="not_found", message=f"no project root at {project_root}")
         )
     run_id = uuid.uuid4().hex
     runs_home().mkdir(parents=True, exist_ok=True)
+    settings = get_settings()
+    verbosity: RunVerbosity = (
+        settings.danger_ok.run_verbosity if settings.is_ok else "normal"
+    )
+    if settings.is_err:
+        _log.warning(
+            "runs: unreadable settings (%s), falling back to normal verbosity",
+            settings.danger_err.message,
+        )
     argv = list(regolith_argv or (sys.executable, "-m", "regolith.cli"))
-    full_args = [*argv, "--color", "never", verb, *extra_args]
+    full_args = [*argv, "--color", "never", *_VERBOSITY_FLAGS[verbosity], verb, *extra_args]
+    _log.debug("runs: verbosity=%s flags=%s", verbosity, _VERBOSITY_FLAGS[verbosity])
     started_at = datetime.now(timezone.utc).isoformat()
     log_path = _log_path(run_id)
     before_health = _capture_health(project_root)
@@ -185,9 +212,9 @@ def start_run(
         before_health=before_health,
     )
     _write_record(record)
-    # WOG5 decision (see module docstring): DEBUG-level stderr is always
-    # on so the D228 progress channel flows on every run, not just a
-    # second "-v" re-run.
+    # WOG5 decision (see module docstring): DEBUG-level stderr via env so
+    # the D228 progress channel flows by default; the verbosity FLAG above
+    # (if any) wins over this env per lithos D163.
     env = {**os.environ, "REGOLITH_LOG": "DEBUG"}
     try:
         with log_path.open("wb") as log_file:

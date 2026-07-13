@@ -45,19 +45,43 @@ make check green.
 
 Branch `wog5-run-console`, commits `d69c817` (backend: D228
 progress parsing, cancel route, verdict diff, full-log replay) +
-the frontend/live-rig commits following it. `make check` green
-(backend lint/type/78 tests, openapi + api.generated.ts drift,
-frontend lint/format/typecheck/tokens/70 vitest/build, 18/18
-mocked Playwright). The WO-G5 live rig
-(`make frontend-system-test-live`, playwright.live.config.ts:
-a real `graphite serve`-equivalent uvicorn over a scratch copy of
-the fixture + the real regolith CLI) 3/3 green: a real
-`build --release` watched end-to-end with the real `discharge`
-phase rail, a real mid-run SIGTERM cancel (exit_code=-15
-recorded), and an honest failure whose log pane carries the CLI's
-verbatim error text. The live rig is a separate foreground target
-(same posture as pytest `--run-integration`: needs uv + the
-`../lithos` wheel), not part of `make check`.
+the frontend/rig commits following it, then the WO-G6 merge
+reconciliation (below). Post-merge `make check` fully green in one
+foreground gate: backend lint/type/92 pytest, openapi +
+api.generated.ts drift (regenerated at the merge, never
+hand-merged), frontend lint/format/typecheck/tokens/78
+vitest/build, 24/24 Playwright -- including the live run-console
+specs: a real `build --release` watched end-to-end with the real
+`discharge` phase rail, a real mid-run SIGTERM cancel
+(exit_code=-15 recorded), and an honest failure whose log pane
+carries the CLI's verbatim error text.
+
+### WO-G6 merge reconciliation (main ef400cf merged in)
+
+- Rig dedup: WO-G5's separate playwright.live.config.ts (+ setup
+  script, npm script, Make target, vite preview proxy) DELETED --
+  WO-G6's in-config real-backend webServer pair (real
+  `graphite serve` on :8766 + un-mocked dev server on :5175, in
+  `make check`) is the ONE rig; the run-console live specs moved
+  onto it (tests/system/run-console-live.spec.ts). The serve
+  command gained GRAPHITE_RUNS_HOME/GRAPHITE_HOME isolation so
+  driven runs and settings reads never touch ~/.graphite.
+- run_verbosity wired: WO-G6 shipped
+  `GraphiteSettings.run_verbosity` as "a run verbosity passthrough
+  for driven CLI invocations" with no consumer; `start_run` now
+  maps it to the CLI's own flags (quiet -> `-q`, normal -> none,
+  verbose -> `-v`), which win over the always-set
+  REGOLITH_LOG=DEBUG env per lithos D163 (see the amended -v
+  decision below). Three service tests pin the mapping.
+- Config-defaults key corrected: the drafted `build.release` key
+  does not exist in the real registry (WO-G6's recorded schema);
+  the run form's config-aware defaults now ride the REAL
+  `optimize.seed`/`optimize.budget_evals` keys (verb=optimize)
+  with the same where-attribution line.
+- client.ts dedup: startRun/cancelRun rewritten over WO-G6's
+  `requestJson` (typed ApiError carrying the real ServiceError);
+  WO-G5's `listConfig` dropped for WO-G6's `listProjectConfig`
+  (+ its `useProjectConfig` hook, which the run console consumes).
 
 ### Superseding note (gate updated mid-flight)
 
@@ -77,21 +101,25 @@ contains NO wire-shape regex of its own, and the frontend only
 ever consumes the server's JSON -- one parser, owned by the
 producer's own package.
 
-### The -v decision (deliverable 3)
+### The -v decision (deliverable 3, amended at the WO-G6 merge)
 
-Every run spawns with `REGOLITH_LOG=DEBUG` ALWAYS ON (module
-docstring, `graphite/service/runs.py`): the D228 channel is
-DEBUG-level stderr, and progress must flow on a user's FIRST run,
-not a "re-run verbose" second lap. The captured log is the full
-DEBUG stream (stderr is data; LogPane search/follow finds the
-signal); there is no client "-v" toggle -- a `-v` typed into the
-free-form flags field still passes through to the CLI unchanged.
+Every run spawns with `REGOLITH_LOG=DEBUG` in its env (the D228
+channel is DEBUG-level stderr; progress must flow on a user's
+FIRST run, never a "re-run verbose" lap), and WO-G6's app-level
+`run_verbosity` setting maps to the CLI's own flags, which win
+over the env per lithos D163: normal -> no flag (progress flows,
+WO-107 default presentation intact), verbose -> `-v` (full
+verbatim firehose), quiet -> `-q` (WARNING+ only -- KNOWINGLY
+silences progress; the user traded progress for quiet, the rail
+shows indeterminate). There is still no per-run "-v" control in
+the run form; a `-v`/`-q` typed into the free-form flags field
+passes through to the CLI unchanged.
 
 ### Deliverable acceptance
 
 | Deliverable | Status |
 |---|---|
-| run form: verb+project+flags, config-aware defaults w/ where-attribution | LANDED (`VERB_DEFAULT_CONFIG_KEY` table over the real /config API; `build.release` -> `--release` with `key=value (source: level)` attribution line) |
+| run form: verb+project+flags, config-aware defaults w/ where-attribution | LANDED (`VERB_DEFAULT_CONFIG_FLAGS` table over the real /config API; verb=optimize prefills `--seed`/`--budget-evals` from the REAL `optimize.*` registry keys with `key=value (source: level)` attribution -- corrected at the WO-G6 merge, the drafted `build.release` key does not exist) |
 | live LogPane (stream/search/follow) | LANDED (existing LogPane over the SSE `log` events) |
 | ProgressRail per phase from REAL D228 events | LANDED (one rail per phase tag; done/total -> percent, indeterminate `-` -> indeterminate rail; live-verified on a real build --release) |
 | cancel (backend route added -- WOG1-F6 closed) | LANDED (`POST /api/runs/{id}/cancel`: SIGTERM -> SIGKILL escalation on the live Popen, `os.kill` fallback on the persisted pid across a server restart; `cancelled` is a first-class RunStatus) |

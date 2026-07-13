@@ -1,10 +1,18 @@
 // WO-G5 deliverable 6 (live half, acceptance criterion): a real
 // `regolith build --release`/`check` on the real fixture is watchable
-// end-to-end through a real `graphite serve` backend (playwright.live.
-// config.ts's webServer), not the mocked system rig -- no
-// VITE_USE_MOCKS here, every request in this file hits the real API.
+// end-to-end through a real `graphite serve` backend -- the ONE
+// real-backend rig shared with WO-G6's config/doctor round-trip specs
+// (playwright.config.ts's port-8766 backend + port-5175 un-mocked dev
+// server pair; WO-G5's separate playwright.live.config.ts was folded
+// into it at the merge, dedup law). No VITE_USE_MOCKS here: every
+// request hits the real API, every run spawns the real CLI.
 
 import { test, expect } from '@playwright/test';
+
+test.use({ baseURL: 'http://127.0.0.1:5175' });
+// Real subprocess builds take seconds each; same posture as the WO-G6
+// round-trip spec's own long timeout.
+test.setTimeout(90000);
 
 const PROJECT = 'examples.timber_pavilion';
 

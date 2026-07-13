@@ -1,5 +1,7 @@
 """`/api/projects/{project}/config`: read (list/one key) + set, always
-with where-attribution (04.1 "ANY FORM/CONFIG FIELD" floor)."""
+with where-attribution (04.1 "ANY FORM/CONFIG FIELD" floor). Plus the
+one global, non-project-scoped route: `/api/config/schema` (the
+registered-key default/kind/doc table, for "reset to default")."""
 
 from __future__ import annotations
 
@@ -9,9 +11,25 @@ from fastapi import APIRouter, Body
 
 from graphite.server.deps import project_root_path
 from graphite.server.errors import raise_for_error
-from graphite.service.config_cli import ConfigEntry, get_config, list_config, set_config
+from graphite.service.config_cli import (
+    ConfigEntry,
+    ConfigKeyDefault,
+    get_config,
+    key_defaults,
+    list_config,
+    set_config,
+)
 
 router = APIRouter(prefix="/api/projects", tags=["config"])
+schema_router = APIRouter(tags=["config"])
+
+
+@schema_router.get("/api/config/schema", response_model=tuple[ConfigKeyDefault, ...])
+def get_config_schema() -> tuple[ConfigKeyDefault, ...]:
+    """Every registered key's default/kind/doc, global and static (not
+    per-project) -- the "reset to default" affordance's data source
+    since neither `config list` nor `where` prints a default."""
+    return key_defaults()
 
 
 @router.get("/{project}/config", response_model=tuple[ConfigEntry, ...])
