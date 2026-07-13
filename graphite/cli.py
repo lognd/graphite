@@ -20,11 +20,11 @@ app = typer.Typer(
 
 @app.command()
 def tui(project: str = typer.Argument(".", help="Project root to open.")) -> None:
-    """Launch the textual TUI (config editing, check/build/optimize driving,
-    build-report browsing)."""
-    from graphite.tui_app import GraphiteApp
+    """Launch the textual TUI: fleet dashboard, obligation list, run
+    console, and config/doctor/settings -- the second renderer over the
+    SAME `graphite.service` layer the web app uses (WO-G7)."""
+    from graphite.tui.app import GraphiteApp
 
-    _log.info("graphite tui: starting, project=%s", project)
     GraphiteApp(project_root=Path(project)).run()
 
 
