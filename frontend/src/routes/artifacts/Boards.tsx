@@ -32,6 +32,11 @@ export function Boards() {
   const nonGerber = boardRows.filter(
     (r) => !r.kind.startsWith('gerber_layer.') && !r.kind.startsWith('drill.'),
   );
+  // `firmware` is its own top-level family in the typed index (lithos's
+  // family_of convention), not nested under `boards` -- shown here too
+  // (rather than only via the generic family route) since board bring-up
+  // and firmware are the same physical product to an engineer browsing.
+  const firmwareRows = (index.data ?? []).filter((r) => r.family === 'firmware');
 
   return (
     <div className="gr-boards">
@@ -39,7 +44,7 @@ export function Boards() {
       <h2 className="gr-section-title">Gerber layer stack</h2>
       {boardRows.length === 0 ? (
         <EmptyState
-          title="No board artifacts shipped for this project (unrouted)"
+          title="No gerber layers shipped for this project (unrouted)"
           detail="This project has no board target, or its board was never routed to gerbers."
         />
       ) : (
@@ -57,6 +62,21 @@ export function Boards() {
           ))}
         </>
       ) : null}
+
+      <h2 className="gr-section-title">Firmware / HDL products</h2>
+      {firmwareRows.length === 0 ? (
+        <EmptyState
+          title="No firmware/HDL products shipped"
+          detail="This project has no firmware or HDL target -- named absence, not an omission."
+        />
+      ) : (
+        firmwareRows.map((row) => (
+          <section key={row.relpath} className="gr-family-view__section">
+            <h3 className="gr-micro-label">{row.relpath}</h3>
+            <FileRenderer projectId={projectId} row={row} />
+          </section>
+        ))
+      )}
     </div>
   );
 }

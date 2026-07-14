@@ -39,7 +39,7 @@ test('capture: claim detail', async ({ page }) => {
 test('capture: calc sheet', async ({ page }) => {
   await page.goto('/artifacts');
   await page.getByLabel('project').selectOption(PROJECT);
-  await page.getByRole('link', { name: /Calc book/ }).click();
+  await page.getByRole('link', { name: /Calc/ }).click();
   await page.getByRole('link', { name: 'open sheet' }).first().click();
   await expect(page.getByText('Evidence chain')).toBeVisible();
   await page.screenshot({ path: `${OUT}/calc-sheet.png` });

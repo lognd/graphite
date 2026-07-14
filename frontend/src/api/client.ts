@@ -22,7 +22,10 @@ import {
   mockObligationsGrouped,
   mockObligationsSynthetic2k,
   SYNTHETIC_2K_PROJECT,
-  mockArtifactIndex,
+  MAINBOARD_MX_PROJECT,
+  MOCK_ARTIFACT_CONTENT,
+  mockArtifactIndexMainboard,
+  mockArtifactIndexTimberPavilion,
   mockProjectArtifacts,
   mockProjectConfig,
   mockProjectHealth,
@@ -223,10 +226,23 @@ export const api = {
    * families/files does this project have" reads THIS, never a hardcoded
    * family constant (the fix for lithos F145). */
   async getArtifactIndex(project: string): Promise<ArtifactIndexRow[]> {
-    if (USE_MOCKS) return mockArtifactIndex;
+    if (USE_MOCKS) {
+      return project === MAINBOARD_MX_PROJECT
+        ? mockArtifactIndexMainboard
+        : mockArtifactIndexTimberPavilion;
+    }
     return request<ArtifactIndexRow[]>(`/projects/${encodeURIComponent(project)}/artifact-index`);
   },
   async fetchArtifact(project: string, contentHash: string): Promise<Blob> {
+    if (USE_MOCKS) {
+      // WO-G9: unlike the pre-existing dedicated views (which only ever
+      // read listing metadata in mock mode), FileRenderer/BoardGerberView/
+      // HarnessView fetch-and-parse real artifact bytes -- so mock mode
+      // needs real bytes behind the mock content hashes it hands out.
+      const content = MOCK_ARTIFACT_CONTENT[contentHash];
+      if (content !== undefined) return new Blob([content]);
+      throw new Error(`no mock content registered for ${contentHash}`);
+    }
     return requestBlob(
       `/projects/${encodeURIComponent(project)}/artifacts/${encodeURIComponent(contentHash)}`,
     );

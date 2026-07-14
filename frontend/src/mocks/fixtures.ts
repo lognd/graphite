@@ -394,12 +394,20 @@ export const mockCalcSheets: CalcSheet[] = [
   },
 ];
 
+// WO-G9's mock artifact-index is PROJECT-scoped (api/client.ts's
+// getArtifactIndex dispatches on the project name): the mocked Playwright
+// rig's `examples.timber_pavilion` project is civil and ships neither
+// boards nor harness (the honest-empty-state assertions in
+// tests/system/artifact-viewers.spec.ts depend on that staying true), so
+// this project name is reserved for a project that DOES ship them.
+export const MAINBOARD_MX_PROJECT = 'mainboard_mx';
+
 // RECORDED from tests/fixtures/mainboard_mx/dist/artifact_index.json
 // (WO-G9): a `boards` family (real KiCad RS-274X gerbers, 14 layers +
 // drill) and a `harness` family (tap map, expected signals with one
 // honest recorded absence, bringup.md, a sigrok capture config) -- the
 // two families that were invisible/absent before this WO (lithos F145).
-export const mockArtifactIndex: ArtifactIndexRow[] = [
+export const mockArtifactIndexMainboard: ArtifactIndexRow[] = [
   {
     family: 'boards',
     kind: 'gerber_layer.F_Silkscreen',
@@ -489,6 +497,69 @@ export const mockArtifactIndex: ArtifactIndexRow[] = [
     bytes: 98,
     media_type: 'text/plain',
     viewer: 'text',
+    source_refs: [],
+    synthesized: false,
+  },
+];
+
+// timber_pavilion's typed index: `calc` and `drawings` only (civil, no
+// boards/harness/3d/bom) -- the same relpaths as `mockProjectArtifacts`
+// below, re-expressed with the family/viewer this WO's index route
+// carries. Kept in sync by hand since the two mocks describe the SAME
+// recorded fixture listing from two API shapes.
+export const mockArtifactIndexTimberPavilion: ArtifactIndexRow[] = [
+  {
+    family: 'calc',
+    kind: 'json',
+    relpath: 'calc/calc_book.json',
+    content_hash: 'sha256:mock0calc0book0000000000000000000000000000000000000000000000',
+    bytes: 4096,
+    media_type: 'application/json',
+    viewer: 'json',
+    source_refs: [],
+    synthesized: false,
+  },
+  {
+    family: 'calc',
+    kind: 'pdf',
+    relpath: 'calc/construction__.pdf',
+    content_hash: 'sha256:mock0constructionpdf000000000000000000000000000000000000000000',
+    bytes: 2048,
+    media_type: 'application/pdf',
+    viewer: 'binary',
+    source_refs: [],
+    synthesized: false,
+  },
+  {
+    family: 'drawings',
+    kind: 'svg',
+    relpath: 'drawings/drawings/PavilionFrame.svg',
+    content_hash: 'sha256:mock0pavilionsvg00000000000000000000000000000000000000000000000',
+    bytes: 8192,
+    media_type: 'image/svg+xml',
+    viewer: 'svg',
+    source_refs: [],
+    synthesized: false,
+  },
+  {
+    family: 'drawings',
+    kind: 'pdf',
+    relpath: 'drawings/drawings/PavilionFrame.pdf',
+    content_hash: 'sha256:mock0pavilionpdf00000000000000000000000000000000000000000000000',
+    bytes: 16384,
+    media_type: 'application/pdf',
+    viewer: 'binary',
+    source_refs: [],
+    synthesized: false,
+  },
+  {
+    family: 'drawings',
+    kind: 'json',
+    relpath: 'drawings/drawings/PavilionFrame.drawing.json',
+    content_hash: 'sha256:mock0paviliondrawingjson0000000000000000000000000000000000000000',
+    bytes: 2048,
+    media_type: 'application/json',
+    viewer: 'json',
     source_refs: [],
     synthesized: false,
   },
@@ -912,4 +983,30 @@ export const mockSettings: GraphiteSettings = {
   default_project_root: '',
   run_verbosity: 'normal',
   run_history_limit: 200,
+};
+
+// WO-G9: content bytes for the mainboard_mx mock artifact-index rows,
+// keyed by the SAME mock content_hash strings above -- FileRenderer/
+// BoardGerberView/HarnessView actually fetch-and-parse artifact bytes
+// (unlike the pre-WO-G9 dedicated views, which only ever read listing
+// metadata in mock mode). Real fixture text via Vite's `?raw` loader
+// (recorded from tests/fixtures/mainboard_mx, never hand-invented).
+import fSilkscreenRaw from '../../../tests/fixtures/mainboard_mx/dist/boards/gerbers/board-F_Silkscreen.gto?raw';
+import edgeCutsRaw from '../../../tests/fixtures/mainboard_mx/dist/boards/gerbers/board-Edge_Cuts.gm1?raw';
+import fCuRaw from '../../../tests/fixtures/mainboard_mx/dist/boards/gerbers/board-F_Cu.gtl?raw';
+import boardBomRaw from '../../../tests/fixtures/mainboard_mx/dist/boards/bom.csv?raw';
+import bringupRaw from '../../../tests/fixtures/mainboard_mx/dist/harness/bringup.md?raw';
+import tapMapRaw from '../../../tests/fixtures/mainboard_mx/dist/harness/tap_map.csv?raw';
+import expectedSignalsRaw from '../../../tests/fixtures/mainboard_mx/dist/harness/expected_signals.json?raw';
+import captureConfigRaw from '../../../tests/fixtures/mainboard_mx/dist/harness/capture.sigrok-cli?raw';
+
+export const MOCK_ARTIFACT_CONTENT: Record<string, string> = {
+  'sha256:mock0fsilkscreen000000000000000000000000000000000000000000000': fSilkscreenRaw,
+  'sha256:mock0edgecuts0000000000000000000000000000000000000000000000': edgeCutsRaw,
+  'sha256:mock0fcu00000000000000000000000000000000000000000000000000000': fCuRaw,
+  'sha256:mock0boardbom00000000000000000000000000000000000000000000000': boardBomRaw,
+  'sha256:mock0bringup00000000000000000000000000000000000000000000000': bringupRaw,
+  'sha256:mock0tapmap0000000000000000000000000000000000000000000000000': tapMapRaw,
+  'sha256:mock0expectedsignals00000000000000000000000000000000000000000': expectedSignalsRaw,
+  'sha256:mock0capturecfg00000000000000000000000000000000000000000000000': captureConfigRaw,
 };

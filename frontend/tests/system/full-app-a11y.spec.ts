@@ -75,12 +75,16 @@ test('axe: claim detail has no violations (dark + light)', async ({ page }) => {
   await assertNoViolations(page, 'claim detail (light)');
 });
 
+// Labels are `familyLabel()`'s title-case of the RAW family string (WO-G9
+// deliverable 1: no hardcoded family->label lookup table), so they no
+// longer match the old bespoke tile copy ("Calc book", "3D model", "BOM").
 const ARTIFACT_FAMILIES: Array<[label: string, testid: string]> = [
-  ['Calc book', 'calc'],
+  ['Calc', 'calc'],
   ['Drawings', 'drawings'],
-  ['3D model', 'model'],
-  ['BOM', 'bom'],
+  ['3d', 'model'],
+  ['Bom', 'bom'],
   ['Boards', 'boards'],
+  ['Harness', 'harness'],
 ];
 
 for (const [label] of ARTIFACT_FAMILIES) {
@@ -97,7 +101,7 @@ for (const [label] of ARTIFACT_FAMILIES) {
 test('axe: calc sheet detail has no violations (dark + light)', async ({ page }) => {
   await page.goto('/artifacts');
   await page.getByLabel('project').selectOption(PROJECT);
-  await page.getByRole('link', { name: /Calc book/ }).click();
+  await page.getByRole('link', { name: /Calc/ }).click();
   await page.getByRole('link', { name: 'open sheet' }).first().click();
   await expect(page.getByText('Evidence chain')).toBeVisible();
   await assertNoViolations(page, 'calc sheet (dark)');

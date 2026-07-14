@@ -28,6 +28,14 @@ const DEDICATED_ROUTE: Record<string, string> = {
   harness: 'harness',
 };
 
+// These six always get a hub tile, even with zero shipped files -- their
+// dedicated views render an honest, specific empty state (e.g. "no GLB
+// shipped"), and that empty state must stay reachable by clicking
+// through the hub, not just by knowing the URL. Every OTHER family is
+// index-driven only (deliverable 1): it appears exactly when the
+// project's index says it exists, never before, never hardcoded.
+const ALWAYS_SHOWN_FAMILIES = ['calc', 'drawings', '3d', 'bom', 'boards', 'harness'];
+
 export function Artifacts() {
   const [params, setParams] = useSearchParams();
   const projects = useProjects();
@@ -52,7 +60,16 @@ export function Artifacts() {
     );
   }
 
-  const families = familiesFromIndex(index.data ?? []);
+  const indexFamilies = familiesFromIndex(index.data ?? []);
+  const present = new Set(indexFamilies.map((f) => f.family));
+  const families = [
+    ...indexFamilies,
+    ...ALWAYS_SHOWN_FAMILIES.filter((f) => !present.has(f)).map((family) => ({
+      family,
+      count: 0,
+      viewers: [] as string[],
+    })),
+  ].sort((a, b) => a.family.localeCompare(b.family));
 
   return (
     <div className="gr-artifacts-hub">
@@ -86,11 +103,6 @@ export function Artifacts() {
           detail={String(index.error)}
           onRetry={() => index.refetch()}
         />
-      ) : families.length === 0 ? (
-        <EmptyState
-          title="This project has no shipped artifacts"
-          detail="Run a build/ship before browsing artifacts."
-        />
       ) : (
         <div className="gr-artifacts-hub__families">
           {families.map((f) => {
@@ -103,7 +115,9 @@ export function Artifacts() {
               >
                 <strong>{familyLabel(f.family)}</strong>
                 <p className="gr-micro-label">
-                  {f.count} file{f.count === 1 ? '' : 's'} -- {f.viewers.join(', ')}
+                  {f.count === 0
+                    ? 'no files shipped'
+                    : `${f.count} file${f.count === 1 ? '' : 's'} -- ${f.viewers.join(', ')}`}
                 </p>
               </Link>
             );
