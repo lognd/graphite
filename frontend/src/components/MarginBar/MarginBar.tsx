@@ -11,9 +11,14 @@ export interface MarginBarProps {
   limit: number;
   unit: string;
   label?: string;
+  /** Render the label as visible text (default). Pass false where the
+   * surrounding context already names the bar (e.g. a table column
+   * header); the label still reaches screen readers via aria-label
+   * (WO-G8: the visible duplicate overflowed dashboard table cells). */
+  labelVisible?: boolean;
 }
 
-export function MarginBar({ value, limit, unit, label }: MarginBarProps) {
+export function MarginBar({ value, limit, unit, label, labelVisible = true }: MarginBarProps) {
   const ratio = limit === 0 ? (value === 0 ? 0 : Infinity) : value / limit;
   const pct = Math.max(0, Math.min(100, Math.abs(ratio) * 100));
   const overLimit = Math.abs(value) > Math.abs(limit);
@@ -24,7 +29,9 @@ export function MarginBar({ value, limit, unit, label }: MarginBarProps) {
       role="img"
       aria-label={`${label ?? 'margin'}: ${value}${unit} of ${limit}${unit} limit`}
     >
-      {label ? <span className="gr-micro-label gr-margin-bar__label">{label}</span> : null}
+      {label && labelVisible ? (
+        <span className="gr-micro-label gr-margin-bar__label">{label}</span>
+      ) : null}
       <div className="gr-margin-bar__track">
         <span className="gr-margin-bar__tick gr-margin-bar__tick--start" />
         <span

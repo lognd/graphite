@@ -1,7 +1,7 @@
 .PHONY: install test lint format typecheck openapi openapi-check \
         frontend-install frontend-api-gen frontend-api-check \
         frontend-check frontend-test frontend-system-test \
-        backend-check check clean build size-check
+        backend-check check clean build size-check screenshots
 
 UV ?= uv
 NPM ?= npm --prefix frontend
@@ -65,6 +65,9 @@ build: ## full release build: vite bundle into graphite/server/static/, then the
 # when invoking this standalone.
 size-check: ## bundle budget gate (WO-G8): main chunk must stay under its recorded budget
 	$(UV) run python scripts/check_bundle_size.py
+
+screenshots: ## regenerate docs/screenshots/*.png via Playwright (WO-G8; committed, not asserted)
+	cd frontend && GRAPHITE_SCREENSHOTS=1 npx playwright test tests/system/capture-screenshots.spec.ts
 
 check: backend-check frontend-check frontend-api-check size-check frontend-system-test ## full gate, cheapest first
 

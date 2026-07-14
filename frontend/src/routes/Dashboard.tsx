@@ -101,6 +101,7 @@ const COLUMNS: DataTableColumn<FleetHealthEntry>[] = [
           limit={s.obligations}
           unit=""
           label="discharged+accepted / obligations"
+          labelVisible={false}
         />
       );
     },
