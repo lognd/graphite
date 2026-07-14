@@ -20,6 +20,8 @@ import {
   mockObligations,
   mockObligationsFiltered,
   mockObligationsGrouped,
+  mockObligationsSynthetic2k,
+  SYNTHETIC_2K_PROJECT,
   mockProjectArtifacts,
   mockProjectConfig,
   mockProjectHealth,
@@ -171,7 +173,11 @@ async function requestBlob(path: string): Promise<Blob> {
   return res.blob();
 }
 
-function mockObligationsFor(query: ObligationsQuery): ObligationsResponse {
+function mockObligationsFor(project: string, query: ObligationsQuery): ObligationsResponse {
+  // WO-G8 perf rig: the synthetic 2k-row project exercises the obligation
+  // explorer's virtualized path; reachable only by direct URL (it has no
+  // fleet/health entry -- it is a perf fixture, not a fake fleet member).
+  if (project === SYNTHETIC_2K_PROJECT) return mockObligationsSynthetic2k;
   if (query.group) return mockObligationsGrouped(query.group);
   if (query.filter) return mockObligationsFiltered(query.filter);
   return mockObligations;
@@ -190,7 +196,7 @@ export const api = {
     project: string,
     query: ObligationsQuery = {},
   ): Promise<ObligationsResponse> {
-    if (USE_MOCKS) return mockObligationsFor(query);
+    if (USE_MOCKS) return mockObligationsFor(project, query);
     const params = new URLSearchParams();
     if (query.filter) params.set('filter', query.filter);
     if (query.group) params.set('group', query.group);

@@ -7,6 +7,7 @@ import { useProjectArtifacts } from '../../api/hooks';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { ErrorState } from '../../components/ErrorState/ErrorState';
 import { listDrawingNames } from './artifactLookup';
+import { PageTitle } from '../../components/PageTitle/PageTitle';
 import './artifacts.css';
 
 export function Drawings() {
@@ -35,16 +36,19 @@ export function Drawings() {
   }
 
   return (
-    <ul className="gr-drawing-list">
-      {names.map((name) => (
-        <li key={name}>
-          <Link
-            to={`/artifacts/${encodeURIComponent(projectId ?? '')}/drawings/${encodeURIComponent(name)}`}
-          >
-            {name}
-          </Link>
-        </li>
-      ))}
-    </ul>
+    <>
+      <PageTitle text="Drawings" />
+      <ul className="gr-drawing-list">
+        {names.map((name) => (
+          <li key={name}>
+            <Link
+              to={`/artifacts/${encodeURIComponent(projectId ?? '')}/drawings/${encodeURIComponent(name)}`}
+            >
+              {name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }

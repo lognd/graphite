@@ -12,6 +12,7 @@ import { EmptyState } from '../components/EmptyState/EmptyState';
 import { ErrorState } from '../components/ErrorState/ErrorState';
 import { useDoctor, useProjects } from '../api/hooks';
 import type { DoctorEntry } from '../api/client';
+import { PageTitle } from '../components/PageTitle/PageTitle';
 import './Doctor.css';
 
 const COLUMNS: DataTableColumn<DoctorEntry>[] = [
@@ -75,6 +76,7 @@ export function Doctor() {
 
   return (
     <div className="gr-doctor-view">
+      <PageTitle text="Doctor" />
       <div className="gr-doctor-view__toolbar">
         <label htmlFor="doctor-project-select">project</label>
         <select

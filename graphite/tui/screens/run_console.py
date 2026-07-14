@@ -121,7 +121,9 @@ class RunConsoleScreen(Screen[None]):
         self._phase_bars.clear()
         self.query_one("#phase-rails", Vertical).remove_children()
         log.clear()
-        self.query_one(StatusLine).set_status(f"running {verb} (run={record.run_id[:8]})")
+        self.query_one(StatusLine).set_status(
+            f"running {verb} (run={record.run_id[:8]})"
+        )
         self._poll()
 
     @work(exclusive=True)

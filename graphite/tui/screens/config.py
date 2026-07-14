@@ -9,15 +9,29 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Literal, cast
 
+from pydantic import ValidationError
 from textual.app import ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.screen import Screen
-from textual.widgets import Button, DataTable, Input, Select, Static, TabbedContent, TabPane
+from textual.widgets import (
+    Button,
+    DataTable,
+    Input,
+    Select,
+    Static,
+    TabbedContent,
+    TabPane,
+)
 
 from graphite.logging_setup import get_logger
 from graphite.service.config_cli import doctor, key_defaults, list_config, set_config
-from graphite.service.settings import GraphiteSettings, get_settings, reset_settings, set_settings
+from graphite.service.settings import (
+    GraphiteSettings,
+    get_settings,
+    reset_settings,
+    set_settings,
+)
 from graphite.tui.widgets import StatusLine, TitleBlock
 
 # `Select.value` types as `str` (textual has no way to type it to our
@@ -58,7 +72,9 @@ class ConfigScreen(Screen[None]):
         with TabbedContent():
             with TabPane("config", id="tab-config"):
                 with Vertical():
-                    yield DataTable(id="config-table", cursor_type="row", zebra_stripes=False)
+                    yield DataTable(
+                        id="config-table", cursor_type="row", zebra_stripes=False
+                    )
                     with Horizontal():
                         yield Input(placeholder="key", id="cfg-key")
                         yield Input(placeholder="value", id="cfg-value")
@@ -72,7 +88,9 @@ class ConfigScreen(Screen[None]):
                     yield Static("", id="cfg-message")
             with TabPane("doctor", id="tab-doctor"):
                 with Vertical():
-                    yield DataTable(id="doctor-table", cursor_type="row", zebra_stripes=False)
+                    yield DataTable(
+                        id="doctor-table", cursor_type="row", zebra_stripes=False
+                    )
                     yield Button("re-probe", id="doctor-reprobe")
             with TabPane("settings", id="tab-settings"):
                 with Vertical():
@@ -80,9 +98,15 @@ class ConfigScreen(Screen[None]):
                     yield Input(id="settings-root")
                     yield Static("run verbosity:")
                     yield Select(
-                        [("quiet", "quiet"), ("normal", "normal"), ("verbose", "verbose")],
+                        [
+                            ("quiet", "quiet"),
+                            ("normal", "normal"),
+                            ("verbose", "verbose"),
+                        ],
                         id="settings-verbosity",
                     )
+                    yield Static("run history limit (0 = keep everything):")
+                    yield Input(id="settings-history-limit")
                     with Horizontal():
                         yield Button("save", id="settings-save")
                         yield Button("reset", id="settings-reset")
@@ -91,7 +115,9 @@ class ConfigScreen(Screen[None]):
 
     def on_mount(self) -> None:
         self.query_one(TitleBlock).set_identity(project=self._project_root.name)
-        self.query_one("#config-table", DataTable).add_columns("key", "value", "source", "default")
+        self.query_one("#config-table", DataTable).add_columns(
+            "key", "value", "source", "default"
+        )
         self.query_one("#doctor-table", DataTable).add_columns(
             "tool", "found", "version", "path"
         )
@@ -122,7 +148,9 @@ class ConfigScreen(Screen[None]):
         table.clear()
         result = doctor(self._project_root)
         if result.is_err:
-            _log.info("config screen: doctor unavailable: %s", result.danger_err.message)
+            _log.info(
+                "config screen: doctor unavailable: %s", result.danger_err.message
+            )
             return
         for entry in result.danger_ok:
             if not isinstance(entry, dict):
@@ -139,6 +167,9 @@ class ConfigScreen(Screen[None]):
         settings = result.danger_ok if result.is_ok else GraphiteSettings()
         self.query_one("#settings-root", Input).value = settings.default_project_root
         self.query_one("#settings-verbosity", Select).value = settings.run_verbosity
+        self.query_one("#settings-history-limit", Input).value = str(
+            settings.run_history_limit
+        )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         button_id = event.button.id
@@ -166,7 +197,9 @@ class ConfigScreen(Screen[None]):
             # CLI's own message, verbatim (charter 3.2 / 04.1 validation floor).
             message.update(result.danger_err.detail or result.danger_err.message)
         else:
-            message.update(f"set {key}={result.danger_ok.value} (source={result.danger_ok.source})")
+            message.update(
+                f"set {key}={result.danger_ok.value} (source={result.danger_ok.source})"
+            )
             self._refresh_config()
 
     def _reset_config(self) -> None:
@@ -186,11 +219,22 @@ class ConfigScreen(Screen[None]):
 
     def _save_settings(self) -> None:
         root = self.query_one("#settings-root", Input).value.strip()
-        verbosity = cast(_RunVerbosity, self.query_one("#settings-verbosity", Select).value)
-        message = self.query_one("#settings-message", Static)
-        result = set_settings(
-            GraphiteSettings(default_project_root=root, run_verbosity=verbosity)
+        verbosity = cast(
+            _RunVerbosity, self.query_one("#settings-verbosity", Select).value
         )
+        limit_text = self.query_one("#settings-history-limit", Input).value.strip()
+        message = self.query_one("#settings-message", Static)
+        try:
+            settings = GraphiteSettings(
+                default_project_root=root,
+                run_verbosity=verbosity,
+                run_history_limit=int(limit_text or "0"),
+            )
+        except (ValueError, ValidationError) as exc:
+            # The model's own message, verbatim (04.1 validation floor).
+            message.update(str(exc))
+            return
+        result = set_settings(settings)
         if result.is_err:
             message.update(result.danger_err.message)
         else:

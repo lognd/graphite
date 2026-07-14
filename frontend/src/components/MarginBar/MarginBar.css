@@ -11,6 +11,9 @@
 .gr-margin-bar__track {
   position: relative;
   flex: 1 1 auto;
+  /* Keep a real bar inside width-by-content contexts like table cells
+     (WO-G8 dashboard polish) -- without this the track can collapse. */
+  min-width: 64px;
   height: var(--graphite-space-2);
   border-left: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
   border-right: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);

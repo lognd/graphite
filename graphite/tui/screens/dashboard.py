@@ -76,7 +76,9 @@ class DashboardScreen(Screen[None]):
             table.add_row(*_row(info), key=info.root)
         status = self.query_one(StatusLine)
         if self._projects:
-            status.set_status(f"{len(self._projects)} project(s) under {self._scan_root}")
+            status.set_status(
+                f"{len(self._projects)} project(s) under {self._scan_root}"
+            )
         else:
             status.set_status(f"no projects found under {self._scan_root}")
         _log.info("dashboard: refreshed, %d project(s)", len(self._projects))
@@ -101,8 +103,15 @@ class DashboardScreen(Screen[None]):
         info = self._selected_project()
         if info is None:
             return
+        from graphite.tui.app import GraphiteApp
         from graphite.tui.screens.obligations import ObligationsScreen
 
+        # Drilling into a project also makes it the ACTIVE project, so
+        # the ctrl+k run-console/config shortcuts follow the user's focus
+        # (WO-G8/WOG7-F1 -- same effect as the palette's "set active
+        # project" command).
+        if isinstance(self.app, GraphiteApp):
+            self.app.set_active_project(Path(info.root))
         self.app.push_screen(ObligationsScreen(Path(info.root)))
 
     def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
@@ -111,4 +120,3 @@ class DashboardScreen(Screen[None]):
         # progressive disclosure) rides it rather than a competing
         # screen-level `enter` binding DataTable would swallow first.
         self.action_open_project()
-

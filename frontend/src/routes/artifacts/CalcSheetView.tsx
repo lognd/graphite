@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../../api/client';
 import { useCalcSheets, useProjectArtifacts } from '../../api/hooks';
+import { DetailNav } from '../../components/DetailNav/DetailNav';
 import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { ErrorState } from '../../components/ErrorState/ErrorState';
 import { HashChip } from '../../components/HashChip/HashChip';
@@ -50,7 +51,18 @@ export function CalcSheetView() {
   }
   if (sheets.isLoading) return <p role="status">loading calc sheet...</p>;
 
-  const sheet = sheets.data?.find((s) => s.sheet_id === sheetId);
+  const sheetRows = sheets.data ?? [];
+  const sheetIndex = sheetRows.findIndex((s) => s.sheet_id === sheetId);
+  const sheet = sheetIndex >= 0 ? sheetRows[sheetIndex] : undefined;
+  // Prev/next over the calc book's OWN sheet order (the order the
+  // pipeline emitted into calc_book.json, the same order the CalcBook
+  // table lists) -- closing WO-G4's deferred detail-view row at WO-G8:
+  // the ordering is read off data, not invented.
+  const prevSheet = sheetIndex > 0 ? sheetRows[sheetIndex - 1] : undefined;
+  const nextSheet =
+    sheetIndex >= 0 && sheetIndex < sheetRows.length - 1 ? sheetRows[sheetIndex + 1] : undefined;
+  const sheetHref = (s: { sheet_id: string }) =>
+    `/artifacts/${encodeURIComponent(projectId ?? '')}/calc/${encodeURIComponent(s.sheet_id)}`;
   if (!sheet) {
     return (
       <EmptyState
@@ -65,8 +77,14 @@ export function CalcSheetView() {
 
   return (
     <article className="gr-calc-sheet">
+      <DetailNav
+        prevTo={prevSheet ? sheetHref(prevSheet) : null}
+        nextTo={nextSheet ? sheetHref(nextSheet) : null}
+        index={sheetIndex}
+        total={sheetRows.length}
+      />
       <header className="gr-calc-sheet__header">
-        <h2>{sheet.claim_text}</h2>
+        <h1>{sheet.claim_text}</h1>
         <VerdictBadge verdict={asVerdict(sheet.verdict)} />
       </header>
 
@@ -99,7 +117,7 @@ export function CalcSheetView() {
         </p>
       )}
 
-      <h3 className="gr-section-title">Inputs</h3>
+      <h2 className="gr-section-title">Inputs</h2>
       <table className="gr-calc-sheet__inputs">
         <thead>
           <tr>
@@ -123,7 +141,7 @@ export function CalcSheetView() {
         </tbody>
       </table>
 
-      <h3 className="gr-section-title">Evidence chain</h3>
+      <h2 className="gr-section-title">Evidence chain</h2>
       <ul className="gr-calc-sheet__chain">
         <li>
           sheet digest <HashChip full={sheet.chain.sheet_digest} />

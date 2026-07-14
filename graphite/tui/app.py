@@ -58,7 +58,9 @@ class ShortcutSheet(ModalScreen[None]):
 class NavigationProvider(Provider):
     """Command-palette entries for jumping straight to a surface --
     the ctrl+k "first-class citizen" requirement (03 sec. 3.5), not an
-    afterthought bolted onto a search box."""
+    afterthought bolted onto a search box. Also offers a "set active
+    project" command per discovered fleet member (WO-G8, closes
+    WOG7-F1: the surface shortcuts assumed a single-project session)."""
 
     async def search(self, query: str) -> Hits:
         matcher = self.matcher(query)
@@ -73,14 +75,31 @@ class NavigationProvider(Provider):
             score = matcher.match(name)
             if score > 0:
                 yield Hit(score, matcher.highlight(name), callback)
+        # Discovered fleet members as first-class palette commands, so the
+        # run-console/config/obligations shortcuts work per-project in a
+        # multi-project terminal session (mirrors the web app's project
+        # selectors). Discovery is the SAME scan the dashboard renders.
+        from graphite.service.discovery import scan_projects
+
+        for info in scan_projects(app.scan_root):
+            name = f"set active project: {info.name}"
+            score = matcher.match(name)
+            if score > 0:
+                root = Path(info.root)
+                yield Hit(
+                    score,
+                    matcher.highlight(name),
+                    lambda root=root: app.set_active_project(root),
+                )
 
 
 class GraphiteApp(App[None]):
-    """graphite's textual TUI: `project_root` is both the default
-    fleet-scan root (dashboard) and the active project for the
-    obligations/run/config surfaces (a single-project session; the
-    dashboard's drill-down is how a multi-project fleet session picks
-    a different active project)."""
+    """graphite's textual TUI: `project_root` is the fleet-scan root
+    (dashboard) and the INITIAL active project for the obligations/run/
+    config surfaces. The active project changes via the dashboard's
+    per-row drill-down or the palette's "set active project" command
+    (WOG7-F1), so a multi-project fleet session never needs a
+    restart."""
 
     TITLE = "graphite"
     COMMAND_PALETTE_BINDING = "ctrl+k"
@@ -92,23 +111,42 @@ class GraphiteApp(App[None]):
 
     def __init__(self, project_root: Path) -> None:
         super().__init__()
-        self._project_root = project_root.resolve()
+        self._scan_root = project_root.resolve()
+        self._active_project = self._scan_root
+
+    @property
+    def scan_root(self) -> Path:
+        """The fleet-scan root the app was launched with (never changes)."""
+        return self._scan_root
+
+    @property
+    def active_project(self) -> Path:
+        """The project the surface shortcuts (run console, config,
+        obligations) currently target."""
+        return self._active_project
+
+    def set_active_project(self, root: Path) -> None:
+        """Point the surface shortcuts at another discovered project
+        (WOG7-F1); the dashboard keeps scanning the launch root."""
+        self._active_project = root.resolve()
+        _log.info("graphite tui: active project -> %s", self._active_project)
+        self.notify(f"active project: {self._active_project.name}")
 
     def on_mount(self) -> None:
-        _log.info("graphite tui: starting, project=%s", self._project_root)
-        self.push_screen(DashboardScreen(self._project_root))
+        _log.info("graphite tui: starting, project=%s", self._scan_root)
+        self.push_screen(DashboardScreen(self._scan_root))
 
     def action_show_help(self) -> None:
         self.push_screen(ShortcutSheet())
 
     def action_go_dashboard(self) -> None:
-        self.push_screen(DashboardScreen(self._project_root))
+        self.push_screen(DashboardScreen(self._scan_root))
 
     def action_go_run_console(self) -> None:
-        self.push_screen(RunConsoleScreen(self._project_root))
+        self.push_screen(RunConsoleScreen(self._active_project))
 
     def action_go_config(self) -> None:
-        self.push_screen(ConfigScreen(self._project_root))
+        self.push_screen(ConfigScreen(self._active_project))
 
     def action_go_obligations(self) -> None:
-        self.push_screen(ObligationsScreen(self._project_root))
+        self.push_screen(ObligationsScreen(self._active_project))

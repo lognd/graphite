@@ -11,6 +11,7 @@ import { api } from '../../api/client';
 import { useProjectArtifacts } from '../../api/hooks';
 import { ErrorState } from '../../components/ErrorState/ErrorState';
 import { GlbViewer } from '../../components/GlbViewer/GlbViewer';
+import { PageTitle } from '../../components/PageTitle/PageTitle';
 
 export function Model3D() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -54,13 +55,16 @@ export function Model3D() {
   }
 
   return (
-    <GlbViewer
-      glbBytes={glbBytes}
-      contentHash={glbEntry?.content_hash ?? null}
-      stepDownloadHref={
-        projectId && stepEntry ? api.artifactUrl(projectId, stepEntry.content_hash) : null
-      }
-      stepContentHash={stepEntry?.content_hash ?? null}
-    />
+    <>
+      <PageTitle text="3D model" />
+      <GlbViewer
+        glbBytes={glbBytes}
+        contentHash={glbEntry?.content_hash ?? null}
+        stepDownloadHref={
+          projectId && stepEntry ? api.artifactUrl(projectId, stepEntry.content_hash) : null
+        }
+        stepContentHash={stepEntry?.content_hash ?? null}
+      />
+    </>
   );
 }

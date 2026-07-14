@@ -21,6 +21,8 @@ import { VerdictBadge } from '../components/VerdictBadge/VerdictBadge';
 import { dispositionToVerdict } from '../components/VerdictBadge/verdict';
 import { parseClaimLimit } from '../lib/claimLimit';
 import { encodeClaimKey } from '../lib/claimKey';
+import { PageTitle } from '../components/PageTitle/PageTitle';
+import './ObligationExplorer.css';
 
 type GroupBy = 'none' | 'reason' | 'family' | 'part';
 
@@ -199,7 +201,8 @@ export function ObligationExplorer() {
   }
 
   return (
-    <div className="gr-obligation-explorer">
+    <div className={`gr-obligation-explorer${grouped ? '' : ' gr-obligation-explorer--flat'}`}>
+      <PageTitle text="Obligation explorer" />
       <div className="gr-obligation-explorer__toolbar">
         <span className="gr-micro-label">group by</span>
         {(['none', 'reason', 'family', 'part'] as GroupBy[]).map((mode) => (

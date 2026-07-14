@@ -15,6 +15,7 @@ import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { ErrorState } from '../../components/ErrorState/ErrorState';
 import { HashChip } from '../../components/HashChip/HashChip';
 import { PanZoomFrame } from '../../components/PanZoomFrame/PanZoomFrame';
+import { PageTitle } from '../../components/PageTitle/PageTitle';
 import { parseGerberOutline, type GerberOutline } from './gerberOutline';
 import './artifacts.css';
 
@@ -67,6 +68,7 @@ export function Boards() {
 
   return (
     <div className="gr-boards">
+      <PageTitle text="Boards" />
       <h2 className="gr-section-title">Gerber layers</h2>
       {gerberLayers.length === 0 ? (
         <EmptyState

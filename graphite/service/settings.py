@@ -15,7 +15,7 @@ import os
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from typani.result import Err, Ok, Result
 
 from graphite.logging_setup import get_logger
@@ -27,20 +27,26 @@ RunVerbosity = Literal["quiet", "normal", "verbose"]
 
 DEFAULT_RUN_VERBOSITY: RunVerbosity = "normal"
 DEFAULT_PROJECT_ROOT = ""
+# WO-G8 (closes WOG5-F3): run records/logs under GRAPHITE_RUNS_HOME used
+# to grow without bound; each new run now prunes history down to this
+# many newest FINISHED records (0 = keep everything, the old behavior).
+DEFAULT_RUN_HISTORY_LIMIT = 200
 
 _SETTINGS_FILENAME = "settings.json"
 
 
 class GraphiteSettings(BaseModel):
     """graphite's own preferences: a default project root to land on at
-    startup and a run verbosity passthrough for driven CLI invocations.
-    Never a regolith config key (that precedence ladder is a different
-    doctrine, D163/D164 -- this is graphite-local UI state)."""
+    startup, a run verbosity passthrough for driven CLI invocations, and
+    the run-history retention bound (WOG5-F3). Never a regolith config
+    key (that precedence ladder is a different doctrine, D163/D164 --
+    this is graphite-local UI state)."""
 
     model_config = ConfigDict(frozen=True)
 
     default_project_root: str = DEFAULT_PROJECT_ROOT
     run_verbosity: RunVerbosity = DEFAULT_RUN_VERBOSITY
+    run_history_limit: int = Field(default=DEFAULT_RUN_HISTORY_LIMIT, ge=0)
 
 
 def settings_home() -> Path:
@@ -67,7 +73,9 @@ def get_settings() -> Result[GraphiteSettings, ServiceError]:
     except (OSError, json.JSONDecodeError) as exc:
         _log.error("settings: cannot read %s: %s", path, exc)
         return Err(
-            ServiceError(kind="io_error", message=f"cannot read {path}", detail=str(exc))
+            ServiceError(
+                kind="io_error", message=f"cannot read {path}", detail=str(exc)
+            )
         )
     try:
         return Ok(GraphiteSettings(**raw))
@@ -94,7 +102,9 @@ def set_settings(settings: GraphiteSettings) -> Result[GraphiteSettings, Service
     except OSError as exc:
         _log.error("settings: cannot write %s: %s", path, exc)
         return Err(
-            ServiceError(kind="io_error", message=f"cannot write {path}", detail=str(exc))
+            ServiceError(
+                kind="io_error", message=f"cannot write {path}", detail=str(exc)
+            )
         )
     _log.info("settings: wrote %s", path)
     return Ok(settings)

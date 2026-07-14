@@ -42,9 +42,7 @@ def get_audit_index(project: str) -> AuditIndex:
     return result.danger_ok
 
 
-@router.get(
-    "/{project}/acceptance-ledger", response_model=AcceptanceLedgerSummary
-)
+@router.get("/{project}/acceptance-ledger", response_model=AcceptanceLedgerSummary)
 def get_acceptance_ledger(project: str) -> AcceptanceLedgerSummary:
     """The accepted-deviation ledger (waiver/memo panel, project-view
     deliverable 2): every accepted deviation with its memo evidence

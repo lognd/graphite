@@ -179,6 +179,41 @@ export function mockObligationsGrouped(group: 'disposition' | 'family'): Obligat
   return { summary: mockProjectHealth.obligation_summary, groups, rows: null };
 }
 
+// WO-G8 deliverable 2 (performance): a synthetic 2000-row obligation set,
+// NOT recorded from any real project (the real ../lithos fleet's largest
+// projects run ~200+ obligations, per the WO's own instruction to test
+// virtualization against a synthetic 2k mock rather than fabricate a
+// falsely-huge "real" project). Keyed to its own fleet entry
+// (examples.synthetic_2k) so it never contaminates the real
+// timber_pavilion fixture's row count assertions elsewhere in this repo.
+export const SYNTHETIC_2K_PROJECT = 'examples.synthetic_2k';
+
+const DISPOSITIONS: AuditRow['disposition'][] = [
+  'calc_sheet',
+  'accepted_deviation',
+  'deferred',
+  'violated',
+];
+
+export const mockObligationsSynthetic2k: ObligationsResponse = {
+  summary: {
+    accepted_deviation: 500,
+    accepted_rows: 500,
+    deferred: 500,
+    discharged: 500,
+    obligations: 2000,
+    violated: 500,
+  },
+  groups: null,
+  rows: Array.from({ length: 2000 }, (_, i) => ({
+    claim_name: `synthetic[${i}]`,
+    content_hash: `0${i % 10}synthetic${i.toString().padStart(6, '0')}`,
+    detail: `synthetic obligation row ${i} for perf testing`,
+    disposition: DISPOSITIONS[i % DISPOSITIONS.length],
+    subject_anchor: `part-${i % 50}`,
+  })),
+};
+
 // RECORDED from tests/fixtures/timber_pavilion/dist/calc/audit_index.json --
 // same rows as mockObligations (both routes read the same underlying
 // calc-book accounting), unfiltered/ungrouped (04.1 "raw" detail view).
@@ -775,4 +810,5 @@ export const mockDoctor: DoctorEntry[] = [
 export const mockSettings: GraphiteSettings = {
   default_project_root: '',
   run_verbosity: 'normal',
+  run_history_limit: 200,
 };

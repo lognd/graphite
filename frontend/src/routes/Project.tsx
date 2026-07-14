@@ -18,6 +18,7 @@ import { DataTable } from '../components/DataTable/DataTable';
 import { EmptyState } from '../components/EmptyState/EmptyState';
 import { ErrorState } from '../components/ErrorState/ErrorState';
 import { HashChip } from '../components/HashChip/HashChip';
+import { PageTitle } from '../components/PageTitle/PageTitle';
 import { TitleBlock } from '../components/TitleBlock/TitleBlock';
 import { VerdictBadge } from '../components/VerdictBadge/VerdictBadge';
 import { optimizeWinnerRows } from '../lib/optimizeRows';
@@ -78,6 +79,7 @@ export function Project() {
 
   return (
     <div className="gr-project">
+      <PageTitle text={`Project: ${projectId}`} />
       <TitleBlock
         projectName={projectId}
         designHash={manifest.data?.design_hash ?? null}
@@ -98,8 +100,14 @@ export function Project() {
           <Link
             to={`/project/${encodeURIComponent(projectId)}/obligations?filter=accepted_deviation`}
           >
-            {summary.accepted_deviation} accepted
+            {/* accepted_rows: the linked drill-down lists ROWS (D221.2 row
+                partition); the unique-deviation census count rides along so
+                neither denominator is ever confused. */}
+            {summary.accepted_rows} accepted
           </Link>
+          {summary.accepted_rows !== summary.accepted_deviation
+            ? ` (${summary.accepted_deviation} unique)`
+            : ''}
           ,{' '}
           <Link to={`/project/${encodeURIComponent(projectId)}/obligations?filter=deferred`}>
             {summary.deferred} deferred

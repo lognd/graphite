@@ -10,6 +10,7 @@ import { ConfigField } from '../components/ConfigField/ConfigField';
 import { EmptyState } from '../components/EmptyState/EmptyState';
 import { ErrorState } from '../components/ErrorState/ErrorState';
 import { useConfigSchema, useProjectConfig, useProjects, useSetProjectConfig } from '../api/hooks';
+import { PageTitle } from '../components/PageTitle/PageTitle';
 import './Config.css';
 
 // `regolith config set` requires an explicit scope (`--global`/`--local`,
@@ -50,6 +51,7 @@ export function Config() {
 
   return (
     <div className="gr-config-view">
+      <PageTitle text="Config" />
       <div className="gr-config-view__toolbar">
         <label htmlFor="config-project-select">project</label>
         <select

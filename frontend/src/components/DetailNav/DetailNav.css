@@ -1,0 +1,9 @@
+.gr-detail-nav {
+  display: flex;
+  align-items: baseline;
+  gap: var(--graphite-space-3);
+}
+
+.gr-detail-nav [aria-disabled='true'] {
+  color: var(--graphite-color-ink-dim);
+}

@@ -13,6 +13,7 @@ import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { ErrorState } from '../../components/ErrorState/ErrorState';
 import { HashChip } from '../../components/HashChip/HashChip';
 import { ReasonCell } from '../../components/ReasonCell/ReasonCell';
+import { PageTitle } from '../../components/PageTitle/PageTitle';
 import './artifacts.css';
 
 export function Bom() {
@@ -45,6 +46,7 @@ export function Bom() {
 
   return (
     <div className="gr-bom">
+      <PageTitle text="BOM / cost / schedule" />
       <p className="gr-micro-label">
         cost profile: {final.cost_profile ?? '--'} -- {costEstimates.length} cost estimate(s)
       </p>

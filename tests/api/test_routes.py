@@ -197,7 +197,11 @@ def test_settings_defaults_and_round_trip(
 
     initial = api_client.get("/api/settings")
     assert initial.status_code == 200
-    assert initial.json() == {"default_project_root": "", "run_verbosity": "normal"}
+    assert initial.json() == {
+        "default_project_root": "",
+        "run_verbosity": "normal",
+        "run_history_limit": 200,
+    }
 
     put = api_client.put(
         "/api/settings",
@@ -277,9 +281,10 @@ def test_run_full_log_replay(api_client: TestClient) -> None:
     # Drain the SSE stream to completion so the log file is fully written.
     with api_client.stream("GET", f"/api/runs/{run_id}/events") as resp:
         for raw_line in resp.iter_lines():
-            if raw_line.startswith("data: ") and json.loads(
-                raw_line[len("data: ") :]
-            ).get("kind") == "done":
+            if (
+                raw_line.startswith("data: ")
+                and json.loads(raw_line[len("data: ") :]).get("kind") == "done"
+            ):
                 break
     log_resp = api_client.get(f"/api/runs/{run_id}/log")
     assert log_resp.status_code == 200

@@ -1,0 +1,25 @@
+/* Obligation explorer layout (WO-G8 perf pass): in flat (ungrouped) mode
+   the route pins itself to the content pane's height so the DataTable's
+   own scroll container is BOUNDED -- virtualization (DataTable.tsx) only
+   works when the table scrolls inside a fixed viewport instead of growing
+   the page. Grouped mode keeps normal document flow (many stacked
+   sections legitimately scroll the page). */
+.gr-obligation-explorer--flat {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.gr-obligation-explorer--flat > .gr-data-table {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.gr-obligation-explorer__toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--graphite-space-2);
+  padding-bottom: var(--graphite-space-2);
+}

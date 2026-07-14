@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DataTable } from './DataTable';
 import type { DataTableColumn } from './DataTable';
@@ -81,5 +81,48 @@ describe('DataTable', () => {
     await user.keyboard('j');
     const activeRows = grid.querySelectorAll('.gr-data-table__tr--active');
     expect(activeRows.length).toBe(1);
+  });
+
+  describe('virtualization (WO-G8 deliverable 2)', () => {
+    const bigRows: Row[] = Array.from({ length: 2000 }, (_, i) => ({
+      id: `row-${i}`,
+      name: `obligation ${i}`,
+      value: i,
+    }));
+
+    it('does not mount every row once past the 1k-row threshold', () => {
+      const { container } = render(
+        <DataTable columns={columns} rows={bigRows} rowKey={(r) => r.id} />,
+      );
+      const grid = screen.getByLabelText('results');
+      expect(grid).toHaveAttribute('data-virtualized', 'true');
+      expect(grid).toHaveAttribute('data-row-count', '2000');
+      const mounted = container.querySelectorAll('.gr-data-table__tr').length;
+      expect(mounted).toBeGreaterThan(0);
+      expect(mounted).toBeLessThan(2000);
+    });
+
+    it('still reports the full row count and stays under the threshold unvirtualized', () => {
+      render(<DataTable columns={columns} rows={rows} rowKey={(r) => r.id} />);
+      const grid = screen.getByLabelText('results');
+      expect(grid).toHaveAttribute('data-virtualized', 'false');
+    });
+
+    it('scrolling changes which rows are mounted', () => {
+      const { container } = render(
+        <DataTable columns={columns} rows={bigRows} rowKey={(r) => r.id} />,
+      );
+      const grid = screen.getByLabelText('results');
+      const before = Array.from(container.querySelectorAll('.gr-data-table__tr')).map(
+        (el) => el.textContent,
+      );
+      Object.defineProperty(grid, 'clientHeight', { value: 480, configurable: true });
+      Object.defineProperty(grid, 'scrollTop', { value: 32 * 500, configurable: true });
+      fireEvent.scroll(grid);
+      const after = Array.from(container.querySelectorAll('.gr-data-table__tr')).map(
+        (el) => el.textContent,
+      );
+      expect(after).not.toEqual(before);
+    });
   });
 });

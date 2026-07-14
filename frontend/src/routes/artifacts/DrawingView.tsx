@@ -14,6 +14,7 @@ import { EmptyState } from '../../components/EmptyState/EmptyState';
 import { ErrorState } from '../../components/ErrorState/ErrorState';
 import { HashChip } from '../../components/HashChip/HashChip';
 import { PanZoomFrame } from '../../components/PanZoomFrame/PanZoomFrame';
+import { PageTitle } from '../../components/PageTitle/PageTitle';
 import { findDrawingArtifact } from './artifactLookup';
 import './artifacts.css';
 
@@ -110,6 +111,7 @@ export function DrawingView() {
 
   return (
     <article className="gr-drawing-view">
+      <PageTitle text={`Drawing: ${name}`} />
       <table className="gr-title-block-table" aria-label="title block">
         <tbody>
           <tr>
