@@ -112,6 +112,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/projects/{project}/artifact-index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Project Artifact Index
+         * @description The typed artifact index (WO-G9 / lithos D244): family, kind,
+         *     viewer hint, source refs -- the ONE surface the frontend's Artifacts
+         *     hub, family router, and honest-fallback ladder read. A project
+         *     shipped without `dist/artifact_index.json` still returns a
+         *     (synthesized, `viewer=binary`) listing rather than an empty one.
+         */
+        get: operations["get_project_artifact_index_api_projects__project__artifact_index_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/projects/{project}/artifacts": {
         parameters: {
             query?: never;
@@ -707,6 +731,42 @@ export interface components {
             size: number;
         };
         /**
+         * ArtifactIndexRow
+         * @description One file from a project's shipped index, with `content_hash`
+         *     REPLACED by graphite's own sha256 over the same bytes (the only
+         *     hash the fetch-by-hash route accepts -- WO-G1). `declared_hash`
+         *     keeps lithos's own hash for cross-checking/debugging; a mismatch
+         *     is logged, never fatal (the file on disk is what gets served).
+         */
+        ArtifactIndexRow: {
+            /** Bytes */
+            bytes: number;
+            /** Content Hash */
+            content_hash: string;
+            /** Declared Hash */
+            declared_hash?: string | null;
+            /** Family */
+            family: string;
+            /** Kind */
+            kind: string;
+            /** Media Type */
+            media_type: string;
+            /** Relpath */
+            relpath: string;
+            /**
+             * Source Refs
+             * @default []
+             */
+            source_refs: string[];
+            /**
+             * Synthesized
+             * @default false
+             */
+            synthesized: boolean;
+            /** Viewer */
+            viewer: string;
+        };
+        /**
          * AuditIndex
          * @description The package-level audit index: total accounting + per-obligation rows.
          */
@@ -747,7 +807,8 @@ export interface components {
          *
          *     TWO honest denominators, both reported so they can never be confused:
          *
-         *     * the CENSUS-shape counts (``discharged`` = results with no deferral;
+         *     * the CENSUS-shape counts (``discharged`` = model-backed resolved:
+         *       no deferral AND ``discharged`` evidence status, census v2/D220.3;
          *       ``accepted_deviation`` = the number of UNIQUE accepted obligation
          *       content addresses -- exactly ``len(acceptance.accepted_hashes)``,
          *       the same value ``fleet._census_from_report`` records; ``violated``)
@@ -969,6 +1030,11 @@ export interface components {
              * @default
              */
             source: string;
+            /**
+             * Unit
+             * @default
+             */
+            unit: string;
             /** Value */
             value: string;
         };
@@ -1004,6 +1070,11 @@ export interface components {
             subject_ref: string;
             /** Tier */
             tier: string;
+            /**
+             * Unit
+             * @default
+             */
+            unit: string;
             /** Value */
             value: string;
             /** Verdict */
@@ -1900,6 +1971,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AcceptanceLedgerSummary"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_project_artifact_index_api_projects__project__artifact_index_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArtifactIndexRow"][];
                 };
             };
             /** @description Validation Error */

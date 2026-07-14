@@ -5,9 +5,12 @@ committed `timber_pavilion` fixture through a real `TestClient`."""
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
+from graphite.server.app import create_app
 from tests.api.conftest import PROJECT_NAME
 
 
@@ -121,6 +124,28 @@ def test_artifacts_list_and_fetch(api_client: TestClient) -> None:
 def test_artifacts_fetch_unknown_hash_404(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/artifacts/sha256:deadbeef")
     assert resp.status_code == 404
+
+
+def test_artifact_index_boards_and_harness(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """WO-G9: the typed index route the frontend hub now drives off of --
+    checked against the fixtures dir directly (GET-only, read-only) since
+    `mainboard_mx` (unlike `timber_pavilion`) ships `boards`/`harness`."""
+    fixtures_dir = Path(__file__).parent.parent / "fixtures"
+    monkeypatch.setenv("GRAPHITE_SCAN_ROOT", str(fixtures_dir))
+    monkeypatch.setenv("GRAPHITE_RUNS_HOME", str(tmp_path / "runs-home"))
+    monkeypatch.setenv("GRAPHITE_HOME", str(tmp_path / "graphite-home"))
+    client = TestClient(create_app())
+
+    resp = client.get("/api/projects/mainboard_mx/artifact-index")
+    assert resp.status_code == 200
+    rows = resp.json()
+    families = {r["family"] for r in rows}
+    assert families == {"boards", "harness"}
+    assert all(r["content_hash"].startswith("sha256:") for r in rows)
+    silk = [r for r in rows if "Silkscreen" in r["relpath"]]
+    assert silk and all(r["viewer"] == "gerber" for r in silk)
 
 
 def test_health(api_client: TestClient) -> None:

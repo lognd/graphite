@@ -205,6 +205,74 @@
         "title": "ArtifactEntry",
         "type": "object"
       },
+      "ArtifactIndexRow": {
+        "description": "One file from a project's shipped index, with `content_hash`\nREPLACED by graphite's own sha256 over the same bytes (the only\nhash the fetch-by-hash route accepts -- WO-G1). `declared_hash`\nkeeps lithos's own hash for cross-checking/debugging; a mismatch\nis logged, never fatal (the file on disk is what gets served).",
+        "properties": {
+          "bytes": {
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "content_hash": {
+            "title": "Content Hash",
+            "type": "string"
+          },
+          "declared_hash": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Declared Hash"
+          },
+          "family": {
+            "title": "Family",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "media_type": {
+            "title": "Media Type",
+            "type": "string"
+          },
+          "relpath": {
+            "title": "Relpath",
+            "type": "string"
+          },
+          "source_refs": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Source Refs",
+            "type": "array"
+          },
+          "synthesized": {
+            "default": false,
+            "title": "Synthesized",
+            "type": "boolean"
+          },
+          "viewer": {
+            "title": "Viewer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "family",
+          "kind",
+          "relpath",
+          "content_hash",
+          "bytes",
+          "media_type",
+          "viewer"
+        ],
+        "title": "ArtifactIndexRow",
+        "type": "object"
+      },
       "AuditIndex": {
         "description": "The package-level audit index: total accounting + per-obligation rows.",
         "properties": {
@@ -272,7 +340,7 @@
         "type": "object"
       },
       "AuditSummary": {
-        "description": "The audit index's obligation accounting (D221.2).\n\nTWO honest denominators, both reported so they can never be confused:\n\n* the CENSUS-shape counts (``discharged`` = results with no deferral;\n  ``accepted_deviation`` = the number of UNIQUE accepted obligation\n  content addresses -- exactly ``len(acceptance.accepted_hashes)``,\n  the same value ``fleet._census_from_report`` records; ``violated``)\n  so the audit index reconciles with ``fleet_census.json`` field for\n  field via :meth:`census_row`;\n* the ROW partition (``discharged`` + ``accepted_rows`` + ``deferred``\n  + ``violated`` == ``obligations``), because a calc sheet and an\n  audit row are PER OBLIGATION and forall-expanded obligation\n  instances legitimately share one content address -- so the number\n  of accepted ROWS (:attr:`accepted_rows`) can exceed the number of\n  unique accepted addresses (:attr:`accepted_deviation`). The row\n  partition is the zero-unexplained property (:meth:`balanced`).",
+        "description": "The audit index's obligation accounting (D221.2).\n\nTWO honest denominators, both reported so they can never be confused:\n\n* the CENSUS-shape counts (``discharged`` = model-backed resolved:\n  no deferral AND ``discharged`` evidence status, census v2/D220.3;\n  ``accepted_deviation`` = the number of UNIQUE accepted obligation\n  content addresses -- exactly ``len(acceptance.accepted_hashes)``,\n  the same value ``fleet._census_from_report`` records; ``violated``)\n  so the audit index reconciles with ``fleet_census.json`` field for\n  field via :meth:`census_row`;\n* the ROW partition (``discharged`` + ``accepted_rows`` + ``deferred``\n  + ``violated`` == ``obligations``), because a calc sheet and an\n  audit row are PER OBLIGATION and forall-expanded obligation\n  instances legitimately share one content address -- so the number\n  of accepted ROWS (:attr:`accepted_rows`) can exceed the number of\n  unique accepted addresses (:attr:`accepted_deviation`). The row\n  partition is the zero-unexplained property (:meth:`balanced`).",
         "properties": {
           "accepted_deviation": {
             "title": "Accepted Deviation",
@@ -643,6 +711,11 @@
             "title": "Source",
             "type": "string"
           },
+          "unit": {
+            "default": "",
+            "title": "Unit",
+            "type": "string"
+          },
           "value": {
             "title": "Value",
             "type": "string"
@@ -715,6 +788,11 @@
           },
           "tier": {
             "title": "Tier",
+            "type": "string"
+          },
+          "unit": {
+            "default": "",
+            "title": "Unit",
             "type": "string"
           },
           "value": {
@@ -2310,6 +2388,53 @@
         "summary": "Get Acceptance Ledger",
         "tags": [
           "calc"
+        ]
+      }
+    },
+    "/api/projects/{project}/artifact-index": {
+      "get": {
+        "description": "The typed artifact index (WO-G9 / lithos D244): family, kind,\nviewer hint, source refs -- the ONE surface the frontend's Artifacts\nhub, family router, and honest-fallback ladder read. A project\nshipped without `dist/artifact_index.json` still returns a\n(synthesized, `viewer=binary`) listing rather than an empty one.",
+        "operationId": "get_project_artifact_index_api_projects__project__artifact_index_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ArtifactIndexRow"
+                  },
+                  "title": "Response Get Project Artifact Index Api Projects  Project  Artifact Index Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Project Artifact Index",
+        "tags": [
+          "artifacts"
         ]
       }
     },

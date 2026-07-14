@@ -1,0 +1,6 @@
+{
+  "project": "mainboard_mx",
+  "subject": "MainboardMcu",
+  "entities": [],
+  "keepouts_absent_reason": "the realized-layout surface carries no keepout-region geometry (F136 gap, F-WO130-1) -- none listed here, never fabricated"
+}

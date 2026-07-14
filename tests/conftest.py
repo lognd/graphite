@@ -13,6 +13,12 @@ import pytest
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 TIMBER_PAVILION = FIXTURES_DIR / "timber_pavilion"
+#: WO-G9: an electrical/board fixture (real KiCad-generated RS-274X
+#: gerbers copied from lithos's demo11_board_gerbers, plus a hand-built
+#: `harness/` family) -- timber_pavilion is civil and ships neither
+#: `boards` nor `harness`, so WO-G9's silkscreen/gerber-stack and
+#: bring-up views need a fixture project that actually carries them.
+MAINBOARD_MX = FIXTURES_DIR / "mainboard_mx"
 
 
 def _find_lithos_root() -> Path:
@@ -80,3 +86,12 @@ def fixture_scan_root(tmp_path: Path, timber_pavilion: Path) -> Path:
     """A scan root (parent dir) holding one copy of the fixture project
     -- what `GRAPHITE_SCAN_ROOT` / `discovery.scan_projects` expects."""
     return timber_pavilion.parent
+
+
+@pytest.fixture
+def mainboard_mx(tmp_path: Path) -> Path:
+    """A fresh COPY of the committed `mainboard_mx` board+harness fixture
+    (see `MAINBOARD_MX` docstring)."""
+    dest = tmp_path / "mainboard_mx"
+    shutil.copytree(MAINBOARD_MX, dest)
+    return dest
