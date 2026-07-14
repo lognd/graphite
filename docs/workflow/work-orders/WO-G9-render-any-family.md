@@ -89,3 +89,34 @@ charter. Do not build any part of it here.
   removed (prove it bites).
 - graphite's own `make check` green; the real-backend Playwright rig
   covers the new views.
+
+
+## Close-out (done)
+
+Landed on branch `wog9` (4 commits, merged): index-driven Artifacts hub
+(the hardcoded family list is gone), real RS-274X gerber rendering
+(apertures, arcs, regions, flashes; unmodeled macros set an honest
+`partial` flag rather than fabricating a shape), the `harness/` family
+view, and a no-route-for-family test that reds when the catch-all route
+is removed. The board-identity silkscreen block reads
+`MainboardMcu 878fb7b92bd2 / REV: N/A` at 1:1 -- the block that was
+invisible when this WO was written.
+
+### Findings
+
+- WOG9-F1: RS-274X parsing is in TypeScript, marked provisional. The
+  largest fixture layer parses in low single-digit ms, under the
+  profiled threshold that would MANDATE the `wasm/` crate (spec 02
+  sec. 7). Promote verbatim when a real fleet board crosses it.
+- WOG9-F2: WITHDRAWN BY THE COORDINATOR. The dispatch reported that
+  graphite's gate "could not have been green before this branch"
+  (mock fixtures missing a required `unit` field). It does not
+  reproduce: `tsc -b` exits 0 at the v0.2.0 tag (6ac1b5a). The `unit`
+  field is one this branch itself introduced while mirroring lithos's
+  calc schema, so the branch fixed its OWN breakage. Recorded because
+  a false "it was already broken" claim is worse than the breakage --
+  it launders a self-inflicted red into an inherited one, and the next
+  person reads it as history.
+- WOG9-F3: the mocked Playwright rig serves a 3-layer subset of the
+  14-layer fab set; the real-backend route serves all 14 (asserted by
+  a backend test). Cosmetic, recorded.
