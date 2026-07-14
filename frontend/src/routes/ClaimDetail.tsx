@@ -10,6 +10,7 @@
 import { Fragment, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useCalcSheets, useObligations } from '../api/hooks';
+import { DetailNav } from '../components/DetailNav/DetailNav';
 import { EmptyState } from '../components/EmptyState/EmptyState';
 import { ErrorState } from '../components/ErrorState/ErrorState';
 import { HashChip } from '../components/HashChip/HashChip';
@@ -72,29 +73,20 @@ export function ClaimDetail() {
 
   return (
     <div className="gr-claim-detail">
-      <div className="gr-claim-detail__nav">
-        {prev ? (
-          <Link
-            to={`/project/${encodeURIComponent(projectId ?? '')}/claim/${encodeClaimKey(prev)}`}
-          >
-            &lt; prev
-          </Link>
-        ) : (
-          <span aria-disabled="true">&lt; prev</span>
-        )}
-        <span className="gr-micro-label">
-          {index + 1} / {rows.length}
-        </span>
-        {next ? (
-          <Link
-            to={`/project/${encodeURIComponent(projectId ?? '')}/claim/${encodeClaimKey(next)}`}
-          >
-            next &gt;
-          </Link>
-        ) : (
-          <span aria-disabled="true">next &gt;</span>
-        )}
-      </div>
+      <DetailNav
+        prevTo={
+          prev
+            ? `/project/${encodeURIComponent(projectId ?? '')}/claim/${encodeClaimKey(prev)}`
+            : null
+        }
+        nextTo={
+          next
+            ? `/project/${encodeURIComponent(projectId ?? '')}/claim/${encodeClaimKey(next)}`
+            : null
+        }
+        index={index}
+        total={rows.length}
+      />
 
       <h1>{row.claim_name}</h1>
       <VerdictBadge verdict={dispositionToVerdict(row.disposition)} />

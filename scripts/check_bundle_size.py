@@ -24,7 +24,9 @@ from graphite.logging_setup import get_logger
 
 _log = get_logger(__name__)
 
-STATIC_ASSETS = Path(__file__).parent.parent / "graphite" / "server" / "static" / "assets"
+STATIC_ASSETS = (
+    Path(__file__).parent.parent / "graphite" / "server" / "static" / "assets"
+)
 
 MAIN_JS_BUDGET_BYTES = 460_000
 MAIN_CSS_BUDGET_BYTES = 75_000
@@ -37,7 +39,11 @@ def _find_one(pattern: re.Pattern[str]) -> Path | None:
     """The single main chunk matching `pattern`, or None when absent."""
     matches = [p for p in STATIC_ASSETS.iterdir() if pattern.match(p.name)]
     if len(matches) != 1:
-        _log.error("check_bundle_size: expected 1 match for %s, got %r", pattern.pattern, matches)
+        _log.error(
+            "check_bundle_size: expected 1 match for %s, got %r",
+            pattern.pattern,
+            matches,
+        )
         return None
     return matches[0]
 
@@ -62,7 +68,9 @@ def main() -> int:
             continue
         size = path.stat().st_size
         verdict = "OK" if size <= budget else "OVER BUDGET"
-        print(f"check_bundle_size: {label} {path.name}: {size} bytes (budget {budget}) {verdict}")
+        print(
+            f"check_bundle_size: {label} {path.name}: {size} bytes (budget {budget}) {verdict}"
+        )
         if size > budget:
             failures.append(f"{label}: {size} > {budget} bytes ({path.name})")
 

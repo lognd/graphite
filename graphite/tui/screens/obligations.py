@@ -50,7 +50,9 @@ class ObligationsScreen(Screen[None]):
         yield TitleBlock()
         with Vertical():
             yield Static("", id="obligations-summary")
-            yield DataTable(id="obligations-table", cursor_type="row", zebra_stripes=False)
+            yield DataTable(
+                id="obligations-table", cursor_type="row", zebra_stripes=False
+            )
         yield StatusLine()
 
     def on_mount(self) -> None:
@@ -105,9 +107,7 @@ class ObligationsScreen(Screen[None]):
                 row.detail,
             )
         for reason, rows in sorted(grouped.items(), key=lambda kv: -len(kv[1])):
-            table.add_row(
-                f"-- {len(rows)}x --", "", "", reason, key=f"group:{reason}"
-            )
+            table.add_row(f"-- {len(rows)}x --", "", "", reason, key=f"group:{reason}")
             for row in rows:
                 table.add_row(
                     _VERDICT_NAME.get(row.disposition, row.disposition),
@@ -115,7 +115,9 @@ class ObligationsScreen(Screen[None]):
                     row.subject_anchor,
                     row.detail,
                 )
-        status.set_status(f"{len(index.rows)} obligation row(s) -- {self._project_root}")
+        status.set_status(
+            f"{len(index.rows)} obligation row(s) -- {self._project_root}"
+        )
 
     def action_cursor_down(self) -> None:
         self.query_one("#obligations-table", DataTable).action_cursor_down()

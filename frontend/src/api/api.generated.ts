@@ -1340,9 +1340,10 @@ export interface components {
         /**
          * GraphiteSettings
          * @description graphite's own preferences: a default project root to land on at
-         *     startup and a run verbosity passthrough for driven CLI invocations.
-         *     Never a regolith config key (that precedence ladder is a different
-         *     doctrine, D163/D164 -- this is graphite-local UI state).
+         *     startup, a run verbosity passthrough for driven CLI invocations, and
+         *     the run-history retention bound (WOG5-F3). Never a regolith config
+         *     key (that precedence ladder is a different doctrine, D163/D164 --
+         *     this is graphite-local UI state).
          */
         GraphiteSettings: {
             /**
@@ -1350,6 +1351,11 @@ export interface components {
              * @default
              */
             default_project_root: string;
+            /**
+             * Run History Limit
+             * @default 200
+             */
+            run_history_limit: number;
             /**
              * Run Verbosity
              * @default normal

@@ -214,3 +214,79 @@ def test_run_verbosity_verbose_spawns_dash_v(timber_pavilion: Path) -> None:
     assert set_settings(GraphiteSettings(run_verbosity="verbose")).is_ok
     argv_line = _spawn_and_read_argv(timber_pavilion)
     assert "--color never -v check" in argv_line
+
+
+def _plant_finished_record(
+    home: Path, run_id: str, started_at: str, status: str = "ok"
+) -> None:
+    """Write a synthetic finished record + log/stdout siblings directly
+    (retention tests need many aged records without spawning processes)."""
+    home.mkdir(parents=True, exist_ok=True)
+    record = runs_module.RunRecord(
+        run_id=run_id,
+        verb="check",
+        project_root="/nowhere",
+        args=(),
+        status=status,  # type: ignore[arg-type]
+        started_at=started_at,
+        before_health=runs_module.HealthSnapshot(
+            release_ok=None, violated=None, total_obligations=None
+        ),
+    )
+    (home / f"{run_id}.json").write_text(record.model_dump_json())
+    (home / f"{run_id}.log").write_text("log\n")
+    (home / f"{run_id}.stdout.json").write_text("{}")
+
+
+def test_prune_run_history_keeps_newest(_runs_home: Path) -> None:
+    for i in range(5):
+        _plant_finished_record(
+            _runs_home, f"run{i}", f"2026-07-0{i + 1}T00:00:00+00:00"
+        )
+    pruned = runs_module.prune_run_history(2)
+    assert pruned == 3
+    survivors = {r.run_id for r in runs_module.list_runs()}
+    assert survivors == {"run3", "run4"}
+    # Siblings of pruned runs are gone too.
+    assert not (_runs_home / "run0.log").exists()
+    assert not (_runs_home / "run0.stdout.json").exists()
+
+
+def test_prune_run_history_zero_keeps_everything(_runs_home: Path) -> None:
+    for i in range(3):
+        _plant_finished_record(
+            _runs_home, f"run{i}", f"2026-07-0{i + 1}T00:00:00+00:00"
+        )
+    assert runs_module.prune_run_history(0) == 0
+    assert len(runs_module.list_runs()) == 3
+
+
+def test_prune_run_history_never_prunes_running(_runs_home: Path) -> None:
+    _plant_finished_record(
+        _runs_home, "old-live", "2026-07-01T00:00:00+00:00", status="running"
+    )
+    for i in range(3):
+        _plant_finished_record(
+            _runs_home, f"run{i}", f"2026-07-0{i + 2}T00:00:00+00:00"
+        )
+    assert runs_module.prune_run_history(1) == 2
+    survivors = {r.run_id for r in runs_module.list_runs()}
+    assert survivors == {"old-live", "run2"}
+
+
+def test_start_run_applies_retention(timber_pavilion: Path, _runs_home: Path) -> None:
+    from graphite.service.settings import GraphiteSettings, set_settings
+
+    assert set_settings(GraphiteSettings(run_history_limit=1)).is_ok
+    for i in range(3):
+        _plant_finished_record(
+            _runs_home, f"aged{i}", f"2026-07-0{i + 1}T00:00:00+00:00"
+        )
+    started = runs_module.start_run(
+        timber_pavilion, "check", regolith_argv=_ECHO_ARGV
+    ).danger_ok
+    _wait_until_finished(started.run_id)
+    survivors = {r.run_id for r in runs_module.list_runs()}
+    # The newest aged record survived the pre-spawn prune; the new run
+    # rides on top of it.
+    assert survivors == {"aged2", started.run_id}

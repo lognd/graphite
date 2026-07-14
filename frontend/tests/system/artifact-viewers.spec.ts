@@ -79,3 +79,17 @@ test('zero-external-request holds with every artifact viewer mounted', async ({ 
 
   expect(offenders, `non-localhost requests: ${offenders.join(', ')}`).toEqual([]);
 });
+
+test('calc sheet: prev/next walks the calc book order (WO-G8, closes the WO-G4 deferral)', async ({
+  page,
+}) => {
+  await openFamily(page, 'Calc book');
+  await page.getByRole('link', { name: 'open sheet' }).first().click();
+  await expect(page.getByText('1 / 6')).toBeVisible();
+  // First sheet: prev disabled, next live.
+  await expect(page.locator('.gr-detail-nav [aria-disabled="true"]')).toHaveText('< prev');
+  await page.getByRole('link', { name: 'next >' }).click();
+  await expect(page.getByText('2 / 6')).toBeVisible();
+  await page.getByRole('link', { name: '< prev' }).click();
+  await expect(page.getByText('1 / 6')).toBeVisible();
+});

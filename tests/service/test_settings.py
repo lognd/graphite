@@ -39,7 +39,9 @@ def test_set_then_get_round_trip() -> None:
 
 
 def test_reset_settings_restores_defaults() -> None:
-    set_settings(GraphiteSettings(default_project_root="/tmp/proj", run_verbosity="quiet"))
+    set_settings(
+        GraphiteSettings(default_project_root="/tmp/proj", run_verbosity="quiet")
+    )
     reset_result = reset_settings()
     assert reset_result.is_ok
     assert reset_result.danger_ok == GraphiteSettings()

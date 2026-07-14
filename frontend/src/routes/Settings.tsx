@@ -18,6 +18,7 @@ import './Settings.css';
 
 const DEFAULT_PROJECT_ROOT = '';
 const DEFAULT_RUN_VERBOSITY: RunVerbosity = 'normal';
+const DEFAULT_RUN_HISTORY_LIMIT = 200;
 const VERBOSITY_OPTIONS: RunVerbosity[] = ['quiet', 'normal', 'verbose'];
 
 export function Settings() {
@@ -99,6 +100,18 @@ export function Settings() {
             ))}
           </select>
         )}
+      />
+
+      <ConfigField
+        label="run_history_limit"
+        doc="Newest finished run records kept under the runs home; older records and their logs are pruned when a new run starts. 0 keeps everything. (WO-G8, closes WOG5-F3.)"
+        value={String(settings.run_history_limit)}
+        source="graphite"
+        isDefault={settings.run_history_limit === DEFAULT_RUN_HISTORY_LIMIT}
+        onSave={(value) =>
+          setSettings.mutateAsync({ ...settings, run_history_limit: Number(value) })
+        }
+        onReset={() => resetSettings.mutateAsync()}
       />
     </div>
   );

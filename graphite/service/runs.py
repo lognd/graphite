@@ -52,7 +52,11 @@ from typani.result import Err, Ok, Result
 from graphite.logging_setup import get_logger
 from graphite.service.errors import ServiceError
 from graphite.service.reports import read_audit_index, read_staged_build_report
-from graphite.service.settings import RunVerbosity, get_settings
+from graphite.service.settings import (
+    DEFAULT_RUN_HISTORY_LIMIT,
+    RunVerbosity,
+    get_settings,
+)
 
 _log = get_logger(__name__)
 
@@ -107,7 +111,9 @@ def _capture_health(project_root: Path) -> HealthSnapshot:
     release_ok: bool | None = None
     violated: int | None = None
     total: int | None = None
-    build = read_staged_build_report(project_root / ".regolith" / "build" / "build_report.json")
+    build = read_staged_build_report(
+        project_root / ".regolith" / "build" / "build_report.json"
+    )
     if build.is_ok:
         release_ok = build.danger_ok.final.release_ok
     audit = read_audit_index(project_root / "dist" / "calc" / "audit_index.json")
@@ -115,7 +121,9 @@ def _capture_health(project_root: Path) -> HealthSnapshot:
         summary = audit.danger_ok.summary
         violated = summary.violated
         total = summary.obligations
-    return HealthSnapshot(release_ok=release_ok, violated=violated, total_obligations=total)
+    return HealthSnapshot(
+        release_ok=release_ok, violated=violated, total_obligations=total
+    )
 
 
 class VerdictDiff(BaseModel):
@@ -196,8 +204,25 @@ def start_run(
             "runs: unreadable settings (%s), falling back to normal verbosity",
             settings.danger_err.message,
         )
+    # Retention (WOG5-F3): bound the history BEFORE adding this run's
+    # record, so the store never exceeds limit+1 files even transiently.
+    history_limit = (
+        settings.danger_ok.run_history_limit
+        if settings.is_ok
+        else DEFAULT_RUN_HISTORY_LIMIT
+    )
+    pruned = prune_run_history(history_limit)
+    if pruned:
+        _log.info("runs: retention pruned %d old run record(s)", pruned)
     argv = list(regolith_argv or (sys.executable, "-m", "regolith.cli"))
-    full_args = [*argv, "--color", "never", *_VERBOSITY_FLAGS[verbosity], verb, *extra_args]
+    full_args = [
+        *argv,
+        "--color",
+        "never",
+        *_VERBOSITY_FLAGS[verbosity],
+        verb,
+        *extra_args,
+    ]
     _log.debug("runs: verbosity=%s flags=%s", verbosity, _VERBOSITY_FLAGS[verbosity])
     started_at = datetime.now(timezone.utc).isoformat()
     log_path = _log_path(run_id)
@@ -309,6 +334,37 @@ def mark_finished(run_id: str, exit_code: int) -> None:
     finishes tailing, and directly by tests that need deterministic
     completion without racing `Popen.poll`)."""
     _finalize(run_id, exit_code)
+
+
+def prune_run_history(limit: int) -> int:
+    """Delete the oldest FINISHED run records (and their `.log` /
+    `.stdout.json` siblings) beyond `limit`, returning how many were
+    pruned (WO-G8, closes WOG5-F3: runs-home grew without bound).
+    `limit=0` keeps everything -- the pre-retention behavior. Records
+    with status `running` are never pruned: a long-lived run must not
+    lose its record mid-flight, whatever its age."""
+    if limit <= 0:
+        return 0
+    keepable = [r for r in list_runs() if r.status != "running"]
+    doomed = keepable[limit:]  # list_runs is newest-first
+    for record in doomed:
+        for path in (
+            _record_path(record.run_id),
+            _log_path(record.run_id),
+            runs_home() / f"{record.run_id}.stdout.json",
+        ):
+            try:
+                path.unlink(missing_ok=True)
+            except OSError as exc:
+                _log.warning("runs: could not prune %s: %s", path, exc)
+        _log.info(
+            "runs: pruned run %s (%s, started %s) past run_history_limit=%d",
+            record.run_id,
+            record.status,
+            record.started_at,
+            limit,
+        )
+    return len(doomed)
 
 
 def list_runs(project_root: Path | None = None) -> tuple[RunRecord, ...]:

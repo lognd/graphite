@@ -13,14 +13,17 @@ describe('ReasonCell', () => {
     expect(screen.getByText('awaiting derating study')).toBeInTheDocument();
   });
 
-  it('links to the governing design-log rule when an F-number is present', () => {
+  it('highlights the governing design-log rule as text, never a dead link (WOG3-F4)', () => {
     render(<ReasonCell reason="load case exceeds envelope" fNumber="F118" />);
-    const link = screen.getByRole('link', { name: 'F118' });
-    expect(link).toHaveAttribute('href', '#/design-log/F118');
+    expect(screen.getByText('F118')).toBeInTheDocument();
+    // No design-log route exists in the app -- a placeholder anchor would
+    // be a dead link, so the rule number must not render as one.
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
   });
 
-  it('omits the link when no F-number is given', () => {
+  it('omits the rule marker when no F-number is given', () => {
     render(<ReasonCell reason="pending review" />);
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
+    expect(screen.queryByTitle(/design-log rule/)).not.toBeInTheDocument();
   });
 });

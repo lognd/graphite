@@ -55,7 +55,9 @@ def test_api_still_works_with_static_mounted(static_client: TestClient) -> None:
     assert static_client.get("/api/ping").json() == {"status": "ok"}
 
 
-def test_no_static_dir_is_api_only(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+def test_no_static_dir_is_api_only(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Without a build (dev checkout, no `make build`) the app stays
     API-only and still assembles."""
     import graphite.server.app as app_module

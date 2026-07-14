@@ -810,4 +810,5 @@ export const mockDoctor: DoctorEntry[] = [
 export const mockSettings: GraphiteSettings = {
   default_project_root: '',
   run_verbosity: 'normal',
+  run_history_limit: 200,
 };
