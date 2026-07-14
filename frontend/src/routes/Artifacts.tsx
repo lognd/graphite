@@ -1,28 +1,38 @@
-// Artifacts hub (WO-G4): pick a project, then a family (calc book,
-// drawings, 3D, BOM/cost/schedule, boards) -- answers "show me the
-// artifact" (charter 2.1). Kept as its own route tree (not folded into
-// WO-G3's /project/:projectId route) per the WO-G4/WO-G3 route-collision
-// note: the two land in parallel on separate branches.
+// Artifacts hub (WO-G9 rewrite: DELETE the hardcoded family list, lithos
+// F145). Families now come from the project's own typed artifact index
+// (`familiesFromIndex`) -- a family graphite has never heard of appears
+// here automatically. A handful of families keep a bespoke, richer route
+// (calc/drawings/model/bom/boards/harness); every other family routes to
+// the generic index-driven FamilyView (the fallback ladder), so no
+// family can ever again be silently dropped (deliverable 6).
 
 import { Link, useSearchParams } from 'react-router-dom';
-import { useProjects } from '../api/hooks';
+import { useProjectArtifactIndex, useProjects } from '../api/hooks';
 import { EmptyState } from '../components/EmptyState/EmptyState';
 import { ErrorState } from '../components/ErrorState/ErrorState';
 import { PageTitle } from '../components/PageTitle/PageTitle';
+import { familiesFromIndex, familyLabel } from './artifacts/familyIndex';
 import './artifacts/artifacts.css';
 
-const FAMILIES = [
-  { path: 'calc', label: 'Calc book', detail: 'Audit index + calc sheets' },
-  { path: 'drawings', label: 'Drawings', detail: 'SVG sheets, PDF, title blocks' },
-  { path: 'model', label: '3D model', detail: 'GLB viewer, STEP download' },
-  { path: 'bom', label: 'BOM / cost / schedule', detail: 'Cost estimates, lock rows' },
-  { path: 'boards', label: 'Boards', detail: 'Gerber layers, firmware/HDL' },
-];
+// Bespoke, richer routes for families this repo has purpose-built views
+// for (app/routes.tsx registers all of these AND the generic catch-all
+// `artifacts/:projectId/family/:family` -- see that file's comment for
+// why both exist). Any family NOT in this map still gets a hub tile,
+// routed to the generic view.
+const DEDICATED_ROUTE: Record<string, string> = {
+  calc: 'calc',
+  drawings: 'drawings',
+  '3d': 'model',
+  bom: 'bom',
+  boards: 'boards',
+  harness: 'harness',
+};
 
 export function Artifacts() {
   const [params, setParams] = useSearchParams();
   const projects = useProjects();
   const selected = params.get('project') ?? undefined;
+  const index = useProjectArtifactIndex(selected);
 
   if (projects.isError) {
     return (
@@ -41,6 +51,8 @@ export function Artifacts() {
       />
     );
   }
+
+  const families = familiesFromIndex(index.data ?? []);
 
   return (
     <div className="gr-artifacts-hub">
@@ -64,20 +76,38 @@ export function Artifacts() {
       {!selected ? (
         <EmptyState
           title="Select a project to browse its artifacts"
-          detail="Every family below sources data from that project's own dist/ and build report."
+          detail="Every family below sources data from that project's own shipped artifact index."
+        />
+      ) : index.isLoading ? (
+        <p role="status">loading artifact index...</p>
+      ) : index.isError ? (
+        <ErrorState
+          title="Could not load this project's artifact index"
+          detail={String(index.error)}
+          onRetry={() => index.refetch()}
+        />
+      ) : families.length === 0 ? (
+        <EmptyState
+          title="This project has no shipped artifacts"
+          detail="Run a build/ship before browsing artifacts."
         />
       ) : (
         <div className="gr-artifacts-hub__families">
-          {FAMILIES.map((f) => (
-            <Link
-              key={f.path}
-              className="gr-artifacts-hub__family"
-              to={`/artifacts/${encodeURIComponent(selected)}/${f.path}`}
-            >
-              <strong>{f.label}</strong>
-              <p className="gr-micro-label">{f.detail}</p>
-            </Link>
-          ))}
+          {families.map((f) => {
+            const path = DEDICATED_ROUTE[f.family] ?? `family/${encodeURIComponent(f.family)}`;
+            return (
+              <Link
+                key={f.family}
+                className="gr-artifacts-hub__family"
+                to={`/artifacts/${encodeURIComponent(selected)}/${path}`}
+              >
+                <strong>{familyLabel(f.family)}</strong>
+                <p className="gr-micro-label">
+                  {f.count} file{f.count === 1 ? '' : 's'} -- {f.viewers.join(', ')}
+                </p>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>

@@ -22,6 +22,7 @@ import {
   mockObligationsGrouped,
   mockObligationsSynthetic2k,
   SYNTHETIC_2K_PROJECT,
+  mockArtifactIndex,
   mockProjectArtifacts,
   mockProjectConfig,
   mockProjectHealth,
@@ -34,6 +35,7 @@ import {
 
 export type ProjectInfo = components['schemas']['ProjectInfo'];
 export type ArtifactEntry = components['schemas']['ArtifactEntry'];
+export type ArtifactIndexRow = components['schemas']['ArtifactIndexRow'];
 export type ProjectHealth = components['schemas']['ProjectHealth'];
 export type ObligationsResponse = components['schemas']['ObligationsResponse'];
 export type ObligationGroup = components['schemas']['ObligationGroup'];
@@ -216,6 +218,13 @@ export const api = {
   async listArtifacts(project: string): Promise<ArtifactEntry[]> {
     if (USE_MOCKS) return mockProjectArtifacts;
     return request<ArtifactEntry[]>(`/projects/${encodeURIComponent(project)}/artifacts`);
+  },
+  /** The typed index (WO-G9 / lithos D244): every route that lists "what
+   * families/files does this project have" reads THIS, never a hardcoded
+   * family constant (the fix for lithos F145). */
+  async getArtifactIndex(project: string): Promise<ArtifactIndexRow[]> {
+    if (USE_MOCKS) return mockArtifactIndex;
+    return request<ArtifactIndexRow[]>(`/projects/${encodeURIComponent(project)}/artifact-index`);
   },
   async fetchArtifact(project: string, contentHash: string): Promise<Blob> {
     return requestBlob(

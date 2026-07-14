@@ -56,6 +56,17 @@ export function useProjectArtifacts(project: string | undefined) {
   });
 }
 
+/** WO-G9: the typed index -- families, per-file viewer hints, source
+ * refs. The Artifacts hub and every family view read this instead of a
+ * hardcoded family list (the fix for lithos F145). */
+export function useProjectArtifactIndex(project: string | undefined) {
+  return useQuery({
+    queryKey: ['artifact-index', project],
+    queryFn: () => api.getArtifactIndex(project as string),
+    enabled: Boolean(project),
+  });
+}
+
 export function useBuildReport(project: string | undefined) {
   return useQuery({
     queryKey: ['build-report', project],

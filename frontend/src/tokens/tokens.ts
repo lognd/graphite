@@ -79,6 +79,27 @@ export const colorDark = {
     acceptedDeviation: '#7A8CE0',
     excluded: '#8A949D',
   },
+  // WO-G9 board gerber-layer stack colors (spec 04.1 "any graphic" floor:
+  // a legend-backed palette, not ad hoc hex per component). Conventional
+  // fab-drawing hues (copper=orange, mask=green, silkscreen=near-white,
+  // fab/courtyard=blue/gold outline layers, Edge.Cuts=amber board edge).
+  gerberLayer: {
+    bCu: '#C87137',
+    fCu: '#E8935A',
+    bMask: '#4CAF6E',
+    fMask: '#6FCB8E',
+    bPaste: '#8A949D',
+    fPaste: '#B7BEC5',
+    bSilkscreen: '#D7DEE4',
+    fSilkscreen: '#FFFFFF',
+    bFab: '#7A8CE0',
+    fFab: '#9CA8EA',
+    bCourtyard: '#D9B23D',
+    fCourtyard: '#E8CB6E',
+    margin: '#E05252',
+    edgeCuts: '#E8A33D',
+    unknown: '#8A949D',
+  },
 } as const;
 
 // Light theme reads as an engineering drawing (title-block paper), not a
@@ -102,6 +123,25 @@ export const colorLight = {
     deferred: '#7D5F14',
     acceptedDeviation: '#4B57A8',
     excluded: '#5A5F67',
+  },
+  // Darkened counterparts of colorDark.gerberLayer for the drawing-paper
+  // background (same AA-floor reasoning as `accent`/`verdict` above).
+  gerberLayer: {
+    bCu: '#8A4A1E',
+    fCu: '#A85A28',
+    bMask: '#2F7D4C',
+    fMask: '#3D9760',
+    bPaste: '#5A5F67',
+    fPaste: '#767C84',
+    bSilkscreen: '#5B6167',
+    fSilkscreen: '#1A1D20',
+    bFab: '#4B57A8',
+    fFab: '#5F6DC4',
+    bCourtyard: '#7D5F14',
+    fCourtyard: '#96751C',
+    margin: '#B23A3A',
+    edgeCuts: '#8A5A16',
+    unknown: '#5B6167',
   },
 } as const;
 

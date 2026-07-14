@@ -11,6 +11,12 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   server: {
+    fs: {
+      // WO-G9: vitest specs read real fixtures (RS-274X gerbers, the
+      // committed artifact_index.json) from ../tests/fixtures via `?raw`
+      // imports -- outside Vite's default project-root allowlist.
+      allow: ['..'],
+    },
     proxy: {
       // dev-time proxy to the FastAPI server (make dev); unused when
       // VITE_USE_MOCKS=1. VITE_API_PROXY_TARGET overrides the port for

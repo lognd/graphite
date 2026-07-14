@@ -18,6 +18,8 @@ import { DrawingView } from '../routes/artifacts/DrawingView';
 import { Model3D } from '../routes/artifacts/Model3D';
 import { Bom } from '../routes/artifacts/Bom';
 import { Boards } from '../routes/artifacts/Boards';
+import { HarnessView } from '../routes/artifacts/HarnessView';
+import { FamilyView } from '../routes/artifacts/FamilyView';
 import { Runs } from '../routes/Runs';
 import { Config } from '../routes/Config';
 import { Doctor } from '../routes/Doctor';
@@ -37,6 +39,12 @@ const children = [
   { path: 'artifacts/:projectId/model', element: <Model3D /> },
   { path: 'artifacts/:projectId/bom', element: <Bom /> },
   { path: 'artifacts/:projectId/boards', element: <Boards /> },
+  { path: 'artifacts/:projectId/harness', element: <HarnessView /> },
+  // WO-G9 deliverable 6: the catch-all for any family without a bespoke
+  // route above. This is the route the "no family drops silently" claim
+  // rests on -- remove it and familyIndex.test.ts's router-integration
+  // test (`no-route-for-family.test.ts`) fails, proving the lesson bites.
+  { path: 'artifacts/:projectId/family/:family', element: <FamilyView /> },
   { path: 'runs', element: <Runs /> },
   { path: 'config', element: <Config /> },
   { path: 'doctor', element: <Doctor /> },
@@ -50,6 +58,12 @@ if (import.meta.env.DEV) {
   const { Gallery } = await import('../routes/Gallery');
   children.push({ path: 'dev/gallery', element: <Gallery /> });
 }
+
+// Exported for router-integration tests (WO-G9 deliverable 6's
+// no-route-for-family test): `createBrowserRouter`'s route objects are
+// awkward to introspect through browser APIs in vitest's jsdom
+// environment, but the plain `children` array is not.
+export const routeChildren = children;
 
 export const router = createBrowserRouter([
   {
