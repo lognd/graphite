@@ -10,6 +10,7 @@ from fastapi import APIRouter, Response
 
 from graphite.server.deps import project_root_path
 from graphite.server.errors import raise_for_error
+from graphite.service.artifact_index import ArtifactIndexRow, load_index
 from graphite.service.artifact_registry import (
     ArtifactEntry,
     fetch_by_hash,
@@ -26,6 +27,17 @@ def list_project_artifacts(project: str) -> tuple[ArtifactEntry, ...]:
     fetch key (04.1 "ANY GRAPHIC" floor: content-hash caption)."""
     root = project_root_path(project)
     return list_artifacts(root / "dist")
+
+
+@router.get("/{project}/artifact-index", response_model=tuple[ArtifactIndexRow, ...])
+def get_project_artifact_index(project: str) -> tuple[ArtifactIndexRow, ...]:
+    """The typed artifact index (WO-G9 / lithos D244): family, kind,
+    viewer hint, source refs -- the ONE surface the frontend's Artifacts
+    hub, family router, and honest-fallback ladder read. A project
+    shipped without `dist/artifact_index.json` still returns a
+    (synthesized, `viewer=binary`) listing rather than an empty one."""
+    root = project_root_path(project)
+    return load_index(root / "dist")
 
 
 @router.get("/{project}/artifacts/{content_hash}")

@@ -1,0 +1,7 @@
+channel,kind,target,connector_pin
+CH0,voltage,VCC_5V0,J1.1
+CH1,voltage,VCC_3V3,J1.2
+CH2,gnd,GND,J1.3
+CH3,digital,MCU.UART0_TX,J2.4
+CH4,digital,MCU.UART0_RX,J2.5
+CH5,analog,VREF,J3.1

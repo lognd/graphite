@@ -1,0 +1,5 @@
+reference,part_number,description,vendor_ref,quantity
+cb_5v,CAP-22UF-X5R-0805,Bulk reservoir 22uF X5R 0805,cap_22uf_x5r_0805,1
+d_pwr,PESD5V0S1BA,"TVS clamp, 5V line",tvs_pesd5v0s1ba,1
+j_pwr,JST-XH-2P,"5V power entry header, JST XH 2-pin",jst_xh_2p,1
+tp_5v,TP-1MM2,"Rail test point, 1mm2 probe pad",tp_probe_pad_1mm2,1

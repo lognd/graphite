@@ -1,0 +1,9 @@
+{
+  "signals": [
+    {"channel": "CH0", "expect": "5.0V +/-2%", "source_ref": "elec/power_tree.cupr:VCC_5V0"},
+    {"channel": "CH1", "expect": "3.3V +/-2%", "source_ref": "elec/power_tree.cupr:VCC_3V3"},
+    {"channel": "CH2", "expect": "0V (reference)", "source_ref": null},
+    {"channel": "CH3", "expect": "idle-high UART, 115200 8N1", "source_ref": "elec/mcu.cupr:UART0"},
+    {"channel": "CH4", "expect": null, "reason": "no expected-signal record was authored for CH4 -- receive line has no source assertion in mcu.cupr"}
+  ]
+}

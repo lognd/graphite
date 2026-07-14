@@ -84,3 +84,29 @@
   padding: var(--graphite-space-4);
   min-width: 12rem;
 }
+
+.gr-board-gerber-view__layers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--graphite-space-1);
+  border: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  padding: var(--graphite-space-2);
+  margin-bottom: var(--graphite-space-3);
+}
+
+.gr-board-gerber-view__layer-row {
+  display: flex;
+  align-items: center;
+  gap: var(--graphite-space-2);
+}
+
+.gr-family-view__section {
+  margin-top: var(--graphite-space-4);
+}
+
+.gr-family-view__file-row {
+  display: flex;
+  align-items: center;
+  gap: var(--graphite-space-2);
+  padding: var(--graphite-space-1) 0;
+}

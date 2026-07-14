@@ -1,0 +1,309 @@
+{
+  "project": "mainboard_mx",
+  "rows": [
+    {
+      "family": "boards",
+      "kind": "json",
+      "relpath": "boards/MainboardMcu.edit_model.json",
+      "content_hash": "938ba6547adec1530557fc45d5f96dd26aa445c569ae644b79786a23ea45ab60",
+      "bytes": 232,
+      "media_type": "application/json",
+      "viewer": "json",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "kicad_pcb",
+      "relpath": "boards/board.kicad_pcb",
+      "content_hash": "2685ab67057d87e495c3e57d94d471061883dae2d642ad794fef97a78f9c1e3e",
+      "bytes": 1055,
+      "media_type": "text/plain",
+      "viewer": "text",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "json",
+      "relpath": "boards/board_status.json",
+      "content_hash": "dfe745f6733c6b7d5f870e0b0ff8d4a52818239a391d19b0841ad8c84626a200",
+      "bytes": 104,
+      "media_type": "application/json",
+      "viewer": "json",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "csv",
+      "relpath": "boards/bom.csv",
+      "content_hash": "9cbc9375a84d1c5c67104bcc1a715c53dd397d0f6aa643bff343fce98a656ad3",
+      "bytes": 318,
+      "media_type": "text/csv",
+      "viewer": "table",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "drill.NPTH-drl_map",
+      "relpath": "boards/drill/board-NPTH-drl_map.gbr",
+      "content_hash": "8e6321c0400ea68c12946dca80253a7e944d5201e14d28bc87de89674b0ead07",
+      "bytes": 3730,
+      "media_type": "application/vnd.excellon-drill",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "drill.NPTH",
+      "relpath": "boards/drill/board-NPTH.drl",
+      "content_hash": "62d986435823033566825eda7d3465dc18b8b21ac09e0b26e290fe89eb36caa4",
+      "bytes": 306,
+      "media_type": "application/vnd.excellon-drill",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "drill.PTH-drl_map",
+      "relpath": "boards/drill/board-PTH-drl_map.gbr",
+      "content_hash": "8e6321c0400ea68c12946dca80253a7e944d5201e14d28bc87de89674b0ead07",
+      "bytes": 3730,
+      "media_type": "application/vnd.excellon-drill",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "drill.PTH",
+      "relpath": "boards/drill/board-PTH.drl",
+      "content_hash": "a14df657228fdfe0e2013b68079bf55711b76cea04bb4dec6ec7fd90ed7d34d4",
+      "bytes": 302,
+      "media_type": "application/vnd.excellon-drill",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "drill.board",
+      "relpath": "boards/drill/board.drl",
+      "content_hash": "586959f22301381e2b4a42ab934aaa2037d562ab42f1334d06a0f2ebe2893b5d",
+      "bytes": 304,
+      "media_type": "application/vnd.excellon-drill",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "gerber_layer.B_Courtyard",
+      "relpath": "boards/gerbers/board-B_Courtyard.gbr",
+      "content_hash": "ade8528a52fcbf246fa35f5da0355cdba74a86f607ca70476de47ce76c15cfa7",
+      "bytes": 465,
+      "media_type": "application/vnd.gerber",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "gerber_layer.B_Cu",
+      "relpath": "boards/gerbers/board-B_Cu.gbl",
+      "content_hash": "1d354dfffab0299a55963958c049a176a4133cc80863901435fe5799f2402df4",
+      "bytes": 496,
+      "media_type": "application/vnd.gerber",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "gerber_layer.B_Fab",
+      "relpath": "boards/gerbers/board-B_Fab.gbr",
+      "content_hash": "67b9ef629e3fede3e4c40d04360151a9f665000af8d3c7a51a24ca4a86540fab",
+      "bytes": 474,
+      "media_type": "application/vnd.gerber",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "gerber_layer.B_Mask",
+      "relpath": "boards/gerbers/board-B_Mask.gbs",
+      "content_hash": "59b496d2734a9781e8e68e39211550f81e0ecef84c8d156adb2fdea8747a3ff5",
+      "bytes": 497,
+      "media_type": "application/vnd.gerber",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "gerber_layer.B_Paste",
+      "relpath": "boards/gerbers/board-B_Paste.gbp",
+      "content_hash": "2fbe7197dfbc29c6d17af72683e8a1e102e00bc58bbf4a44ca992ffdbcfaa1da",
+      "bytes": 492,
+      "media_type": "application/vnd.gerber",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "gerber_layer.B_Silkscreen",
+      "relpath": "boards/gerbers/board-B_Silkscreen.gbo",
+      "content_hash": "b239e5216427283869e8937b2743657b9ac476fc1a2586bf1dc9c7c44a2e971e",
+      "bytes": 493,
+      "media_type": "application/vnd.gerber",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "gerber_layer.Edge_Cuts",
+      "relpath": "boards/gerbers/board-Edge_Cuts.gm1",
+      "content_hash": "b909e3dd13109376acaaa0a8716da9f82e7a1cee30d03b4d7a78bde1ac4a72ba",
+      "bytes": 601,
+      "media_type": "application/vnd.gerber",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "gerber_layer.F_Courtyard",
+      "relpath": "boards/gerbers/board-F_Courtyard.gbr",
+      "content_hash": "ade8528a52fcbf246fa35f5da0355cdba74a86f607ca70476de47ce76c15cfa7",
+      "bytes": 465,
+      "media_type": "application/vnd.gerber",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "gerber_layer.F_Cu",
+      "relpath": "boards/gerbers/board-F_Cu.gtl",
+      "content_hash": "9969a2b9b9c4c167e1316e8bb42e4318aadf9111679b42f373c7cc40539afb8a",
+      "bytes": 496,
+      "media_type": "application/vnd.gerber",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "gerber_layer.F_Fab",
+      "relpath": "boards/gerbers/board-F_Fab.gbr",
+      "content_hash": "776b733d75a7401f182c5e6ad26e1aa5ce58e49f28896925b8fcf4d811c35b47",
+      "bytes": 474,
+      "media_type": "application/vnd.gerber",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "gerber_layer.F_Mask",
+      "relpath": "boards/gerbers/board-F_Mask.gts",
+      "content_hash": "a496a80c07404dc82dfe40f3d6ad556777dfa278e2bde67e776d7b493cc444aa",
+      "bytes": 497,
+      "media_type": "application/vnd.gerber",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "gerber_layer.F_Paste",
+      "relpath": "boards/gerbers/board-F_Paste.gtp",
+      "content_hash": "532ce02a51dd671c09b21c67e5e007b076fa9539569f622f32a07dd24d7f90fd",
+      "bytes": 492,
+      "media_type": "application/vnd.gerber",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "gerber_layer.F_Silkscreen",
+      "relpath": "boards/gerbers/board-F_Silkscreen.gto",
+      "content_hash": "ca8cf7026e75c24ccd71ad6381070fb01cf70018cec2b6707db50a0173c44ff2",
+      "bytes": 15772,
+      "media_type": "application/vnd.gerber",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "gerber_layer.Margin",
+      "relpath": "boards/gerbers/board-Margin.gbr",
+      "content_hash": "ade8528a52fcbf246fa35f5da0355cdba74a86f607ca70476de47ce76c15cfa7",
+      "bytes": 465,
+      "media_type": "application/vnd.gerber",
+      "viewer": "gerber",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "job_file",
+      "relpath": "boards/gerbers/board-job.gbrjob",
+      "content_hash": "0afb20d4f5b548ade844989a3cd644dd3635f6a8d0f8c7ad03b1af0636d9886b",
+      "bytes": 2718,
+      "media_type": "application/json",
+      "viewer": "json",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "json",
+      "relpath": "boards/panel.json",
+      "content_hash": "a94af1c626d8f5bca70082a6be2744dd0287250b3e97a166f1bc92c4c119a3e4",
+      "bytes": 27,
+      "media_type": "application/json",
+      "viewer": "json",
+      "source_refs": []
+    },
+    {
+      "family": "boards",
+      "kind": "csv",
+      "relpath": "boards/pos/positions.csv",
+      "content_hash": "7565b037b9375e5a5070ba77a93488768c56409db7c519ace55cc83bb2f74819",
+      "bytes": 35,
+      "media_type": "text/csv",
+      "viewer": "table",
+      "source_refs": []
+    },
+    {
+      "family": "harness",
+      "kind": "markdown",
+      "relpath": "harness/bringup.md",
+      "content_hash": "67ff50115e665ccf0dbb50e8660549c8e0c2bb04c86b692464f5f24f2671b466",
+      "bytes": 387,
+      "media_type": "text/markdown",
+      "viewer": "markdown",
+      "source_refs": []
+    },
+    {
+      "family": "harness",
+      "kind": "capture_config",
+      "relpath": "harness/capture.sigrok-cli",
+      "content_hash": "b897816072c236a6c587fc2c7accd0f040c7b070f8e33441d227dcc7a85a63e0",
+      "bytes": 98,
+      "media_type": "text/plain",
+      "viewer": "text",
+      "source_refs": []
+    },
+    {
+      "family": "harness",
+      "kind": "json",
+      "relpath": "harness/expected_signals.json",
+      "content_hash": "8d1986e06a6e9e03fd35a88d16b9d65ef896ccdc0ba0f7eaf3ff9a34b9921a9c",
+      "bytes": 535,
+      "media_type": "application/json",
+      "viewer": "json",
+      "source_refs": [
+        "elec/power_tree.cupr:VCC_5V0",
+        "elec/power_tree.cupr:VCC_3V3",
+        "elec/mcu.cupr:UART0"
+      ]
+    },
+    {
+      "family": "harness",
+      "kind": "csv",
+      "relpath": "harness/tap_map.csv",
+      "content_hash": "1d32bfe7d94606883562033b626a8c1deaed9ac9af8cf7f72b0ce464119dec5f",
+      "bytes": 182,
+      "media_type": "text/csv",
+      "viewer": "table",
+      "source_refs": []
+    }
+  ]
+}
