@@ -38,4 +38,24 @@ WO-G1 (backend API + schema chain) and WO-G2 (frontend
 foundation) are parallel roots. WO-G3..G6 need both. WO-G7 (TUI)
 needs G1 + the token generator from G2. WO-G8 (system polish)
 is last. lithos WO-119 (progress producer) gates the LIVE half of
-WO-G5; its static run-history half is un-gated.
+WO-G5; its static run-history half is un-gated. WO-G9 (render any
+family) closed cycle 36.
+
+Cycle 37, second batch (authoring surfaces, lithos D261/D263;
+WO-G10 stays retired -- cancelled before dispatch, D253.5):
+
+lithos WO-146 (ratified `.rgp` spec)
+  -> WO-G11 (studio substrate: upload, calibration rungs A/B, grid
+     capture) -- can start against WO-146's fixtures; does not need
+     lithos WO-147/148
+     -> WO-G12 (trace tools + `.rgp` emission + THE write-source
+        seam -- built ONCE here, WO-G16 is its second consumer)
+        -> WO-G13 (round-trip + pipeline UX; needs lithos WO-148 for
+           the artifact-index rendering half)
+     -> WO-G14 (calibration rung C distortion fit, v1.1; independent
+        of G13)
+
+lithos WO-151 (waveform/mask record class)
+  -> WO-G15 (read-only waveform/mask view -- render before author)
+     -> WO-G16 (the signal-design editor; consumes WO-G12's write-
+        source seam, extended to the `records/` path)
