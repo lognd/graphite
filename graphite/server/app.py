@@ -24,6 +24,7 @@ from graphite.server.routes import (
     obligations,
     projects,
     runs,
+    scans,
     settings,
 )
 
@@ -72,6 +73,7 @@ def create_app() -> FastAPI:
         build.router,
         artifacts.router,
         runs.router,
+        scans.router,
         config.router,
         config.schema_router,
         doctor.router,
