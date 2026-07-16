@@ -88,6 +88,10 @@ export function Project() {
         verdict={verdict}
       />
 
+      <p>
+        <Link to={`/project/${encodeURIComponent(projectId)}/studio`}>scan-trace studio</Link>
+      </p>
+
       {health.isLoading ? (
         <p role="status">loading census...</p>
       ) : summary ? (

@@ -445,6 +445,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/projects/{project}/scans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload Scan
+         * @description Store an uploaded scan under `traced/scans/<name><ext>` and
+         *     return its blake3 hash. `name` is the studio's display name for the
+         *     scan (validated, never the raw client filename); the extension is
+         *     taken from the uploaded filename.
+         */
+        post: operations["upload_scan_api_projects__project__scans_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/runs/{run_id}": {
         parameters: {
             query?: never;
@@ -858,6 +881,13 @@ export interface components {
              * @enum {string}
              */
             verb: "build" | "ship" | "test" | "optimize" | "check" | "preview";
+        };
+        /** Body_upload_scan_api_projects__project__scans_post */
+        Body_upload_scan_api_projects__project__scans_post: {
+            /** File */
+            file: string;
+            /** Name */
+            name: string;
         };
         /**
          * BuildReport
@@ -1742,6 +1772,20 @@ export interface components {
             verb: "build" | "ship" | "test" | "optimize" | "check" | "preview";
         };
         /**
+         * ScanEntry
+         * @description One stored scan: its blake3 content hash (the pinned identity a
+         *     later `.rgp`'s `[provenance] scan` block cites), its path relative
+         *     to the project root, and its byte size.
+         */
+        ScanEntry: {
+            /** Content Hash */
+            content_hash: string;
+            /** Relpath */
+            relpath: string;
+            /** Size */
+            size: number;
+        };
+        /**
          * StagedBuildReport
          * @description The outcome of WO-42 deliverable 5's staged build loop (AD-25/D128):
          *     lower -> realize (producing new realized-domain IRs) -> re-lower with
@@ -2514,6 +2558,41 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RunRecord"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    upload_scan_api_projects__project__scans_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                project: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_upload_scan_api_projects__project__scans_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ScanEntry"];
                 };
             };
             /** @description Validation Error */

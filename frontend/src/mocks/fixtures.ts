@@ -26,6 +26,7 @@ import type {
   ProjectHealth,
   ProjectInfo,
   RunRecord,
+  ScanEntry,
   StagedBuildReport,
   VerdictDiff,
 } from '../api/client';
@@ -1018,3 +1019,17 @@ export const MOCK_ARTIFACT_CONTENT: Record<string, string> = {
   'sha256:mock0expectedsignals00000000000000000000000000000000000000000': expectedSignalsRaw,
   'sha256:mock0capturecfg00000000000000000000000000000000000000000000000': captureConfigRaw,
 };
+
+// Scan-trace studio (WO-G11): a deterministic mock hash for
+// VITE_USE_MOCKS=1 dev mode -- a real blake3 digest is a backend-only
+// computation (graphite.service.scan_upload); the mock only needs to
+// be stable and shaped like the wire response, never the real hash.
+export function mockScanUpload(name: string, file: File): Promise<ScanEntry> {
+  const ext = file.name.includes('.') ? file.name.slice(file.name.lastIndexOf('.')) : '';
+  return Promise.resolve({
+    content_hash:
+      `blake3:mock0${name.toLowerCase().replace(/[^a-z0-9]/g, '')}${'0'.repeat(50)}`.slice(0, 71),
+    relpath: `traced/scans/${name}${ext}`,
+    size: file.size,
+  });
+}

@@ -32,12 +32,14 @@ import {
   mockProjects,
   mockRunLog,
   mockRuns,
+  mockScanUpload,
   mockSettings,
   mockVerdictDiff,
 } from '../mocks/fixtures';
 
 export type ProjectInfo = components['schemas']['ProjectInfo'];
 export type ArtifactEntry = components['schemas']['ArtifactEntry'];
+export type ScanEntry = components['schemas']['ScanEntry'];
 export type ArtifactIndexRow = components['schemas']['ArtifactIndexRow'];
 export type ProjectHealth = components['schemas']['ProjectHealth'];
 export type ObligationsResponse = components['schemas']['ObligationsResponse'];
@@ -170,6 +172,18 @@ async function requestJson<T>(method: 'POST' | 'PUT', path: string, body?: unkno
  * a hash that must already appear in this project's own listing --
  * artifact_registry.py's security posture). Used for SVG/PDF/GLB/STEP
  * downloads and inline renders alike. */
+/** Multipart POST -- the ONE upload in the app (scan-trace studio
+ * scan import, WO-G11 deliverable 1). Kept separate from
+ * `requestJson` because a multipart body must not set a JSON
+ * Content-Type header (the browser sets the boundary itself). */
+async function requestMultipart<T>(path: string, form: FormData): Promise<T> {
+  const res = await fetch(`/api${path}`, { method: 'POST', body: form });
+  if (!res.ok) {
+    throw new ApiError(res.status, await parseErrorBody(res));
+  }
+  return (await res.json()) as T;
+}
+
 async function requestBlob(path: string): Promise<Blob> {
   const res = await fetch(`/api${path}`);
   if (!res.ok) {
@@ -249,6 +263,17 @@ export const api = {
   },
   artifactUrl(project: string, contentHash: string): string {
     return `/api/projects/${encodeURIComponent(project)}/artifacts/${encodeURIComponent(contentHash)}`;
+  },
+  /** Scan-trace studio (WO-G11 deliverable 1): upload a scan image,
+   * stored under `traced/scans/` and returned by its blake3 hash. The
+   * ONE upload/write endpoint this WO owns (D253/D259) -- the `.rgp`
+   * write seam is WO-G12's. */
+  async uploadScan(project: string, name: string, file: File): Promise<ScanEntry> {
+    if (USE_MOCKS) return mockScanUpload(name, file);
+    const form = new FormData();
+    form.set('name', name);
+    form.set('file', file);
+    return requestMultipart<ScanEntry>(`/projects/${encodeURIComponent(project)}/scans`, form);
   },
   async getBuildReport(project: string): Promise<StagedBuildReport> {
     if (USE_MOCKS) return mockBuildReport;
