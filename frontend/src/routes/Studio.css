@@ -1,0 +1,32 @@
+/* Scan-trace studio (WO-G11): minimal structural styling -- the
+ * component palette (PanZoomFrame, HashChip) carries the visual
+ * language; this file only lays out the studio's own sections/table. */
+
+.gr-studio__section {
+  margin-bottom: var(--graphite-space-4, 1rem);
+  padding-bottom: var(--graphite-space-4, 1rem);
+  border-bottom: 1px solid var(--graphite-border, #444);
+}
+
+.gr-studio table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.gr-studio th,
+.gr-studio td {
+  padding: 0.25rem 0.5rem;
+  text-align: left;
+}
+
+.gr-studio__underlay {
+  background-color: var(--graphite-color-hairline);
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.gr-studio__place-target {
+  border: var(--graphite-border-width-hairline) solid var(--graphite-color-hairline);
+  cursor: crosshair;
+}

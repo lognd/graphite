@@ -7,6 +7,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import { AppShell } from './AppShell';
 import { Dashboard } from '../routes/Dashboard';
 import { Project } from '../routes/Project';
+import { Studio } from '../routes/Studio';
 import { Obligations } from '../routes/Obligations';
 import { ObligationExplorer } from '../routes/ObligationExplorer';
 import { ClaimDetail } from '../routes/ClaimDetail';
@@ -30,6 +31,7 @@ const children = [
   { path: 'project/:projectId', element: <Project /> },
   { path: 'project/:projectId/obligations', element: <ObligationExplorer /> },
   { path: 'project/:projectId/claim/:claimKey', element: <ClaimDetail /> },
+  { path: 'project/:projectId/studio', element: <Studio /> },
   { path: 'obligations', element: <Obligations /> },
   { path: 'artifacts', element: <Artifacts /> },
   { path: 'artifacts/:projectId/calc', element: <CalcBook /> },

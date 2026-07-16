@@ -429,6 +429,25 @@
         "title": "Body_start_project_run_api_projects__project__runs_post",
         "type": "object"
       },
+      "Body_upload_scan_api_projects__project__scans_post": {
+        "properties": {
+          "file": {
+            "contentMediaType": "application/octet-stream",
+            "title": "File",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file",
+          "name"
+        ],
+        "title": "Body_upload_scan_api_projects__project__scans_post",
+        "type": "object"
+      },
       "BuildReport": {
         "description": "The outcome of one orchestrated build at a given tier.",
         "properties": {
@@ -2045,6 +2064,30 @@
         "title": "RunRecord",
         "type": "object"
       },
+      "ScanEntry": {
+        "description": "One stored scan: its blake3 content hash (the pinned identity a\nlater `.rgp`'s `[provenance] scan` block cites), its path relative\nto the project root, and its byte size.",
+        "properties": {
+          "content_hash": {
+            "title": "Content Hash",
+            "type": "string"
+          },
+          "relpath": {
+            "title": "Relpath",
+            "type": "string"
+          },
+          "size": {
+            "title": "Size",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "content_hash",
+          "relpath",
+          "size"
+        ],
+        "title": "ScanEntry",
+        "type": "object"
+      },
       "StagedBuildReport": {
         "description": "The outcome of WO-42 deliverable 5's staged build loop (AD-25/D128):\nlower -> realize (producing new realized-domain IRs) -> re-lower with\nthem, to a fixed point.\n\n``final`` is the last :class:`BuildReport` (the fixed-point build --\nthe one whose ``payload_json`` no longer names a realizable pending\nsubject). ``iterations`` counts how many core ``check``/``compile``\npasses ran (always >= 1: the loop always runs at least once, even\nwith no ``feature_programs`` supplied). ``realized_inputs`` is every\nrealized-domain IR supplied to the FINAL pass, and ``lock_rows`` are\ntheir INV-21 lockfile rows (:func:`realized_lock_rows`).",
         "properties": {
@@ -3218,6 +3261,59 @@
         "summary": "Start Project Run",
         "tags": [
           "runs"
+        ]
+      }
+    },
+    "/api/projects/{project}/scans": {
+      "post": {
+        "description": "Store an uploaded scan under `traced/scans/<name><ext>` and\nreturn its blake3 hash. `name` is the studio's display name for the\nscan (validated, never the raw client filename); the extension is\ntaken from the uploaded filename.",
+        "operationId": "upload_scan_api_projects__project__scans_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "project",
+            "required": true,
+            "schema": {
+              "title": "Project",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_scan_api_projects__project__scans_post"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScanEntry"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Upload Scan",
+        "tags": [
+          "scans"
         ]
       }
     },

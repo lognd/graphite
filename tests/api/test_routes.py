@@ -343,3 +343,36 @@ def test_run_cancel_running_process(api_client: TestClient) -> None:
 def test_run_cancel_unknown_run_404(api_client: TestClient) -> None:
     resp = api_client.post("/api/runs/no-such-run/cancel")
     assert resp.status_code == 404
+
+
+def test_scan_upload_stores_and_hashes(api_client: TestClient) -> None:
+    resp = api_client.post(
+        f"/api/projects/{PROJECT_NAME}/scans",
+        data={"name": "gasket_top"},
+        files={"file": ("gasket_top.png", b"fake-png-bytes", "image/png")},
+    )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["content_hash"].startswith("blake3:")
+    assert body["relpath"] == "traced/scans/gasket_top.png"
+    assert body["size"] == len(b"fake-png-bytes")
+
+
+def test_scan_upload_refuses_bad_extension(api_client: TestClient) -> None:
+    resp = api_client.post(
+        f"/api/projects/{PROJECT_NAME}/scans",
+        data={"name": "gasket_top"},
+        files={"file": ("gasket_top.exe", b"nope", "application/octet-stream")},
+    )
+    assert resp.status_code == 422
+    assert resp.json()["detail"]["kind"] == "invalid_input"
+
+
+def test_scan_upload_refuses_unsafe_name(api_client: TestClient) -> None:
+    resp = api_client.post(
+        f"/api/projects/{PROJECT_NAME}/scans",
+        data={"name": "../../etc/passwd"},
+        files={"file": ("scan.png", b"bytes", "image/png")},
+    )
+    assert resp.status_code == 422
+    assert resp.json()["detail"]["kind"] == "invalid_input"
