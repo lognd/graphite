@@ -16,6 +16,7 @@ import { ErrorState } from '../../components/ErrorState/ErrorState';
 import { PageTitle } from '../../components/PageTitle/PageTitle';
 import './artifacts.css';
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function CalcBook() {
   const { projectId } = useParams<{ projectId: string }>();
   const audit = useAuditIndex(projectId);

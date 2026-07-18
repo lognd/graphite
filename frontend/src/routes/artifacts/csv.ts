@@ -2,6 +2,7 @@
 // quoted fields and embedded commas -- good enough for the shipped BOM/
 // tap-map/positions CSVs, which never carry multi-line quoted cells.
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function parseCsv(text: string): { headers: string[]; rows: string[][] } {
   const lines = text.split(/\r?\n/).filter((l) => l.length > 0);
   const parseLine = (line: string): string[] => {

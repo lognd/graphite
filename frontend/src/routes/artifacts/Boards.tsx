@@ -13,6 +13,7 @@ import { BoardGerberView } from './BoardGerberView';
 import { FileRenderer } from './FileRenderer';
 import './artifacts.css';
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function Boards() {
   const { projectId } = useParams<{ projectId: string }>();
   const index = useProjectArtifactIndex(projectId);

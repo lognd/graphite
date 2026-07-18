@@ -13,6 +13,7 @@ import { ErrorState } from '../../components/ErrorState/ErrorState';
 import { GlbViewer } from '../../components/GlbViewer/GlbViewer';
 import { PageTitle } from '../../components/PageTitle/PageTitle';
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function Model3D() {
   const { projectId } = useParams<{ projectId: string }>();
   const artifacts = useProjectArtifacts(projectId);

@@ -5,6 +5,7 @@
 // viewers, not just families; the family-level version lives in
 // familyIndex.test.ts/router integration).
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export const ALL_VIEWERS = [
   'svg',
   'raster',
@@ -17,8 +18,10 @@ export const ALL_VIEWERS = [
   'binary',
 ] as const;
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export type ViewerKind = (typeof ALL_VIEWERS)[number];
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export type RenderStrategy =
   | 'inline-svg'
   | 'inline-img'
@@ -34,6 +37,7 @@ export type RenderStrategy =
  * and anything this map does not otherwise cover, resolves to
  * `honest-fallback` (name/family/size/hash + reason), never a blank
  * pane (deliverable 2). */
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export const VIEWER_STRATEGY: Record<ViewerKind, RenderStrategy> = {
   svg: 'inline-svg',
   raster: 'inline-img',
@@ -49,6 +53,7 @@ export const VIEWER_STRATEGY: Record<ViewerKind, RenderStrategy> = {
 /** The strategy for a viewer string that may NOT be in the closed
  * vocabulary (a future lithos viewer graphite has not been taught) --
  * falls back honestly rather than throwing. */
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function strategyFor(viewer: string): RenderStrategy {
   return (VIEWER_STRATEGY as Record<string, RenderStrategy>)[viewer] ?? 'honest-fallback';
 }

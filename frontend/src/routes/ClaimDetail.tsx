@@ -21,6 +21,7 @@ import { dispositionToVerdict } from '../components/VerdictBadge/verdict';
 import { decodeClaimKey, encodeClaimKey } from '../lib/claimKey';
 import { parseClaimLimit } from '../lib/claimLimit';
 
+// frob:doc docs/guide.md#2-the-obligation-explorer-why-did-this-claim-deferfail
 export function ClaimDetail() {
   const { projectId, claimKey } = useParams<{ projectId: string; claimKey: string }>();
   const [showRaw, setShowRaw] = useState(false);

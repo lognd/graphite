@@ -4,6 +4,7 @@
 import { EmptyState } from '../components/EmptyState/EmptyState';
 import { PageTitle } from '../components/PageTitle/PageTitle';
 
+// frob:doc docs/guide.md#2-the-obligation-explorer-why-did-this-claim-deferfail
 export function Obligations() {
   return (
     <>

@@ -16,6 +16,7 @@ import { ReasonCell } from '../../components/ReasonCell/ReasonCell';
 import { PageTitle } from '../../components/PageTitle/PageTitle';
 import './artifacts.css';
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function Bom() {
   const { projectId } = useParams<{ projectId: string }>();
   const report = useBuildReport(projectId);

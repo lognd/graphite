@@ -35,6 +35,7 @@ function useTextContent(projectId: string | undefined, row: ArtifactIndexRow, wa
   return { text, error };
 }
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function FileRenderer({
   projectId,
   row,

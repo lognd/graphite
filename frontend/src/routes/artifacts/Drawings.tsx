@@ -10,6 +10,7 @@ import { listDrawingNames } from './artifactLookup';
 import { PageTitle } from '../../components/PageTitle/PageTitle';
 import './artifacts.css';
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function Drawings() {
   const { projectId } = useParams<{ projectId: string }>();
   const artifacts = useProjectArtifacts(projectId);

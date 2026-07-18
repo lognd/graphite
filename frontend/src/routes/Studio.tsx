@@ -42,6 +42,7 @@ function emptyPoint(): DraftPoint {
   return { image: { u: 0, v: 0 }, distanceMm: '', x: '', y: '' };
 }
 
+// frob:doc docs/guide.md#6-scan-trace-studio
 export function Studio() {
   const { projectId } = useParams<{ projectId: string }>();
   const [scan, setScan] = useState<ScanEntry | null>(null);

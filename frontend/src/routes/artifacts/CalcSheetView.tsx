@@ -34,6 +34,7 @@ function parseMargin(margin: string): { value: number; limit: number } | null {
   return null;
 }
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function CalcSheetView() {
   const { projectId, sheetId } = useParams<{ projectId: string; sheetId: string }>();
   const sheets = useCalcSheets(projectId);

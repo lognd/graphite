@@ -5,6 +5,7 @@
 // fences with syntax highlight) still shows as a paragraph, honestly,
 // rather than being silently dropped.
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function MarkdownBlock({ text }: { text: string }) {
   const lines = text.split(/\r?\n/);
   const blocks: { kind: 'h1' | 'h2' | 'h3' | 'li' | 'p'; text: string }[] = [];

@@ -23,6 +23,7 @@ function scopeFor(source: string): 'global' | 'local' {
   return source === 'global' ? 'global' : 'local';
 }
 
+// frob:doc docs/guide.md#5-config-doctor-settings
 export function Config() {
   const { data: projects, isLoading: projectsLoading, isError: projectsError } = useProjects();
   const [selected, setSelected] = useState<string | undefined>(undefined);

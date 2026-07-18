@@ -44,6 +44,7 @@ function readTitleBlock(doc: unknown): TitleBlockFields | null {
   return tb as TitleBlockFields;
 }
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function DrawingView() {
   const { projectId, name } = useParams<{ projectId: string; name: string }>();
   const artifacts = useProjectArtifacts(projectId);

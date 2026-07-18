@@ -36,6 +36,7 @@ const DEDICATED_ROUTE: Record<string, string> = {
 // project's index says it exists, never before, never hardcoded.
 const ALWAYS_SHOWN_FAMILIES = ['calc', 'drawings', '3d', 'bom', 'boards', 'harness'];
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function Artifacts() {
   const [params, setParams] = useSearchParams();
   const projects = useProjects();

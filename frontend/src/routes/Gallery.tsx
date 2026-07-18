@@ -30,6 +30,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   );
 }
 
+// frob:doc docs/guide.md#7-dev-tooling
 export function Gallery() {
   const { resolved, setPreference } = useTheme();
   const [paused, setPaused] = useState(false);

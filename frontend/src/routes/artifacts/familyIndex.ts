@@ -8,12 +8,14 @@
 
 import type { ArtifactIndexRow } from '../../api/client';
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export interface FamilyGroup {
   family: string;
   count: number;
   viewers: string[];
 }
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function familiesFromIndex(rows: ArtifactIndexRow[]): FamilyGroup[] {
   const byFamily = new Map<string, ArtifactIndexRow[]>();
   for (const row of rows) {
@@ -33,6 +35,7 @@ export function familiesFromIndex(rows: ArtifactIndexRow[]): FamilyGroup[] {
 /** Human label for a family the hub has never been taught about --
  * title-cased from the raw family string, not a lookup table (a lookup
  * table is exactly the hardcoded-list failure mode this WO removes). */
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function familyLabel(family: string): string {
   return family
     .split(/[_-]/)

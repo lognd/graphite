@@ -82,6 +82,7 @@ function durationOf(record: RunRecord): string {
   return `${(ms / 1000).toFixed(1)}s`;
 }
 
+// frob:doc docs/guide.md#4-driving-runs
 export function Runs() {
   const { data: projects } = useProjects();
   const [selectedProject, setSelectedProject] = useState<string>('');

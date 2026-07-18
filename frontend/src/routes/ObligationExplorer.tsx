@@ -81,6 +81,7 @@ function toReportMarkdown(rows: Enriched[]): string {
   return `${header}\n${body}`;
 }
 
+// frob:doc docs/guide.md#2-the-obligation-explorer-why-did-this-claim-deferfail
 export function ObligationExplorer() {
   const { projectId } = useParams<{ projectId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();

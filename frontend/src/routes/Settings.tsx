@@ -21,6 +21,7 @@ const DEFAULT_RUN_VERBOSITY: RunVerbosity = 'normal';
 const DEFAULT_RUN_HISTORY_LIMIT = 200;
 const VERBOSITY_OPTIONS: RunVerbosity[] = ['quiet', 'normal', 'verbose'];
 
+// frob:doc docs/guide.md#5-config-doctor-settings
 export function Settings() {
   const { preference, setPreference } = useTheme();
   const { data: settings, isLoading, isError, error, refetch } = useSettings();

@@ -64,6 +64,7 @@ function useText(projectId: string | undefined, row: ArtifactIndexRow | undefine
   return text;
 }
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function HarnessView() {
   const { projectId } = useParams<{ projectId: string }>();
   const index = useProjectArtifactIndex(projectId);

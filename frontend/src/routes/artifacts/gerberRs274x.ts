@@ -17,8 +17,10 @@
 // (the escalation is recorded here, not silently deferred) rather than
 // hand-rolling more RS-274X either here or there.
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export type GerberPrimitiveKind = 'stroke' | 'fill';
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export interface GerberPrimitive {
   kind: GerberPrimitiveKind;
   /** SVG path `d` attribute, already in the gerber's own mm/inch coord
@@ -29,6 +31,7 @@ export interface GerberPrimitive {
   width: number;
 }
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export interface GerberLayer {
   primitives: GerberPrimitive[];
   unitsMm: boolean;
@@ -101,6 +104,7 @@ function arcSegment(
   return `A ${r} ${r} 0 ${largeArc} ${sweep} ${x1} ${y1}`;
 }
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function parseGerberRs274x(source: string): GerberLayer {
   const lines = source.split(/\r?\n/);
   const primitives: GerberPrimitive[] = [];

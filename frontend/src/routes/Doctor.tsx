@@ -55,6 +55,7 @@ const COLUMNS: DataTableColumn<DoctorEntry>[] = [
   },
 ];
 
+// frob:doc docs/guide.md#5-config-doctor-settings
 export function Doctor() {
   const { data: projects, isLoading: projectsLoading, isError: projectsError } = useProjects();
   const [selected, setSelected] = useState<string | undefined>(undefined);

@@ -113,6 +113,7 @@ const COLUMNS: DataTableColumn<FleetHealthEntry>[] = [
   },
 ];
 
+// frob:doc docs/guide.md#1-reading-the-dashboard-is-my-fleet-healthy
 export function Dashboard() {
   const { data: projects, isLoading, isError, error, refetch } = useProjects();
   const { entries } = useFleetHealth(projects);

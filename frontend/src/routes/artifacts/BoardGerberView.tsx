@@ -67,6 +67,7 @@ interface LoadedLayer {
   error: string | null;
 }
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function BoardGerberView() {
   const { projectId } = useParams<{ projectId: string }>();
   const [rows, setRows] = useState<ArtifactIndexRow[] | null>(null);

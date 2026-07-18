@@ -43,6 +43,7 @@ function familyLink(projectId: string, fam: string): string {
     : `/artifacts?project=${encodeURIComponent(projectId)}`;
 }
 
+// frob:doc docs/guide.md#1-reading-the-dashboard-is-my-fleet-healthy
 export function Project() {
   const { projectId } = useParams<{ projectId: string }>();
   const health = useProjectHealth(projectId);

@@ -10,6 +10,7 @@ import type { ArtifactEntry } from '../../api/client';
  * (`sheet_id.replace('::', '__') + '.pdf'`, e.g. "deflect::afc15fc09a7f"
  * -> "deflect__afc15fc09a7f.pdf"). Matched against the REAL listing --
  * this only narrows the search, it never invents a hash. */
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function findCalcSheetPdf(
   artifacts: ArtifactEntry[] | undefined,
   sheetId: string,
@@ -30,6 +31,7 @@ export function findCalcSheetPdf(
   );
 }
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function findDrawingArtifact(
   artifacts: ArtifactEntry[] | undefined,
   drawingName: string,
@@ -46,6 +48,7 @@ export function findDrawingArtifact(
 /** Every distinct drawing base name shipped (derived from the `.svg`
  * companions actually listed -- a drawing "exists" in this UI only if its
  * SVG or PDF is present, never inferred from an unrelated file). */
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function listDrawingNames(artifacts: ArtifactEntry[] | undefined): string[] {
   if (!artifacts) return [];
   const names = new Set<string>();

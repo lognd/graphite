@@ -15,6 +15,7 @@ import { familyLabel } from './familyIndex';
 import { FileRenderer } from './FileRenderer';
 import './artifacts.css';
 
+// frob:doc docs/guide.md#3-the-calc-book-walk-show-me-the-artifact
 export function FamilyView() {
   const { projectId, family } = useParams<{ projectId: string; family: string }>();
   const index = useProjectArtifactIndex(projectId);
