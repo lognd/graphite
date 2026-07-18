@@ -6,6 +6,7 @@ import { router } from './app/routes';
 
 const queryClient = new QueryClient();
 
+// frob:doc docs/guide.md#1018-app-shell
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
