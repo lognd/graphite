@@ -63,6 +63,7 @@ class _SpaStaticFiles(StaticFiles):
 
 
 # frob:doc docs/spec/02-architecture.md#11-server-app-dependencies-and-error-mapping
+# frob:boundary b_server_validate
 def create_app() -> FastAPI:
     """Build the FastAPI app: every router under `/api`, CORS left OFF
     (localhost-only, single-origin -- charter sec. 3.1, no cross-origin

@@ -1,0 +1,323 @@
+// graphite.strata -- graphite's real topology, modeled honestly from the
+// code (not from the spec's aspirations). graphite is the localhost-only
+// interaction surface for the regolith toolchain: a FastAPI server + React
+// SPA and a textual TUI, both sitting on one shared service layer that is
+// the ONLY sanctioned crossing to the `regolith` CLI and its on-disk
+// artifact tree (docs/spec/02-architecture.md section 4).
+//
+// Sources read to build this model (all real, no hypothetical topology):
+//   - graphite/cli.py: uvicorn.run(create_app(), host=localhost) -- the
+//     process entrypoint; writes GRAPHITE_SCAN_ROOT into os.environ.
+//   - graphite/server/routes/*.py: FastAPI routes, pydantic-validated,
+//     calling graphite.service only (routes/__init__.py's own contract).
+//   - graphite/service/runs.py + config_cli.py: the two subprocess call
+//     sites (regolith CLI, fixed argv, --color never).
+//   - graphite/service/{reports,artifact_index,artifact_registry,
+//     discovery,settings}.py: report/artifact reads from the fleet tree.
+//   - graphite/tui/screens/*.py: textual screens importing service
+//     functions directly -- the TUI never crosses HTTP.
+//   - frontend/src/api/client.ts + routes/**: fetch() against the
+//     same-origin localhost server only.
+//   - frontend/src/app/theme.tsx, routes/Settings.tsx: localStorage.
+//   - frontend/src/routes/artifacts/{DrawingView,FileRenderer}.tsx: the
+//     two real dangerouslySetInnerHTML sinks (MarkdownBlock.tsx only
+//     mentions the API in a comment forbidding it).
+//   - scripts/gen_openapi.py: imports create_app to dump openapi.json.
+//
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+module graphite
+
+// -- nodes ------------------------------------------------------------
+
+// The browser tab running the bundled SPA. Foreign: user-controlled
+// input source, even though the server only ever binds localhost.
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+node browser : foreign {
+    clearance Internal;
+    code "frontend/src/**";
+    // fetch(): frontend/src/api/client.ts and the TanStack Query hooks
+    // under frontend/src/routes/** -- all same-origin localhost calls.
+    may "fetch_url";
+    // localStorage: frontend/src/app/theme.tsx (theme preference),
+    // surfaced in frontend/src/routes/Settings.tsx.
+    may "client_storage";
+    // dangerouslySetInnerHTML: DrawingView.tsx:147 (raw artifact SVG
+    // text from the server) and FileRenderer.tsx:70 (sanitizeSvg-wrapped
+    // SVG text). See the CWE-79 assume below for the honest risk note.
+    may "html_render";
+}
+
+// The FastAPI app: graphite/server/** (app.py, deps.py, errors.py,
+// routes/). Serves REST + SSE and the bundled static SPA; calls the
+// service layer for every real answer.
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+node server : trusted {
+    clearance Internal;
+    code "graphite/server/**";
+    // env: deps.py reads GRAPHITE_SCAN_ROOT for the fleet root.
+    // NOTE deliberately no `may "fs"`: routes delegate every disk write
+    // to the service layer (scan uploads land via service/scan_upload.py;
+    // app.py's static mount is starlette config, not an open() site) --
+    // confirmed by `frob sys audit`'s own per-file capability scan.
+    may "env";
+}
+
+// The service layer: graphite/service/** -- the ONE place that talks to
+// regolith (CLI subprocess + report-file reading), per
+// docs/spec/02-architecture.md section 4.
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+node service : trusted {
+    clearance Internal;
+    code "graphite/service/**";
+    // exec: runs.py (regolith build runs, Popen, fixed argv,
+    // --color never) and config_cli.py (regolith config/doctor,
+    // subprocess.run, fixed argv).
+    may "exec";
+    // fs: reports.py, artifact_index.py, artifact_registry.py,
+    // discovery.py, settings.py, runs.py all read (and runs/settings
+    // write) under the fleet root and ~/.graphite.
+    may "fs";
+    // env: settings.py (GRAPHITE_HOME), runs.py (GRAPHITE_RUNS_HOME,
+    // REGOLITH_LOG passthrough).
+    may "env";
+}
+
+// The textual TUI: graphite/tui/**. Imports service functions directly
+// (screens/*.py import blocks); does no file/network/process I/O of its
+// own -- a direct grep of graphite/tui/ for open(/read_text/subprocess/
+// socket found zero call sites, so this node deliberately declares no
+// `may` at all.
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+node tui : trusted {
+    clearance Internal;
+    code "graphite/tui/**";
+}
+
+// Core entrypoint modules: cli.py (argument parsing, uvicorn.run),
+// logging_setup.py, artifacts.py (artifact JSON loading helpers),
+// __init__.py.
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+node core : trusted {
+    clearance Internal;
+    code "graphite/cli.py" "graphite/logging_setup.py"
+        "graphite/artifacts.py" "graphite/__init__.py";
+    // net: cli.py uvicorn.run binds the localhost socket (charter
+    // sec. 3.1: refuses to bind anything but 127.0.0.1).
+    may "net";
+    // env: cli.py writes GRAPHITE_SCAN_ROOT; logging_setup.py reads
+    // GRAPHITE_LOG.
+    may "env";
+    // fs: artifacts.py reads artifact JSON files.
+    may "fs";
+}
+
+// Build/CI scripts: scripts/** (gen_openapi.py dumps openapi.json,
+// check_openapi_drift.py and check_bundle_size.py gate the build).
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+node scripts : trusted {
+    clearance Internal;
+    code "scripts/**";
+    // fs: all three scripts read/write build artifacts (openapi.json,
+    // frontend/dist).
+    may "fs";
+}
+
+// The regolith CLI + wheel: the external engineering toolchain graphite
+// drives and renders. Not source in this repo (../lithos sibling), so no
+// `code` glob -- see docs/spec/05-strata-system-model.md#known-gaps-not-
+// gamed-away for the config-only-node limitation (frob T-0172).
+// frob:doc docs/spec/05-strata-system-model.md#known-gaps-not-gamed-away
+// frob:ticket T-0014
+node regolith_cli : trusted {
+    clearance Internal;
+}
+
+// The on-disk fleet artifact tree: regolith project outputs (audit
+// indexes, calc books, drawings, BOMs, run logs) under <fleet-root>.
+// graphite renders it and never recomputes it (the honesty rule,
+// charter sec. 3.2).
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+store fleet_artifacts : trusted {
+    clearance Internal;
+}
+
+// -- flows ------------------------------------------------------------
+
+// Browser -> server: every REST/SSE call from the SPA (frontend/src/api/
+// client.ts and the route hooks), same-origin localhost only.
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+flow f_browser_server : browser -> server { label Internal; }
+
+// Server -> browser: the bundled static SPA assets (app.py's static
+// mount) and REST/SSE responses.
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+flow f_server_browser : server -> browser { label Internal; }
+
+// Server -> service: every route handler's real work (routes/*.py import
+// graphite.service.* only -- no report parsing, no subprocess calls in
+// routes, per routes/__init__.py's own contract).
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+flow f_server_service : server -> service { label Internal; }
+
+// TUI -> service: screens/*.py import service functions directly
+// (config_cli, discovery, reports, runs) -- in-process calls, no HTTP.
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+flow f_tui_service : tui -> service { label Internal; }
+
+// Core -> server: cli.py's uvicorn.run(create_app()) -- the process
+// entrypoint hosting the ASGI app.
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+flow f_core_server : core -> server { label Internal; }
+
+// Scripts -> server: scripts/gen_openapi.py imports create_app to dump
+// the committed openapi.json (the one-schema-source chain,
+// docs/spec/02-architecture.md section 2).
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+flow f_scripts_server : scripts -> server { label Internal; }
+
+// Service -> regolith_cli: the two subprocess call sites (runs.py,
+// config_cli.py), fixed argv, --color never, stdout JSON + stderr logs.
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+flow f_service_regolith : service -> regolith_cli { label Internal; }
+
+// regolith_cli -> fleet_artifacts: regolith writes every report/artifact
+// graphite later renders (graphite itself never writes into a project's
+// artifact tree).
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+flow f_regolith_artifacts : regolith_cli -> fleet_artifacts { label Internal; }
+
+// Service -> fleet_artifacts: report/artifact/index reads (reports.py,
+// artifact_index.py, artifact_registry.py, discovery.py) plus run-history
+// writes under ~/.graphite/runs (runs.py).
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+flow f_service_artifacts : service -> fleet_artifacts { label Internal; }
+
+// Core -> tui: cli.py imports graphite.tui.app for the `graphite tui`
+// command (cli.py:27) -- the second process entrypoint, caught by the
+// sys gate's SYS003 import scan after the first model draft missed it.
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+flow f_core_tui : core -> tui { label Internal; }
+
+// Server -> core: app.py/deps.py import graphite.logging_setup (the
+// shared module-logger helper).
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+flow f_server_core : server -> core { label Internal; }
+
+// Service -> core: every service module imports graphite.logging_setup;
+// reports.py/artifact_index.py use graphite.artifacts helpers.
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+flow f_service_core : service -> core { label Internal; }
+
+// TUI -> core: screens and app import graphite.logging_setup.
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+flow f_tui_core : tui -> core { label Internal; }
+
+// Scripts -> core: check_bundle_size.py imports graphite.logging_setup.
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+flow f_scripts_core : scripts -> core { label Internal; }
+
+// -- boundaries -------------------------------------------------------
+
+// The one real endorsement site on the browser<->server edge: pydantic
+// request validation on every FastAPI route under graphite/server/
+// routes/** turns untrusted browser input into data the service layer
+// trusts (path/query/body models; scans.py additionally re-validates
+// upload names/extensions before any fs write).
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+boundary b_server_validate endorse f_browser_server : foreign -> trusted when "pydantic_request_validation"
+
+// -- claims -----------------------------------------------------------
+
+// 1. The whole point of the app: the browser can reach the fleet
+// artifact tree (browser -> server -> service -> fleet_artifacts), so a
+// broken edge anywhere in that chain is a model error.
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+assert c_browser_reaches_artifacts reach browser -> fleet_artifacts
+
+// 2. Builds are driven from the web UI: the run-console path must reach
+// the regolith CLI (browser -> server -> service -> regolith_cli).
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+assert c_browser_reaches_regolith reach browser -> regolith_cli
+
+// 3. (withdrawn) `noflow tui -> server` was the first draft's claim --
+// the TUI never crosses HTTP -- but the sys gate's SYS003 scan rightly
+// forced declaring the shared-logging import edges (f_tui_core,
+// f_core_server), and reachability then refutes it through the core hub
+// (tui -> core -> server) even though no HTTP call exists on that path.
+// The true fact IS still modeled, just capability-wise: node tui
+// declares no `may` at all (no net, no fetch_url). See the wiring
+// report: strata has no utility/non-transitive flow marking yet, so
+// hub nodes make honest noflow claims inexpressible.
+
+// 4. regolith's outputs come back only through the artifact tree --
+// there is no path from regolith_cli back into the server (no callback,
+// no socket; service reads files).
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+assert c_regolith_no_callback noflow regolith_cli -> server
+
+// 5. The dedup-law chain is one-way: the SPA never reaches the build
+// scripts (gen_openapi runs at build time, not at serve time).
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0014
+assert c_browser_no_scripts noflow browser -> scripts
+
+// -- assumptions (capability-driven obligations, honestly discharged) --
+
+// browser's `may "html_render"` drags in CWE-79/116 (XSS). Verified call
+// sites: FileRenderer.tsx:70 wraps the injected SVG in sanitizeSvg();
+// DrawingView.tsx:147 injects raw artifact SVG text served by the
+// localhost server from the user's own fleet tree -- not
+// browser-controlled input, but not sanitized either. Recorded as an
+// assumption (owner review), not a proof: strata has no sanitization-
+// boundary vocabulary yet, and the DrawingView sink deserves a repo
+// ticket rather than a silent green.
+// frob:doc docs/spec/05-strata-system-model.md#known-gaps-not-gamed-away
+assume "weakness:CWE-79:browser" noflow browser -> browser owner logan review "2026-10-16"
+
+// browser's `may "client_storage"` drags in CWE-922. Verified: the only
+// localStorage key is the theme preference (frontend/src/app/theme.tsx);
+// no Pii/Secret-labeled value is ever written client-side.
+// frob:doc docs/spec/05-strata-system-model.md#known-gaps-not-gamed-away
+assume "weakness:CWE-922:browser" noflow browser -> browser owner logan review "2026-10-16"
+
+// browser's `may "fetch_url"` drags in CWE-918 (SSRF). The SPA fetches
+// its own localhost origin only (client.ts builds URLs from the page
+// origin; no user-supplied absolute URL ever reaches fetch()).
+// frob:doc docs/spec/05-strata-system-model.md#known-gaps-not-gamed-away
+assume "weakness:CWE-918:browser" noflow browser -> browser owner logan review "2026-10-16"
+
+// service's `may "exec"` drags in CWE-78 (command injection). Verified:
+// both call sites (runs.py, config_cli.py) build fixed argv lists from
+// the resolved regolith executable and enum-shaped verbs; no
+// request-supplied string is ever passed to a shell (shell=False
+// everywhere, --color never appended by the wrapper).
+// The claim body names the one foreign source (browser): post-endorsement
+// (b_server_validate), no unvalidated browser bytes reach service's argv.
+// frob:doc docs/spec/05-strata-system-model.md#known-gaps-not-gamed-away
+assume "weakness:CWE-78:service" noflow browser -> service owner logan review "2026-10-16"

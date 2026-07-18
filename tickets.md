@@ -322,3 +322,44 @@ attachments: []
 acceptance: []
 threat: null
 ```
+
+<!-- ticket:T-0014 -->
+```yaml
+id: T-0014
+title: 'strata pilot: design/graphite.strata system model wired into frob sys'
+state: queued
+kind: feature
+origin: agent
+created: '2026-07-18'
+blocked_by: []
+parent: null
+scope:
+- design/** docs/spec/05-strata-system-model.md frob.toml
+evidence: []
+attachments: []
+acceptance:
+- given the committed design/graphite.strata, when frob sys audit runs, then it exits
+  with PROVED or a named-gap state documented in docs/spec/05-strata-system-model.md
+threat: null
+```
+Pilot agent task: model graphite's real topology (browser SPA, server, service layer, TUI, CLI, scripts, regolith CLI boundary) in strata and drive frob sys plan/doc/audit. Named gaps that trace to frob bugs are recorded in the wiring report, not gamed away.
+
+<!-- ticket:T-0015 -->
+```yaml
+id: T-0015
+title: Bind boundary b_server_validate in code
+state: queued
+kind: security
+origin: agent
+created: '2026-07-18'
+blocked_by: []
+parent: null
+scope: []
+evidence: []
+attachments: []
+acceptance: []
+threat: tampering
+```
+sys-plan:b_server_validate:unbound
+
+boundary `b_server_validate` has no code binding; add `frob:boundary b_server_validate` at the enforcing site (docs/strata/surface.md#directives-t-0080).
