@@ -7,6 +7,7 @@
 
 import type { Lockfile } from '../api/client';
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface OptimizeWinnerRow {
   section: string;
   slot: string;
@@ -14,6 +15,7 @@ export interface OptimizeWinnerRow {
   cause: string;
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function optimizeWinnerRows(lockfile: Lockfile | undefined): OptimizeWinnerRow[] {
   return (lockfile?.sections ?? []).flatMap((section) =>
     section.rows

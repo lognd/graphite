@@ -31,6 +31,7 @@ import type {
   VerdictDiff,
 } from '../api/client';
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockProjects: ProjectInfo[] = [
   {
     name: 'examples.timber_pavilion',
@@ -59,6 +60,7 @@ export const mockProjects: ProjectInfo[] = [
   },
 ];
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockProjectHealth: ProjectHealth = {
   release_ok: true,
   obligation_summary: {
@@ -149,6 +151,7 @@ const AUDIT_ROWS: AuditRow[] = [
   },
 ];
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockObligations: ObligationsResponse = {
   summary: mockProjectHealth.obligation_summary,
   groups: null,
@@ -159,6 +162,7 @@ function family(claimName: string): string {
   return claimName.split('[', 1)[0];
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function mockObligationsFiltered(filter: string): ObligationsResponse {
   return {
     summary: mockProjectHealth.obligation_summary,
@@ -167,6 +171,7 @@ export function mockObligationsFiltered(filter: string): ObligationsResponse {
   };
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function mockObligationsGrouped(group: 'disposition' | 'family'): ObligationsResponse {
   const buckets = new Map<string, AuditRow[]>();
   for (const row of AUDIT_ROWS) {
@@ -188,6 +193,7 @@ export function mockObligationsGrouped(group: 'disposition' | 'family'): Obligat
 // falsely-huge "real" project). Keyed to its own fleet entry
 // (examples.synthetic_2k) so it never contaminates the real
 // timber_pavilion fixture's row count assertions elsewhere in this repo.
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const SYNTHETIC_2K_PROJECT = 'examples.synthetic_2k';
 
 const DISPOSITIONS: AuditRow['disposition'][] = [
@@ -197,6 +203,7 @@ const DISPOSITIONS: AuditRow['disposition'][] = [
   'violated',
 ];
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockObligationsSynthetic2k: ObligationsResponse = {
   summary: {
     accepted_deviation: 500,
@@ -219,6 +226,7 @@ export const mockObligationsSynthetic2k: ObligationsResponse = {
 // RECORDED from tests/fixtures/timber_pavilion/dist/calc/audit_index.json --
 // same rows as mockObligations (both routes read the same underlying
 // calc-book accounting), unfiltered/ungrouped (04.1 "raw" detail view).
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockAuditIndex: AuditIndex = {
   project: 'frame.calx',
   rows: AUDIT_ROWS,
@@ -228,6 +236,7 @@ export const mockAuditIndex: AuditIndex = {
 // dist/calc/calc_book.json's 6 sheets, verbatim (the ONE mockCalcSheets --
 // WO-G3 and WO-G4 each recorded one on their parallel branches; the merge
 // keeps the full recorded book, dedup law 04.2).
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockCalcSheets: CalcSheet[] = [
   {
     attestation: 'unsigned',
@@ -409,6 +418,7 @@ export const mockCalcSheets: CalcSheet[] = [
 // boards nor harness (the honest-empty-state assertions in
 // tests/system/artifact-viewers.spec.ts depend on that staying true), so
 // this project name is reserved for a project that DOES ship them.
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const MAINBOARD_MX_PROJECT = 'mainboard_mx';
 
 // RECORDED from tests/fixtures/mainboard_mx/dist/artifact_index.json
@@ -416,6 +426,7 @@ export const MAINBOARD_MX_PROJECT = 'mainboard_mx';
 // drill) and a `harness` family (tap map, expected signals with one
 // honest recorded absence, bringup.md, a sigrok capture config) -- the
 // two families that were invisible/absent before this WO (lithos F145).
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockArtifactIndexMainboard: ArtifactIndexRow[] = [
   {
     family: 'boards',
@@ -516,6 +527,7 @@ export const mockArtifactIndexMainboard: ArtifactIndexRow[] = [
 // below, re-expressed with the family/viewer this WO's index route
 // carries. Kept in sync by hand since the two mocks describe the SAME
 // recorded fixture listing from two API shapes.
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockArtifactIndexTimberPavilion: ArtifactIndexRow[] = [
   {
     family: 'calc',
@@ -578,6 +590,7 @@ export const mockArtifactIndexTimberPavilion: ArtifactIndexRow[] = [
 // content types only -- hashes shortened/synthesized for the mock since
 // component tests never fetch real bytes behind them; VITE_USE_MOCKS mode
 // never calls api.fetchArtifact for this reason, honesty rule 04.3).
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockProjectArtifacts: ArtifactEntry[] = [
   {
     content_hash: 'sha256:mock0calc0book0000000000000000000000000000000000000000000000',
@@ -612,6 +625,7 @@ export const mockProjectArtifacts: ArtifactEntry[] = [
 ];
 
 // .regolith/build/regolith.lock, both sections.
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockLockfile: Lockfile = {
   tool_version: '0.1.0',
   sections: [
@@ -678,6 +692,7 @@ export const mockLockfile: Lockfile = {
 };
 
 // dist/gate_summary.json, verbatim.
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockGateSummary: GateSummary = {
   tier: 'RELEASE',
   ok: true,
@@ -692,6 +707,7 @@ export const mockGateSummary: GateSummary = {
 };
 
 // dist/acceptance_ledger.json's accepted_deviations, verbatim.
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockAcceptanceLedger: AcceptanceLedgerSummary = {
   accepted_deviations: [
     {
@@ -745,6 +761,7 @@ export const mockAcceptanceLedger: AcceptanceLedgerSummary = {
 // RECORDED from tests/fixtures/timber_pavilion/.regolith/build/build_report.json
 // (`final` section) -- civil fixture carries cost/frame lock data but no
 // GLB/gerber-bearing mech/cuprite products, per the WO's fixture note.
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockBuildReport: StagedBuildReport = {
   final: {
     tier: 3,
@@ -802,6 +819,7 @@ export const mockBuildReport: StagedBuildReport = {
 // RECORDED from tests/fixtures/timber_pavilion/dist/manifest.json;
 // design_hash is lifted top-level for the TitleBlock (WO-G3's
 // ManifestSummary field), the raw dict carries the file rows verbatim.
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockManifest: ManifestSummary = {
   signed: false,
   design_hash: 'blake3:80a706376d7b10ce2a2b286febea61acd7879e5334de8bdb730a978ea0f420c5',
@@ -820,6 +838,7 @@ export const mockManifest: ManifestSummary = {
 // there is no real subprocess to record from in VITE_USE_MOCKS=1 dev
 // mode; shapes are the real RunRecord wire shape, values are honest
 // placeholders, not a recorded run).
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockRuns: RunRecord[] = [
   {
     run_id: 'a1b2c3d4e5f6',
@@ -851,6 +870,7 @@ export const mockRuns: RunRecord[] = [
 // program.calx` on the fixture (trimmed to a representative tail; the
 // progress line is a verbatim D228 wire-shape record from a real
 // `build --release`, regolith.progress module docstring).
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockRunLog: string[] = [
   'check: 1 file(s)',
   'loaded manifest examples.timber_pavilion@0.1.0 from magnetite.toml',
@@ -862,6 +882,7 @@ export const mockRunLog: string[] = [
 // The before side matches mockRuns[1]'s captured before_health; the
 // after side is the fixture project's real current health (10
 // obligations, 0 violated -- mockProjectHealth's recorded summary).
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockVerdictDiff: VerdictDiff = {
   before: { release_ok: false, violated: 1, total_obligations: 2 },
   after: { release_ok: true, violated: 0, total_obligations: 10 },
@@ -870,6 +891,7 @@ export const mockVerdictDiff: VerdictDiff = {
 // RECORDED from `regolith config list --project tests/fixtures/timber_pavilion`
 // -- the fixture project has no magnetite.toml [tool.regolith] overrides and
 // no REGOLITH_* env set, so every key sits at "default" (WO-G6).
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockProjectConfig: ConfigEntry[] = [
   { key: 'lint.level', value: 'warn', source: 'default' },
   { key: 'optimize.budget_evals', value: '1000', source: 'default' },
@@ -881,6 +903,7 @@ export const mockProjectConfig: ConfigEntry[] = [
 
 // RECORDED from `regolith.config.registered_keys()` (WOG6-F1's read
 // path) -- the default/kind/doc for every key above.
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockConfigSchema: ConfigKeyDefault[] = [
   {
     key: 'lint.level',
@@ -926,6 +949,7 @@ export const mockConfigSchema: ConfigKeyDefault[] = [
 // and install-hint rendering something to demonstrate against -- the
 // same synthesized-row precedent as `mockProjects`' stale_bracket entry
 // (this dev machine happens to have every real catalog tool installed).
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockDoctor: DoctorEntry[] = [
   {
     name: 'kicad-cli',
@@ -988,6 +1012,7 @@ export const mockDoctor: DoctorEntry[] = [
 ];
 
 // graphite's own settings default (graphite.service.settings.GraphiteSettings()).
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const mockSettings: GraphiteSettings = {
   default_project_root: '',
   run_verbosity: 'normal',
@@ -1009,6 +1034,7 @@ import tapMapRaw from '../../../tests/fixtures/mainboard_mx/dist/harness/tap_map
 import expectedSignalsRaw from '../../../tests/fixtures/mainboard_mx/dist/harness/expected_signals.json?raw';
 import captureConfigRaw from '../../../tests/fixtures/mainboard_mx/dist/harness/capture.sigrok-cli?raw';
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const MOCK_ARTIFACT_CONTENT: Record<string, string> = {
   'sha256:mock0fsilkscreen000000000000000000000000000000000000000000000': fSilkscreenRaw,
   'sha256:mock0edgecuts0000000000000000000000000000000000000000000000': edgeCutsRaw,
@@ -1024,6 +1050,7 @@ export const MOCK_ARTIFACT_CONTENT: Record<string, string> = {
 // VITE_USE_MOCKS=1 dev mode -- a real blake3 digest is a backend-only
 // computation (graphite.service.scan_upload); the mock only needs to
 // be stable and shaped like the wire response, never the real hash.
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function mockScanUpload(name: string, file: File): Promise<ScanEntry> {
   const ext = file.name.includes('.') ? file.name.slice(file.name.lastIndexOf('.')) : '';
   return Promise.resolve({

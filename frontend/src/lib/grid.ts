@@ -10,6 +10,7 @@
 import type { FittedTransform, ImagePoint } from './calibration';
 import { applyTransform, CalibrationError } from './calibration';
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface GridCorners {
   topLeft: ImagePoint;
   topRight: ImagePoint;
@@ -17,6 +18,7 @@ export interface GridCorners {
   bottomRight: ImagePoint;
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface GridSpec {
   corners: GridCorners;
   /** Interior + edge intersection COUNTS along each axis (a count of 2
@@ -27,6 +29,7 @@ export interface GridSpec {
   countV: number;
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface GridObservation {
   /** Which grid line intersection this is, [i, j] with i in
    * [0, countU), j in [0, countV) -- (0,0) is topLeft, (countU-1,0) is
@@ -76,6 +79,7 @@ function bilinear(corners: GridCorners, s: number, t: number): ImagePoint {
  * corners + counts. Degenerate specs (fewer than 2 lines per axis)
  * refuse with a typed error rather than returning an empty/garbage
  * set. */
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function projectGrid(spec: GridSpec): GridObservation[] {
   if (spec.countU < 2 || spec.countV < 2) {
     throw new CalibrationError(
@@ -104,6 +108,7 @@ export function projectGrid(spec: GridSpec): GridObservation[] {
  * position, marking it confirmed. Pure function over the observation
  * array (immutable update) so the caller (Studio.tsx) can drive it
  * from React state. */
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function confirmObservation(
   observations: readonly GridObservation[],
   gridIndex: [number, number],
@@ -119,10 +124,12 @@ export function confirmObservation(
 /** Confirm every remaining observation in place (accept all
  * predictions) -- the "confirm the set" action once no mispredictions
  * need dragging. */
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function confirmAll(observations: readonly GridObservation[]): GridObservation[] {
   return observations.map((obs) => ({ ...obs, isConfirmed: true }));
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface GridObjectPitch {
   pitchMm: number;
 }
@@ -134,6 +141,7 @@ export interface GridObjectPitch {
  * residual, since the grid is typically the SOURCE of rung B's own
  * points but can also be a held-out check set). Object-plane
  * positions are derived from grid_index * pitch, anchored at (0,0). */
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function gridResidualsMm(
   observations: readonly GridObservation[],
   transform: FittedTransform,

@@ -37,32 +37,59 @@ import {
   mockVerdictDiff,
 } from '../mocks/fixtures';
 
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type ProjectInfo = components['schemas']['ProjectInfo'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type ArtifactEntry = components['schemas']['ArtifactEntry'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type ScanEntry = components['schemas']['ScanEntry'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type ArtifactIndexRow = components['schemas']['ArtifactIndexRow'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type ProjectHealth = components['schemas']['ProjectHealth'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type ObligationsResponse = components['schemas']['ObligationsResponse'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type ObligationGroup = components['schemas']['ObligationGroup'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type AuditRow = components['schemas']['AuditRow'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type AuditSummary = components['schemas']['AuditSummary'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type AuditIndex = components['schemas']['AuditIndex'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type CalcSheet = components['schemas']['CalcSheet'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type StagedBuildReport = components['schemas']['StagedBuildReport'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type Lockfile = components['schemas']['Lockfile'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type LockSection = components['schemas']['LockSection'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type LockRow = components['schemas']['LockRow'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type GateSummary = components['schemas']['GateSummary'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type ManifestSummary = components['schemas']['ManifestSummary'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type AcceptanceLedgerSummary = components['schemas']['AcceptanceLedgerSummary'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type AcceptedDeviation = components['schemas']['AcceptedDeviation'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type ConfigEntry = components['schemas']['ConfigEntry'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type ConfigKeyDefault = components['schemas']['ConfigKeyDefault'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type GraphiteSettings = components['schemas']['GraphiteSettings'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type RunVerbosity = GraphiteSettings['run_verbosity'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type RunRecord = components['schemas']['RunRecord'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type RunVerb = RunRecord['verb'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type HealthSnapshot = components['schemas']['HealthSnapshot'];
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
 export type VerdictDiff = components['schemas']['VerdictDiff'];
 
 // The two SSE event kinds `/api/runs/{id}/events` emits (graphite/routes/
@@ -70,11 +97,13 @@ export type VerdictDiff = components['schemas']['VerdictDiff'];
 // `progress` is the D228 typed event lithos's own regolith.progress.
 // parse_line already parsed server-side -- the frontend NEVER re-parses
 // the wire-shape text itself (ONE parser, dedup law 04.2).
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface RunLogEvent {
   kind: 'log';
   line: string;
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface RunProgressEvent {
   kind: 'progress';
   v: number;
@@ -85,11 +114,13 @@ export interface RunProgressEvent {
   elapsed: number;
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface RunDoneEvent {
   kind: 'done';
   status: RunRecord['status'];
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export type RunStreamEvent = RunLogEvent | RunProgressEvent | RunDoneEvent;
 
 // `regolith doctor --json`'s hand-written shape (regolith/cli/app.py's
@@ -98,6 +129,7 @@ export type RunStreamEvent = RunLogEvent | RunProgressEvent | RunDoneEvent;
 // itself is untyped (`response_model=list[object]`, api.generated.ts
 // says `unknown[]`) -- there is no generated shape to duplicate here,
 // so this is not a dedup-law (04.2) violation, just the one honest gap.
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface DoctorEntry {
   name: string;
   found: boolean;
@@ -107,6 +139,7 @@ export interface DoctorEntry {
   install_hint: string | null;
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface ObligationsQuery {
   filter?: string;
   group?: 'disposition' | 'family';
@@ -118,17 +151,20 @@ const USE_MOCKS = import.meta.env.VITE_USE_MOCKS === '1';
  * carried verbatim so callers can render the real CLI/validation
  * message (04.1's "real validation errors" floor) instead of a
  * generic "request failed". */
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface ApiErrorBody {
   kind: string;
   message: string;
   detail?: string | null;
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export class ApiError extends Error {
   status: number;
   body: ApiErrorBody | null;
 
   constructor(status: number, body: ApiErrorBody | null) {
+    // frob:doc docs/guide.md#9-frontend-lib-notes
     super(body?.detail || body?.message || `request failed: ${status}`);
     this.name = 'ApiError';
     this.status = status;
@@ -202,6 +238,7 @@ function mockObligationsFor(project: string, query: ObligationsQuery): Obligatio
   return mockObligations;
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export const api = {
   async listProjects(): Promise<ProjectInfo[]> {
     if (USE_MOCKS) return mockProjects;

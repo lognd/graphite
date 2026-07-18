@@ -19,36 +19,43 @@
 // callers that already have mm positions (e.g. grid corners of known
 // pitch) go straight through the point-pair path.
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface ImagePoint {
   u: number;
   v: number;
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface ObjectPoint {
   x: number;
   y: number;
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface ReferencePoint {
   image: ImagePoint;
   object: ObjectPoint;
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export type CalibrationRung = 'scale' | 'homography';
 
 /** A degenerate configuration (too few points, collinear points, a
  * singular normal-equations matrix) refuses with a TYPED error --
  * never NaN, never a silently-wrong transform (WO-G11 quality bar). */
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export class CalibrationError extends Error {
   readonly kind: 'too_few_points' | 'degenerate_points' | 'singular_system';
 
   constructor(kind: CalibrationError['kind'], message: string) {
+    // frob:doc docs/guide.md#9-frontend-lib-notes
     super(message);
     this.name = 'CalibrationError';
     this.kind = kind;
   }
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface SimilarityTransform {
   rung: 'scale';
   // object = R(theta) * scale * image + t, i.e. a uniform-scale
@@ -60,19 +67,23 @@ export interface SimilarityTransform {
   mmPerPx: number;
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface HomographyTransform {
   rung: 'homography';
   // Row-major 3x3, normalized so H[2][2] = 1.
   h: number[][];
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export type FittedTransform = SimilarityTransform | HomographyTransform;
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface Residuals {
   rmsMm: number;
   maxMm: number;
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface CalibrationResult {
   transform: FittedTransform;
   residuals: Residuals;
@@ -109,6 +120,7 @@ function applyHomography(h: number[][], p: ImagePoint): ObjectPoint {
 /** Apply a fitted transform to an image-space point, returning its
  * predicted object-plane (mm) position -- the same application used
  * both to compute fit residuals and to project grid predictions. */
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function applyTransform(t: FittedTransform, p: ImagePoint): ObjectPoint {
   return t.rung === 'scale' ? applySimilarity(t, p) : applyHomography(t.h, p);
 }
@@ -138,6 +150,7 @@ function accuracyBoundFor(residuals: Residuals): number {
  * general SVD/linear-algebra dependency. Throws `CalibrationError`
  * (`singular_system`) rather than returning NaN when the system is
  * singular/near-singular. */
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function solveLinearSystem(aIn: number[][], bIn: number[]): number[] {
   const n = bIn.length;
   const a = aIn.map((row) => [...row]);
@@ -199,6 +212,7 @@ function solveNormalEquations(a: number[][], b: number[]): number[] {
  * least squares over 2+ reference points (a solvable minimum: 2 point
  * pairs already fully determine a, b, tx, ty; 3+ points make the fit
  * over-determined and is when residuals become meaningful). */
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function fitSimilarity(points: readonly ReferencePoint[]): CalibrationResult {
   if (points.length < 2) {
     throw new CalibrationError(
@@ -234,6 +248,7 @@ export function fitSimilarity(points: readonly ReferencePoint[]): CalibrationRes
  * (DLT), fit by least squares (normal equations) over 4+ points on a
  * known planar target -- corrects perspective/keystone. Dependency-
  * free closed-form linear algebra per the WO's escalation note. */
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function fitHomography(points: readonly ReferencePoint[]): CalibrationResult {
   if (points.length < 4) {
     throw new CalibrationError(
@@ -267,6 +282,7 @@ export function fitHomography(points: readonly ReferencePoint[]): CalibrationRes
   return { transform, residuals, accuracyBoundMm: accuracyBoundFor(residuals) };
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function fitCalibration(
   rung: CalibrationRung,
   points: readonly ReferencePoint[],
@@ -276,9 +292,12 @@ export function fitCalibration(
 
 // --- Honesty diagnostics (WO-G11 deliverable 6) -----------------------
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export type CaptureKind = 'flatbed_scan' | 'photo' | 'drawing_scan';
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export type PitchBasis = 'measured' | 'certified' | 'printed';
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface CalibrationDiagnostic {
   code: 'photo_uncorrected_scale' | 'accuracy_bound_tighter_than_residual';
   message: string;
@@ -287,6 +306,7 @@ export interface CalibrationDiagnostic {
 /** The two honesty checks the WO names, run client-side so the author
  * sees them BEFORE export (mirrors the lowering-side checks WO-147
  * will enforce -- same rule, earlier surface). */
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function calibrationDiagnostics(params: {
   captureKind: CaptureKind;
   rung: CalibrationRung;

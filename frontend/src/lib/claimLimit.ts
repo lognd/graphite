@@ -9,11 +9,13 @@
 
 const LIMIT_PATTERN = /<=\s*([0-9]+(?:\.[0-9]+)?)\s*([A-Za-z%]*)\s*$/;
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface ParsedLimit {
   limit: number;
   unit: string;
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function parseClaimLimit(claimText: string): ParsedLimit | null {
   const lastLine = claimText.trim().split('\n').at(-1) ?? '';
   const match = LIMIT_PATTERN.exec(lastLine.trim());

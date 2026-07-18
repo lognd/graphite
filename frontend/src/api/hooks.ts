@@ -12,10 +12,12 @@ import type {
   RunVerb,
 } from './client';
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useProjects() {
   return useQuery({ queryKey: ['projects'], queryFn: api.listProjects });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useProjectHealth(project: string | undefined) {
   return useQuery({
     queryKey: ['project-health', project],
@@ -24,6 +26,7 @@ export function useProjectHealth(project: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useObligations(project: string | undefined, query: ObligationsQuery = {}) {
   return useQuery({
     queryKey: ['obligations', project, query.filter ?? null, query.group ?? null],
@@ -32,6 +35,7 @@ export function useObligations(project: string | undefined, query: ObligationsQu
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useCalcSheets(project: string | undefined) {
   return useQuery({
     queryKey: ['calc-sheets', project],
@@ -40,6 +44,7 @@ export function useCalcSheets(project: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useAuditIndex(project: string | undefined) {
   return useQuery({
     queryKey: ['calc-audit', project],
@@ -48,6 +53,7 @@ export function useAuditIndex(project: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useProjectArtifacts(project: string | undefined) {
   return useQuery({
     queryKey: ['artifacts', project],
@@ -59,6 +65,7 @@ export function useProjectArtifacts(project: string | undefined) {
 /** WO-G9: the typed index -- families, per-file viewer hints, source
  * refs. The Artifacts hub and every family view read this instead of a
  * hardcoded family list (the fix for lithos F145). */
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useProjectArtifactIndex(project: string | undefined) {
   return useQuery({
     queryKey: ['artifact-index', project],
@@ -67,6 +74,7 @@ export function useProjectArtifactIndex(project: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useBuildReport(project: string | undefined) {
   return useQuery({
     queryKey: ['build-report', project],
@@ -75,6 +83,7 @@ export function useBuildReport(project: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useLockfile(project: string | undefined) {
   return useQuery({
     queryKey: ['lockfile', project],
@@ -83,6 +92,7 @@ export function useLockfile(project: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useGateSummary(project: string | undefined) {
   return useQuery({
     queryKey: ['gate-summary', project],
@@ -91,6 +101,7 @@ export function useGateSummary(project: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useAcceptanceLedger(project: string | undefined) {
   return useQuery({
     queryKey: ['acceptance-ledger', project],
@@ -99,6 +110,7 @@ export function useAcceptanceLedger(project: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useManifest(project: string | undefined) {
   return useQuery({
     queryKey: ['manifest', project],
@@ -107,6 +119,7 @@ export function useManifest(project: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useConfigSchema() {
   return useQuery({ queryKey: ['config-schema'], queryFn: api.getConfigSchema });
 }
@@ -115,6 +128,7 @@ export function useConfigSchema() {
 // declared one; WO-G6's -- keyed 'project-config' over listProjectConfig
 // -- survived, and the run console consumes it for its config-aware
 // default flags).
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useProjectConfig(project: string | undefined) {
   return useQuery({
     queryKey: ['project-config', project],
@@ -123,6 +137,7 @@ export function useProjectConfig(project: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useSetProjectConfig(project: string | undefined) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -139,6 +154,7 @@ export function useSetProjectConfig(project: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useDoctor(project: string | undefined) {
   return useQuery({
     queryKey: ['doctor', project],
@@ -147,6 +163,7 @@ export function useDoctor(project: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useRuns(project: string | undefined) {
   return useQuery({
     queryKey: ['runs', project],
@@ -155,6 +172,7 @@ export function useRuns(project: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useRunDetail(runId: string | undefined) {
   return useQuery({
     queryKey: ['run', runId],
@@ -163,6 +181,7 @@ export function useRunDetail(runId: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useRunLog(runId: string | undefined) {
   return useQuery({
     queryKey: ['run-log', runId],
@@ -171,6 +190,7 @@ export function useRunLog(runId: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useVerdictDiff(runId: string | undefined) {
   return useQuery({
     queryKey: ['run-verdict-diff', runId],
@@ -179,6 +199,7 @@ export function useVerdictDiff(runId: string | undefined) {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useStartRun() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -190,6 +211,7 @@ export function useStartRun() {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useCancelRun() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -200,10 +222,12 @@ export function useCancelRun() {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useSettings() {
   return useQuery({ queryKey: ['settings'], queryFn: api.getSettings });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useSetSettings() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -212,6 +236,7 @@ export function useSetSettings() {
   });
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useResetSettings() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -224,6 +249,7 @@ export function useResetSettings() {
 // call per project (WOG2-F1's finding: health is per-project, no fleet
 // endpoint exists) -- fanned out here via useQueries so the Dashboard
 // route stays a plain consumer of one hook, not a manual Promise.all.
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export interface FleetHealthEntry {
   project: ProjectInfo;
   health: ProjectHealth | undefined;
@@ -231,6 +257,7 @@ export interface FleetHealthEntry {
   isError: boolean;
 }
 
+// frob:doc docs/guide.md#9-frontend-lib-notes
 export function useFleetHealth(projects: ProjectInfo[] | undefined): {
   entries: FleetHealthEntry[];
   isLoading: boolean;

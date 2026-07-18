@@ -7,6 +7,7 @@
 //   2. the textual mirror -> ../../graphite/tui/tokens.py (committed, drift-checked)
 // Edit ONLY this file; never hand-edit either generated output.
 
+// frob:doc docs/spec/03-design-system.md#4-token-law-dedup-enforcement
 export const space = {
   0: '0px',
   1: '4px',
@@ -21,11 +22,13 @@ export const space = {
   16: '64px',
 } as const;
 
+// frob:doc docs/spec/03-design-system.md#4-token-law-dedup-enforcement
 export const radius = {
   none: '0px',
   sm: '2px',
 } as const;
 
+// frob:doc docs/spec/03-design-system.md#4-token-law-dedup-enforcement
 export const fontSize = {
   11: '11px',
   12: '12px',
@@ -36,6 +39,7 @@ export const fontSize = {
 } as const;
 
 // Line heights sit on the 4px baseline grid.
+// frob:doc docs/spec/03-design-system.md#4-token-law-dedup-enforcement
 export const lineHeight = {
   11: '16px',
   12: '16px',
@@ -45,26 +49,31 @@ export const lineHeight = {
   20: '28px',
 } as const;
 
+// frob:doc docs/spec/03-design-system.md#4-token-law-dedup-enforcement
 export const fontFamily = {
   mono: '"JetBrains Mono", ui-monospace, monospace',
   sans: '"Inter", ui-sans-serif, sans-serif',
 } as const;
 
+// frob:doc docs/spec/03-design-system.md#4-token-law-dedup-enforcement
 export const letterSpacing = {
   normal: '0',
   microLabel: '0.08em',
 } as const;
 
+// frob:doc docs/spec/03-design-system.md#4-token-law-dedup-enforcement
 export const borderWidth = {
   hairline: '1px',
 } as const;
 
+// frob:doc docs/spec/03-design-system.md#4-token-law-dedup-enforcement
 export const motion = {
   fast: '100ms',
   ack: '150ms',
 } as const;
 
 // Dark theme is the primary/default palette (spec 03.2).
+// frob:doc docs/spec/03-design-system.md#4-token-law-dedup-enforcement
 export const colorDark = {
   paper: '#111417',
   raised: '#171B1F',
@@ -104,6 +113,7 @@ export const colorDark = {
 
 // Light theme reads as an engineering drawing (title-block paper), not a
 // bleached dark theme (spec 03.2).
+// frob:doc docs/spec/03-design-system.md#4-token-law-dedup-enforcement
 export const colorLight = {
   paper: '#F4F2EC',
   raised: '#FFFFFF',
@@ -145,6 +155,7 @@ export const colorLight = {
   },
 } as const;
 
+// frob:doc docs/spec/03-design-system.md#4-token-law-dedup-enforcement
 export const tokens = {
   space,
   radius,
@@ -160,4 +171,5 @@ export const tokens = {
   },
 } as const;
 
+// frob:doc docs/spec/03-design-system.md#4-token-law-dedup-enforcement
 export type Tokens = typeof tokens;

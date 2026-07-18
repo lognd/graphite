@@ -174,6 +174,46 @@ views above, each doing exactly one honest, non-recomputing thing:
   homography transform from reference-point clicks; `grid.ts`
   projects and confirms the grid-capture observations against that
   fit.
+- **`api/hooks.ts`**: the typed TanStack Query hooks that are the
+  ONLY sanctioned way UI code reaches the server (spec 02.2) --
+  components call these, never `api/client.ts` directly, so caching/
+  invalidation has one home. Each `useXxx` query hook wraps one
+  `api.getXxx`/`api.listXxx` call (query key + `enabled: Boolean(id)`
+  when the route needs a project/run id that may not exist yet); each
+  `useSetXxx`/`useStartRun`/`useCancelRun` mutation hook invalidates
+  the query keys its own write affects. `useFleetHealth` is the one
+  exception -- it fans a per-project `/health` call out via
+  `useQueries` (no fleet-wide health endpoint exists) so the
+  dashboard route stays a plain consumer of one hook rather than a
+  manual `Promise.all`; `FleetHealthEntry` is its per-project result
+  shape.
+- **`api/client.ts`**: the ONE place that talks to the server (dedup
+  law 04.2 / spec 02.2) -- see spec 02.2 for the generation chain its
+  re-exported types alias into. `ApiError`/`ApiErrorBody` carry the
+  service layer's real error verbatim (kind/message/detail) so
+  callers render the real message instead of a generic failure.
+  `ObligationsQuery` is the filter/group query shape `getObligations`
+  takes. The `api` object is the single exported surface: one async
+  method per endpoint, each routed to the matching `mocks/fixtures.ts`
+  value under `VITE_USE_MOCKS=1` and to the real fetch otherwise
+  (`request`/`requestJson`/`requestMultipart`/`requestBlob` are its
+  four private HTTP primitives, never called directly outside this
+  file). `RunLogEvent`/`RunProgressEvent`/`RunDoneEvent`/
+  `RunStreamEvent` are the SSE run-event union `subscribeRunEvents`
+  parses -- the frontend never re-parses `regolith.progress`'s own
+  parsed shape, only relays it.
+- **`mocks/fixtures.ts`**: `VITE_USE_MOCKS=1` dev-mode and vitest
+  fixture data (spec 02.5), RECORDED from the real
+  `tests/fixtures/timber_pavilion` and `tests/fixtures/mainboard_mx`
+  build outputs so the mock shapes are real wire shapes and real
+  project data, never invented (charter 3.2) -- with one exception
+  called out at its own definition (`SYNTHETIC_2K_PROJECT`, a
+  synthetic 2000-row obligation set for virtualization testing that
+  never contaminates the recorded fixture's row counts). The three
+  non-static exports (`mockObligationsFiltered`,
+  `mockObligationsGrouped`, `mockScanUpload`) apply a filter/group/
+  mock-hash over the recorded `AUDIT_ROWS` rather than returning
+  static data.
 
 ## 10. Component reference
 
