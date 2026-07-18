@@ -20,6 +20,7 @@ const RECT_SPEC: GridSpec = {
 };
 
 describe('projectGrid', () => {
+  // frob:tests frontend/src/lib/grid.ts::projectGrid kind="unit"
   it('produces countU * countV observations with corners at the exact clicks', () => {
     const observations = projectGrid(RECT_SPEC);
     expect(observations).toHaveLength(4 * 3);
@@ -44,6 +45,7 @@ describe('projectGrid', () => {
 });
 
 describe('confirmObservation / confirmAll', () => {
+  // frob:tests frontend/src/lib/grid.ts::confirmObservation kind="unit"
   it('updates only the targeted observation and marks it confirmed', () => {
     const observations = projectGrid(RECT_SPEC);
     const updated = confirmObservation(observations, [1, 1], { u: 31, v: 20.5 });
@@ -54,6 +56,7 @@ describe('confirmObservation / confirmAll', () => {
     expect(untouched?.isConfirmed).toBe(false);
   });
 
+  // frob:tests frontend/src/lib/grid.ts::confirmAll kind="unit"
   it('confirmAll marks every observation confirmed without moving them', () => {
     const observations = projectGrid(RECT_SPEC);
     const confirmed = confirmAll(observations);
@@ -63,6 +66,7 @@ describe('confirmObservation / confirmAll', () => {
 });
 
 describe('gridResidualsMm', () => {
+  // frob:tests frontend/src/lib/grid.ts::gridResidualsMm kind="unit"
   it('is zero for a grid whose confirmed points exactly match pitch under an identity-like fit', () => {
     // A rung-A fit that maps image px 1:1 to object mm (a=1,b=0,t=0).
     const points: ReferencePoint[] = [

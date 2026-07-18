@@ -7,10 +7,12 @@ import { mockLockfile } from '../mocks/fixtures';
 import type { Lockfile } from '../api/client';
 
 describe('optimizeWinnerRows', () => {
+  // frob:tests frontend/src/lib/optimizeRows.ts::optimizeWinnerRows kind="unit"
   it('returns empty for an undefined lockfile', () => {
     expect(optimizeWinnerRows(undefined)).toEqual([]);
   });
 
+  // frob:tests frontend/src/lib/optimizeRows.ts::optimizeWinnerRows kind="unit"
   it('keeps only optimize(-caused rows, labeling empty section names (base)', () => {
     const lockfile: Lockfile = {
       ...mockLockfile,

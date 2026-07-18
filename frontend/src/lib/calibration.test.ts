@@ -3,6 +3,7 @@ import {
   applyTransform,
   calibrationDiagnostics,
   CalibrationError,
+  fitCalibration,
   fitHomography,
   fitSimilarity,
   solveLinearSystem,
@@ -12,6 +13,7 @@ import {
 } from './calibration';
 
 describe('solveLinearSystem', () => {
+  // frob:tests frontend/src/lib/calibration.ts::solveLinearSystem kind="unit"
   it('solves a known well-conditioned system', () => {
     // 2x + y = 5; x + 3y = 10 -> x=1, y=3
     const x = solveLinearSystem(
@@ -25,6 +27,7 @@ describe('solveLinearSystem', () => {
     expect(x[1]).toBeCloseTo(3);
   });
 
+  // frob:tests frontend/src/lib/calibration.ts::CalibrationError.constructor kind="unit"
   it('throws a typed CalibrationError for a singular system', () => {
     expect(() =>
       solveLinearSystem(
@@ -39,6 +42,7 @@ describe('solveLinearSystem', () => {
 });
 
 describe('fitSimilarity (rung A)', () => {
+  // frob:tests frontend/src/lib/calibration.ts::fitSimilarity kind="unit"
   it('recovers an exact known scale+rotation+translation from synthetic points', () => {
     // Known transform: 45deg rotation, scale 2, translate (10, 20).
     const theta = Math.PI / 4;
@@ -104,6 +108,7 @@ describe('fitSimilarity (rung A)', () => {
 });
 
 describe('fitHomography (rung B)', () => {
+  // frob:tests frontend/src/lib/calibration.ts::fitHomography kind="unit"
   it('recovers an exact known perspective-distorted (keystoned) mapping', () => {
     // A genuine projective homography (not affine): includes non-zero
     // h31/h32, i.e. real perspective/keystone -- the case rung A cannot
@@ -148,6 +153,7 @@ describe('fitHomography (rung B)', () => {
     expect(result.residuals.maxMm).toBeCloseTo(0, 4);
   });
 
+  // frob:tests frontend/src/lib/calibration.ts::applyTransform kind="unit"
   it('applies the fitted homography consistently with applyTransform', () => {
     const hTrue = [
       [1, 0, 0],
@@ -195,7 +201,30 @@ describe('fitHomography (rung B)', () => {
   });
 });
 
+describe('fitCalibration', () => {
+  // frob:tests frontend/src/lib/calibration.ts::fitCalibration kind="unit"
+  it('dispatches scale to fitSimilarity and homography to fitHomography', () => {
+    const scalePoints: ReferencePoint[] = [
+      { image: { u: 0, v: 0 }, object: { x: 0, y: 0 } },
+      { image: { u: 10, v: 0 }, object: { x: 10, y: 0 } },
+    ];
+    const scaleResult = fitCalibration('scale', scalePoints);
+    expect(scaleResult.transform.rung).toBe('scale');
+    expect(scaleResult).toEqual(fitSimilarity(scalePoints));
+
+    const homographyPoints: ReferencePoint[] = [
+      { image: { u: 0, v: 0 }, object: { x: 0, y: 0 } },
+      { image: { u: 100, v: 0 }, object: { x: 100, y: 0 } },
+      { image: { u: 100, v: 100 }, object: { x: 100, y: 100 } },
+      { image: { u: 0, v: 100 }, object: { x: 0, y: 100 } },
+    ];
+    const homographyResult = fitCalibration('homography', homographyPoints);
+    expect(homographyResult.transform.rung).toBe('homography');
+  });
+});
+
 describe('calibrationDiagnostics', () => {
+  // frob:tests frontend/src/lib/calibration.ts::calibrationDiagnostics kind="unit"
   it('flags an uncorrected photo claiming uniform scale', () => {
     const diagnostics = calibrationDiagnostics({
       captureKind: 'photo',

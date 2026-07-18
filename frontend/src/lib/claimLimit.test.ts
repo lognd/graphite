@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { parseClaimLimit } from './claimLimit';
 
 describe('parseClaimLimit', () => {
+  // frob:tests frontend/src/lib/claimLimit.ts::parseClaimLimit kind="unit"
   it('parses a numeric limit with a unit', () => {
     expect(parseClaimLimit('mfg.cost(all, profile=construction) <= 60000USD')).toEqual({
       limit: 60000,
