@@ -17,6 +17,7 @@ from graphite.service.discovery import ProjectInfo, scan_projects
 _log = get_logger(__name__)
 
 
+# frob:doc docs/spec/02-architecture.md#11-server-app-dependencies-and-error-mapping
 def scan_root() -> Path:
     """The configured fleet scan root (`GRAPHITE_SCAN_ROOT`, default
     cwd) -- read fresh on every call so tests can monkeypatch the env
@@ -24,11 +25,13 @@ def scan_root() -> Path:
     return Path(os.environ.get("GRAPHITE_SCAN_ROOT", ".")).resolve()
 
 
+# frob:doc docs/spec/02-architecture.md#11-server-app-dependencies-and-error-mapping
 def list_all_projects() -> tuple[ProjectInfo, ...]:
     """Every project under the configured scan root."""
     return scan_projects(scan_root())
 
 
+# frob:doc docs/spec/02-architecture.md#11-server-app-dependencies-and-error-mapping
 def resolve_project(project: str) -> ProjectInfo:
     """`{project}` path segment -> its `ProjectInfo`, 404 when the name
     is not among the scan root's discovered projects (never accepts an
@@ -44,6 +47,7 @@ def resolve_project(project: str) -> ProjectInfo:
     )
 
 
+# frob:doc docs/spec/02-architecture.md#11-server-app-dependencies-and-error-mapping
 def project_root_path(project: str) -> Path:
     """Convenience: `{project}` -> its root `Path` (re-derives via
     `project_info` on the resolved root so a caller does not need two

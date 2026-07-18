@@ -24,6 +24,7 @@ router = APIRouter(prefix="/api/projects", tags=["config"])
 schema_router = APIRouter(tags=["config"])
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @schema_router.get("/api/config/schema", response_model=tuple[ConfigKeyDefault, ...])
 def get_config_schema() -> tuple[ConfigKeyDefault, ...]:
     """Every registered key's default/kind/doc, global and static (not
@@ -32,6 +33,7 @@ def get_config_schema() -> tuple[ConfigKeyDefault, ...]:
     return key_defaults()
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/{project}/config", response_model=tuple[ConfigEntry, ...])
 def list_project_config(project: str) -> tuple[ConfigEntry, ...]:
     """Every registered config key with its effective value + source."""
@@ -41,6 +43,7 @@ def list_project_config(project: str) -> tuple[ConfigEntry, ...]:
     return result.danger_ok
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/{project}/config/{key}", response_model=ConfigEntry)
 def get_project_config(project: str, key: str) -> ConfigEntry:
     """One key's effective value + winning source."""
@@ -50,6 +53,7 @@ def get_project_config(project: str, key: str) -> ConfigEntry:
     return result.danger_ok
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.put("/{project}/config/{key}", response_model=ConfigEntry)
 def set_project_config(
     project: str,

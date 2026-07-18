@@ -17,6 +17,7 @@ from graphite.server.errors import raise_for_error
 router = APIRouter(prefix="/api/projects", tags=["obligations"])
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 class ObligationGroup(BaseModel):
     """One `group=` bucket: the key value (a disposition or a family)
     plus its member rows, in source order."""
@@ -27,6 +28,7 @@ class ObligationGroup(BaseModel):
     rows: tuple[AuditRow, ...]
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 class ObligationsResponse(BaseModel):
     """The obligations listing: the real `AuditSummary` (unmodified)
     plus either a flat `rows` array or, when `group` is given,
@@ -58,6 +60,7 @@ def _load_index(project_root: Path) -> AuditIndex:
     return result.danger_ok
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/{project}/obligations", response_model=ObligationsResponse)
 def get_obligations(
     project: str,

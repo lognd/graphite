@@ -37,6 +37,7 @@ def test_real_asset_served(static_client: TestClient) -> None:
     assert resp.text == "// bundled js"
 
 
+# frob:tests graphite/server/app.py::_SpaStaticFiles.get_response kind="unit"
 def test_spa_fallback_for_client_route(static_client: TestClient) -> None:
     """A hard reload on a client-side route must serve index.html."""
     resp = static_client.get("/project/examples.timber_pavilion/obligations")
@@ -55,6 +56,7 @@ def test_api_still_works_with_static_mounted(static_client: TestClient) -> None:
     assert static_client.get("/api/ping").json() == {"status": "ok"}
 
 
+# frob:tests graphite/server/app.py::create_app kind="unit"
 def test_no_static_dir_is_api_only(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

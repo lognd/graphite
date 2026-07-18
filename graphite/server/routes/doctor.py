@@ -11,6 +11,7 @@ from graphite.service.config_cli import doctor
 router = APIRouter(prefix="/api/projects", tags=["doctor"])
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/{project}/doctor", response_model=list[object])
 def get_doctor(project: str) -> list[object]:
     """Every registered optional external tool's found/missing status

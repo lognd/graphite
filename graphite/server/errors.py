@@ -24,6 +24,7 @@ _STATUS_BY_KIND: dict[ErrorKind, int] = {
 }
 
 
+# frob:doc docs/spec/02-architecture.md#11-server-app-dependencies-and-error-mapping
 def raise_for_error(error: ServiceError) -> NoReturn:
     """Raise the one `HTTPException` shape for a `ServiceError`, status
     chosen by `error.kind` (the closed mapping above -- add a kind

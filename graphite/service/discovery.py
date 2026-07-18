@@ -37,6 +37,7 @@ LOCKFILE_REL = Path(".regolith") / "build" / "regolith.lock"
 DIST_REL = Path("dist")
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 class ProjectInfo(BaseModel):
     """One discovered project: its manifest identity plus which report
     artifacts already exist on disk (a fresh project has none of
@@ -126,6 +127,7 @@ def _is_build_report_stale(root: Path, build_report_path: Path) -> bool:
     return newest_source > report_mtime
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def project_info(root: Path) -> Result[ProjectInfo, ServiceError]:
     """One project's `ProjectInfo`, `root` being the project directory
     (the one holding `magnetite.toml`, NOT the manifest file itself)."""
@@ -157,6 +159,7 @@ def project_info(root: Path) -> Result[ProjectInfo, ServiceError]:
     )
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def scan_projects(scan_root: Path) -> tuple[ProjectInfo, ...]:
     """Every project under `scan_root` (name-sorted for determinism) --
     a manifest that fails to parse is logged and skipped, never fatal

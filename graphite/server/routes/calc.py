@@ -18,6 +18,7 @@ from graphite.service.reports import (
 router = APIRouter(prefix="/api/projects", tags=["calc"])
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/{project}/calc/sheets", response_model=tuple[CalcSheet, ...])
 def list_calc_sheets(project: str) -> tuple[CalcSheet, ...]:
     """Every calc sheet in the project's shipped calc book (04.1 "ANY
@@ -30,6 +31,7 @@ def list_calc_sheets(project: str) -> tuple[CalcSheet, ...]:
     return result.danger_ok.sheets
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/{project}/calc/audit", response_model=AuditIndex)
 def get_audit_index(project: str) -> AuditIndex:
     """The project's audit index (summary + rows) -- the same model
@@ -42,6 +44,7 @@ def get_audit_index(project: str) -> AuditIndex:
     return result.danger_ok
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/{project}/acceptance-ledger", response_model=AcceptanceLedgerSummary)
 def get_acceptance_ledger(project: str) -> AcceptanceLedgerSummary:
     """The accepted-deviation ledger (waiver/memo panel, project-view

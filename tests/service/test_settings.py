@@ -12,6 +12,7 @@ from graphite.service.settings import (
     get_settings,
     reset_settings,
     set_settings,
+    settings_home,
 )
 
 
@@ -26,6 +27,15 @@ def test_get_settings_defaults_when_no_file_yet() -> None:
     assert result.danger_ok == GraphiteSettings()
 
 
+# frob:tests graphite/service/settings.py::settings_home kind="unit"
+def test_settings_home_reads_env_var(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("GRAPHITE_HOME", str(tmp_path / "custom-home"))
+    assert settings_home() == tmp_path / "custom-home"
+
+
+# frob:tests graphite/service/settings.py::set_settings kind="unit"
 def test_set_then_get_round_trip() -> None:
     written = set_settings(
         GraphiteSettings(default_project_root="/tmp/proj", run_verbosity="verbose")

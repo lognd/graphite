@@ -16,6 +16,7 @@ from graphite.service.scan_upload import ScanEntry, save_scan
 router = APIRouter(prefix="/api/projects", tags=["scans"])
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.post("/{project}/scans", response_model=ScanEntry)
 async def upload_scan(
     project: str, file: UploadFile, name: str = Form(...)

@@ -12,6 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from gen_openapi import render  # noqa: E402
 
 
+# frob:doc docs/spec/02-architecture.md#13-build-and-ci-scripts
 def main() -> int:
     committed_path = Path(__file__).resolve().parents[1] / "openapi.json"
     if not committed_path.is_file():

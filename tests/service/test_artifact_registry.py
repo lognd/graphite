@@ -8,6 +8,7 @@ from pathlib import Path
 from graphite.service.artifact_registry import fetch_by_hash, list_artifacts
 
 
+# frob:tests graphite/service/artifact_registry.py::build_registry kind="unit"
 def test_list_artifacts_over_fixture_dist(timber_pavilion: Path) -> None:
     entries = list_artifacts(timber_pavilion / "dist")
     assert len(entries) > 0

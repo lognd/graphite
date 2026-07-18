@@ -15,10 +15,12 @@ from tests.api.conftest import PROJECT_NAME
 
 
 # frob:tests graphite/server/routes kind="integration"
+# frob:tests graphite/server/app.py kind="integration"
 def test_ping(api_client: TestClient) -> None:
     assert api_client.get("/api/ping").json() == {"status": "ok"}
 
 
+# frob:tests graphite/service/discovery.py kind="integration"
 def test_list_projects(api_client: TestClient) -> None:
     body = api_client.get("/api/projects").json()
     assert len(body) == 1
@@ -31,12 +33,15 @@ def test_get_project(api_client: TestClient) -> None:
     assert resp.json()["name"] == PROJECT_NAME
 
 
+# frob:tests graphite/server/errors.py kind="integration"
+# frob:tests graphite/service/errors.py kind="integration"
 def test_get_project_unknown_404(api_client: TestClient) -> None:
     resp = api_client.get("/api/projects/does-not-exist")
     assert resp.status_code == 404
     assert resp.json()["detail"]["kind"] == "not_found"
 
 
+# frob:tests graphite/server/routes/obligations.py::get_obligations kind="unit"
 def test_obligations_flat(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/obligations")
     assert resp.status_code == 200
@@ -63,12 +68,14 @@ def test_obligations_grouped_by_family(api_client: TestClient) -> None:
     assert "strength" in keys
 
 
+# frob:tests graphite/server/routes/calc.py::list_calc_sheets kind="unit"
 def test_calc_sheets(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/calc/sheets")
     assert resp.status_code == 200
     assert len(resp.json()) == 6
 
 
+# frob:tests graphite/server/routes/calc.py::get_audit_index kind="unit"
 def test_calc_audit(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/calc/audit")
     assert resp.status_code == 200
@@ -76,24 +83,28 @@ def test_calc_audit(api_client: TestClient) -> None:
 
 
 # frob:tests graphite/service/reports.py kind="integration"
+# frob:tests graphite/server/routes/build.py::get_build_report kind="unit"
 def test_build_report(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/build-report")
     assert resp.status_code == 200
     assert resp.json()["final"]["release_ok"] is True
 
 
+# frob:tests graphite/server/routes/build.py::get_lockfile kind="unit"
 def test_lockfile(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/lockfile")
     assert resp.status_code == 200
     assert len(resp.json()["sections"]) == 2
 
 
+# frob:tests graphite/server/routes/build.py::get_manifest kind="unit"
 def test_manifest(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/manifest")
     assert resp.status_code == 200
     assert resp.json()["signed"] is False
 
 
+# frob:tests graphite/server/routes/build.py::get_gate_summary kind="unit"
 def test_gate_summary(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/gate-summary")
     assert resp.status_code == 200
@@ -102,6 +113,7 @@ def test_gate_summary(api_client: TestClient) -> None:
     assert body["counts"]["accepted_deviation"] == 4
 
 
+# frob:tests graphite/server/routes/calc.py::get_acceptance_ledger kind="unit"
 def test_acceptance_ledger(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/acceptance-ledger")
     assert resp.status_code == 200
@@ -110,6 +122,8 @@ def test_acceptance_ledger(api_client: TestClient) -> None:
     assert body["accepted_deviations"][0]["target"] == "bearing"
 
 
+# frob:tests graphite/service/artifact_registry.py kind="integration"
+# frob:tests graphite/server/routes/artifacts.py::list_project_artifacts kind="unit"
 def test_artifacts_list_and_fetch(api_client: TestClient) -> None:
     listing = api_client.get(f"/api/projects/{PROJECT_NAME}/artifacts")
     assert listing.status_code == 200
@@ -123,11 +137,14 @@ def test_artifacts_list_and_fetch(api_client: TestClient) -> None:
     assert b"<svg" in fetched.content or b"<?xml" in fetched.content
 
 
+# frob:tests graphite/server/routes/artifacts.py::fetch_project_artifact kind="unit"
 def test_artifacts_fetch_unknown_hash_404(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/artifacts/sha256:deadbeef")
     assert resp.status_code == 404
 
 
+# frob:tests graphite/server/routes/artifacts.py::get_project_artifact_index kind="unit"
+# frob:tests graphite/service/artifact_index.py kind="integration"
 def test_artifact_index_boards_and_harness(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -150,6 +167,7 @@ def test_artifact_index_boards_and_harness(
     assert silk and all(r["viewer"] == "gerber" for r in silk)
 
 
+# frob:tests graphite/server/routes/health.py::get_project_health kind="unit"
 def test_health(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/health")
     assert resp.status_code == 200
@@ -158,6 +176,8 @@ def test_health(api_client: TestClient) -> None:
     assert body["obligation_summary"]["obligations"] == 10
 
 
+# frob:tests graphite/server/routes/config.py::list_project_config kind="unit"
+# frob:tests graphite/service/config_cli.py kind="integration"
 def test_config_list(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/config")
     assert resp.status_code == 200
@@ -165,12 +185,14 @@ def test_config_list(api_client: TestClient) -> None:
     assert "ui.port" in keys
 
 
+# frob:tests graphite/server/routes/config.py::get_project_config kind="unit"
 def test_config_get_one_key(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/config/ui.port")
     assert resp.status_code == 200
     assert resp.json()["source"] == "default"
 
 
+# frob:tests graphite/server/routes/config.py::get_config_schema kind="unit"
 def test_config_schema(api_client: TestClient) -> None:
     resp = api_client.get("/api/config/schema")
     assert resp.status_code == 200
@@ -180,6 +202,7 @@ def test_config_schema(api_client: TestClient) -> None:
     assert entry["kind"] == "int"
 
 
+# frob:tests graphite/server/routes/config.py::set_project_config kind="unit"
 def test_config_set_and_reset_round_trip(api_client: TestClient) -> None:
     set_resp = api_client.put(
         f"/api/projects/{PROJECT_NAME}/config/ui.port",
@@ -211,12 +234,15 @@ def test_config_set_unknown_key_is_a_real_cli_error(api_client: TestClient) -> N
     assert "does.not.exist" in resp.json()["detail"]["detail"]
 
 
+# frob:tests graphite/server/routes/doctor.py::get_doctor kind="unit"
 def test_doctor(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/doctor")
     assert resp.status_code == 200
     assert isinstance(resp.json(), list)
 
 
+# frob:tests graphite/server/routes/settings.py::read_settings kind="unit"
+# frob:tests graphite/server/routes/settings.py::write_settings kind="unit"
 def test_settings_defaults_and_round_trip(
     api_client: TestClient, tmp_path, monkeypatch
 ) -> None:
@@ -245,6 +271,25 @@ def test_settings_defaults_and_round_trip(
     assert reset.json()["run_verbosity"] == "normal"
 
 
+# frob:tests graphite/server/routes/settings.py::reset_settings_route kind="unit"
+# frob:tests graphite/service/settings.py kind="integration"
+def test_settings_reset_after_change_restores_defaults(
+    api_client: TestClient, tmp_path, monkeypatch
+) -> None:
+    monkeypatch.setenv("GRAPHITE_HOME", str(tmp_path / "graphite-home"))
+    api_client.put(
+        "/api/settings",
+        json={"default_project_root": "/tmp/other-project", "run_verbosity": "quiet"},
+    )
+    reset = api_client.post("/api/settings/reset")
+    assert reset.status_code == 200
+    assert reset.json() == {
+        "default_project_root": "",
+        "run_verbosity": "normal",
+        "run_history_limit": 200,
+    }
+
+
 def test_settings_invalid_verbosity_is_a_real_validation_error(
     api_client: TestClient,
 ) -> None:
@@ -256,6 +301,7 @@ def test_settings_invalid_verbosity_is_a_real_validation_error(
 
 
 # frob:tests graphite/service/runs.py kind="integration"
+# frob:tests graphite/server/routes/runs.py::start_project_run kind="unit"
 def test_start_run_and_poll(api_client: TestClient) -> None:
     started = api_client.post(
         f"/api/projects/{PROJECT_NAME}/runs",
@@ -291,6 +337,7 @@ def test_run_events_streams_and_closes(api_client: TestClient) -> None:
     assert saw_done
 
 
+# frob:tests graphite/server/routes/runs.py::get_run_detail kind="unit"
 def test_run_started_captures_before_health(api_client: TestClient) -> None:
     started = api_client.post(
         f"/api/projects/{PROJECT_NAME}/runs",
@@ -299,7 +346,25 @@ def test_run_started_captures_before_health(api_client: TestClient) -> None:
     assert started.status_code == 200
     assert "before_health" in started.json()
 
+    run_id = started.json()["run_id"]
+    detail = api_client.get(f"/api/runs/{run_id}")
+    assert detail.status_code == 200
+    assert detail.json()["run_id"] == run_id
 
+
+# frob:tests graphite/server/routes/runs.py::list_project_runs kind="unit"
+def test_list_project_runs_after_start(api_client: TestClient) -> None:
+    started = api_client.post(
+        f"/api/projects/{PROJECT_NAME}/runs",
+        json={"verb": "check", "args": ["program.calx"]},
+    )
+    run_id = started.json()["run_id"]
+    history = api_client.get(f"/api/projects/{PROJECT_NAME}/runs")
+    assert history.status_code == 200
+    assert any(r["run_id"] == run_id for r in history.json())
+
+
+# frob:tests graphite/server/routes/runs.py::get_run_log kind="unit"
 def test_run_full_log_replay(api_client: TestClient) -> None:
     started = api_client.post(
         f"/api/projects/{PROJECT_NAME}/runs",
@@ -320,6 +385,7 @@ def test_run_full_log_replay(api_client: TestClient) -> None:
     assert any("check" in line for line in log_resp.json())
 
 
+# frob:tests graphite/server/routes/runs.py::get_run_verdict_diff kind="unit"
 def test_run_verdict_diff(api_client: TestClient) -> None:
     started = api_client.post(
         f"/api/projects/{PROJECT_NAME}/runs",
@@ -332,6 +398,7 @@ def test_run_verdict_diff(api_client: TestClient) -> None:
     assert "before" in body and "after" in body
 
 
+# frob:tests graphite/server/routes/runs.py::cancel_project_run kind="unit"
 def test_run_cancel_running_process(api_client: TestClient) -> None:
     started = api_client.post(
         f"/api/projects/{PROJECT_NAME}/runs",
@@ -348,6 +415,8 @@ def test_run_cancel_unknown_run_404(api_client: TestClient) -> None:
     assert resp.status_code == 404
 
 
+# frob:tests graphite/service/scan_upload.py kind="integration"
+# frob:tests graphite/server/routes/scans.py::upload_scan kind="unit"
 def test_scan_upload_stores_and_hashes(api_client: TestClient) -> None:
     resp = api_client.post(
         f"/api/projects/{PROJECT_NAME}/scans",

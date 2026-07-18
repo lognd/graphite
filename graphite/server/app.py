@@ -46,6 +46,7 @@ class _SpaStaticFiles(StaticFiles):
     (/project/..., /runs, ...) deep-link correctly on a hard reload."""
 
     async def get_response(self, path: str, scope: Scope) -> Response:
+        # frob:doc docs/spec/02-architecture.md#11-server-app-dependencies-and-error-mapping
         try:
             response = await super().get_response(path, scope)
         except HTTPException as exc:
@@ -61,6 +62,7 @@ class _SpaStaticFiles(StaticFiles):
         return response
 
 
+# frob:doc docs/spec/02-architecture.md#11-server-app-dependencies-and-error-mapping
 def create_app() -> FastAPI:
     """Build the FastAPI app: every router under `/api`, CORS left OFF
     (localhost-only, single-origin -- charter sec. 3.1, no cross-origin

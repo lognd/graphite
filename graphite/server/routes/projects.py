@@ -10,6 +10,7 @@ from graphite.service.discovery import ProjectInfo
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("", response_model=tuple[ProjectInfo, ...])
 def list_projects() -> tuple[ProjectInfo, ...]:
     """Every project under the server's configured scan root
@@ -19,6 +20,7 @@ def list_projects() -> tuple[ProjectInfo, ...]:
     return list_all_projects()
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/{project}", response_model=ProjectInfo)
 def get_project(project: str) -> ProjectInfo:
     """One project's manifest identity + artifact presence flags."""

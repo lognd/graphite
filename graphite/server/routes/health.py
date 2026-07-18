@@ -18,6 +18,7 @@ from graphite.service.reports import read_audit_index, read_staged_build_report
 router = APIRouter(prefix="/api/projects", tags=["health"])
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 class ProjectHealth(BaseModel):
     """The title-block verdict summary for one project."""
 
@@ -27,6 +28,7 @@ class ProjectHealth(BaseModel):
     obligation_summary: AuditSummary
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/{project}/health", response_model=ProjectHealth)
 def get_project_health(project: str) -> ProjectHealth:
     """`release_ok` from the build report + the audit index's obligation

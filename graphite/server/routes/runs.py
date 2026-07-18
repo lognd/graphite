@@ -43,6 +43,7 @@ router = APIRouter(tags=["runs"])
 _POLL_SECONDS = 0.25
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.post("/api/projects/{project}/runs", response_model=RunRecord)
 def start_project_run(
     project: str,
@@ -60,6 +61,7 @@ def start_project_run(
     return result.danger_ok
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/api/projects/{project}/runs", response_model=tuple[RunRecord, ...])
 def list_project_runs(project: str) -> tuple[RunRecord, ...]:
     """This project's run history, newest first."""
@@ -67,6 +69,7 @@ def list_project_runs(project: str) -> tuple[RunRecord, ...]:
     return list_runs(root)
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/api/runs/{run_id}", response_model=RunRecord)
 def get_run_detail(run_id: str) -> RunRecord:
     """One run's current record (re-polls liveness when still `running`,
@@ -77,6 +80,7 @@ def get_run_detail(run_id: str) -> RunRecord:
     return result.danger_ok
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/api/runs/{run_id}/log", response_model=tuple[str, ...])
 def get_run_log(run_id: str) -> tuple[str, ...]:
     """The full captured log for `run_id` as a plain array -- run-
@@ -86,6 +90,7 @@ def get_run_log(run_id: str) -> tuple[str, ...]:
     return get_full_log(run_id)
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.post("/api/runs/{run_id}/cancel", response_model=RunRecord)
 def cancel_project_run(run_id: str) -> RunRecord:
     """Stop a running run (deliverable 1's cancel affordance; WOG1-F6
@@ -96,6 +101,7 @@ def cancel_project_run(run_id: str) -> RunRecord:
     return result.danger_ok
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/api/runs/{run_id}/verdict-diff", response_model=VerdictDiff)
 def get_run_verdict_diff(run_id: str) -> VerdictDiff:
     """The before/after health-snapshot pair for `run_id`'s exit summary
@@ -150,6 +156,7 @@ async def _log_event_stream(run_id: str) -> AsyncIterator[dict[str, str]]:
         await asyncio.sleep(_POLL_SECONDS)
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/api/runs/{run_id}/events")
 async def run_events(run_id: str) -> EventSourceResponse:
     """SSE stream of `run_id`'s log lines + parsed progress events,

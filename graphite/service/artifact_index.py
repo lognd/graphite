@@ -40,6 +40,7 @@ Viewer = Literal[
 _INDEX_FILENAME = "artifact_index.json"
 
 
+# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
 class ArtifactIndexRow(BaseModel):
     """One file from a project's shipped index, with `content_hash`
     REPLACED by graphite's own sha256 over the same bytes (the only
@@ -121,6 +122,7 @@ def _hash_relpath(dist_root: Path, relpath: str) -> str | None:
     return f"sha256:{digest.hexdigest()}"
 
 
+# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
 def load_index(dist_root: Path) -> tuple[ArtifactIndexRow, ...]:
     """The project's typed artifact index, relpath-sorted. Reads the
     shipped `artifact_index.json` when present and re-keys every row to

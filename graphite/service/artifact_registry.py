@@ -25,6 +25,7 @@ from graphite.service.errors import ServiceError
 _log = get_logger(__name__)
 
 
+# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
 class ArtifactEntry(BaseModel):
     """One indexed file under a project's `dist/`: its content hash,
     a UI-facing relative path (display only, never used to serve),
@@ -46,6 +47,7 @@ def _hash_file(path: Path) -> str:
     return f"sha256:{digest.hexdigest()}"
 
 
+# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
 def build_registry(dist_root: Path) -> dict[str, Path]:
     """Every file under `dist_root`, keyed by its `sha256:<hex>` content
     hash (last-write-wins on a hash collision -- collisions of sha256
@@ -64,6 +66,7 @@ def build_registry(dist_root: Path) -> dict[str, Path]:
     return registry
 
 
+# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
 def list_artifacts(dist_root: Path) -> tuple[ArtifactEntry, ...]:
     """Every artifact under `dist_root` as a listing entry (relpath
     display-only; the content hash is the only fetch key)."""
@@ -83,6 +86,7 @@ def list_artifacts(dist_root: Path) -> tuple[ArtifactEntry, ...]:
     return tuple(entries)
 
 
+# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
 def fetch_by_hash(
     dist_root: Path, content_hash: str
 ) -> Result[tuple[bytes, str], ServiceError]:

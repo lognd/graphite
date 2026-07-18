@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from graphite.server.app import create_app  # noqa: E402
 
 
+# frob:doc docs/spec/02-architecture.md#13-build-and-ci-scripts
 def render() -> str:
     """The app's `openapi.json` bytes, deterministically formatted
     (sorted keys, trailing newline) so the drift check is a plain
@@ -23,6 +24,7 @@ def render() -> str:
     return json.dumps(schema, indent=2, sort_keys=True) + "\n"
 
 
+# frob:doc docs/spec/02-architecture.md#13-build-and-ci-scripts
 def main() -> None:
     out_path = Path(__file__).resolve().parents[1] / "openapi.json"
     out_path.write_text(render())

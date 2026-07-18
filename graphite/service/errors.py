@@ -29,6 +29,7 @@ ErrorKind = Literal[
 ]
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 class ServiceError(BaseModel):
     """A recoverable, JSON-safe error from the service layer."""
 

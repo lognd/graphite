@@ -35,6 +35,7 @@ DEFAULT_RUN_HISTORY_LIMIT = 200
 _SETTINGS_FILENAME = "settings.json"
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 class GraphiteSettings(BaseModel):
     """graphite's own preferences: a default project root to land on at
     startup, a run verbosity passthrough for driven CLI invocations, and
@@ -49,6 +50,7 @@ class GraphiteSettings(BaseModel):
     run_history_limit: int = Field(default=DEFAULT_RUN_HISTORY_LIMIT, ge=0)
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def settings_home() -> Path:
     """The configured settings directory (`GRAPHITE_HOME`, default
     `~/.graphite`) -- read fresh on every call, mirroring
@@ -61,6 +63,7 @@ def _settings_path() -> Path:
     return settings_home() / _SETTINGS_FILENAME
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def get_settings() -> Result[GraphiteSettings, ServiceError]:
     """The current settings, or the recorded defaults when no settings
     file has been written yet (first run)."""
@@ -90,6 +93,7 @@ def get_settings() -> Result[GraphiteSettings, ServiceError]:
         )
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def set_settings(settings: GraphiteSettings) -> Result[GraphiteSettings, ServiceError]:
     """Overwrite the whole settings file (the settings shape is small
     enough that a whole-document PUT, not per-key PATCH, is the
@@ -110,6 +114,7 @@ def set_settings(settings: GraphiteSettings) -> Result[GraphiteSettings, Service
     return Ok(settings)
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def reset_settings() -> Result[GraphiteSettings, ServiceError]:
     """Reset to the recorded defaults (04.1's "reset to default" floor,
     graphite's own settings side of it)."""

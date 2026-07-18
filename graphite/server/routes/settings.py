@@ -17,6 +17,7 @@ from graphite.service.settings import (
 router = APIRouter(prefix="/api/settings", tags=["settings"])
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("", response_model=GraphiteSettings)
 def read_settings() -> GraphiteSettings:
     """The current graphite settings (recorded defaults on first run)."""
@@ -26,6 +27,7 @@ def read_settings() -> GraphiteSettings:
     return result.danger_ok
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.put("", response_model=GraphiteSettings)
 def write_settings(settings: GraphiteSettings) -> GraphiteSettings:
     """Overwrite the whole settings document."""
@@ -35,6 +37,7 @@ def write_settings(settings: GraphiteSettings) -> GraphiteSettings:
     return result.danger_ok
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.post("/reset", response_model=GraphiteSettings)
 def reset_settings_route() -> GraphiteSettings:
     """Reset graphite's own settings to their recorded defaults."""

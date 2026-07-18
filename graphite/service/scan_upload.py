@@ -41,6 +41,7 @@ _ALLOWED_EXTENSIONS = {".png", ".jpg", ".jpeg", ".tif", ".tiff"}
 _SAFE_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
 
 
+# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
 class ScanEntry(BaseModel):
     """One stored scan: its blake3 content hash (the pinned identity a
     later `.rgp`'s `[provenance] scan` block cites), its path relative
@@ -57,6 +58,7 @@ def _hash_bytes(data: bytes) -> str:
     return f"blake3:{blake3.blake3(data).hexdigest()}"
 
 
+# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
 def save_scan(
     project_root: Path, name: str, extension: str, data: bytes
 ) -> Result[ScanEntry, ServiceError]:

@@ -20,6 +20,7 @@ from graphite.service.artifact_registry import (
 router = APIRouter(prefix="/api/projects", tags=["artifacts"])
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/{project}/artifacts", response_model=tuple[ArtifactEntry, ...])
 def list_project_artifacts(project: str) -> tuple[ArtifactEntry, ...]:
     """Every artifact under the project's `dist/` (GLB/SVG/PDF/STEP/
@@ -29,6 +30,7 @@ def list_project_artifacts(project: str) -> tuple[ArtifactEntry, ...]:
     return list_artifacts(root / "dist")
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/{project}/artifact-index", response_model=tuple[ArtifactIndexRow, ...])
 def get_project_artifact_index(project: str) -> tuple[ArtifactIndexRow, ...]:
     """The typed artifact index (WO-G9 / lithos D244): family, kind,
@@ -40,6 +42,7 @@ def get_project_artifact_index(project: str) -> tuple[ArtifactIndexRow, ...]:
     return load_index(root / "dist")
 
 
+# frob:doc docs/spec/02-architecture.md#12-api-routes
 @router.get("/{project}/artifacts/{content_hash}")
 def fetch_project_artifact(project: str, content_hash: str) -> Response:
     """Raw bytes for one artifact, looked up by content hash ONLY --

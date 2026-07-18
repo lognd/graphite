@@ -37,6 +37,7 @@ _log = get_logger(__name__)
 _CONFIG_LINE = re.compile(r"^(?P<key>\S+)=(?P<value>.*) \(source=(?P<source>\w+)\)$")
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 class ConfigEntry(BaseModel):
     """One `regolith config` key: its effective value and the
     where-attribution level that won it (04.1 "ANY FORM/CONFIG FIELD"
@@ -49,6 +50,7 @@ class ConfigEntry(BaseModel):
     source: str
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 class ConfigKeyDefault(BaseModel):
     """One registered key's declared default + doc, for the "reset to
     default" affordance (04.1). Neither `regolith config list` nor
@@ -77,6 +79,7 @@ class ConfigKeyDefault(BaseModel):
     doc: str
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def key_defaults() -> tuple[ConfigKeyDefault, ...]:
     """Every registered key's default/kind/doc (WOG6-F1: read directly
     off `regolith.config.registered_keys()`, see `ConfigKeyDefault`)."""
@@ -117,6 +120,7 @@ def _run(argv: list[str], cwd: Path) -> Result[str, ServiceError]:
     return Ok(completed.stdout)
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def list_config(project_root: Path) -> Result[tuple[ConfigEntry, ...], ServiceError]:
     """Every registered config key (`regolith config list`)."""
     stdout = _run(["config", "list", "--project", str(project_root)], project_root)
@@ -131,6 +135,7 @@ def list_config(project_root: Path) -> Result[tuple[ConfigEntry, ...], ServiceEr
     return Ok(tuple(entries))
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def get_config(project_root: Path, key: str) -> Result[ConfigEntry, ServiceError]:
     """One key's effective value + winning source (`regolith config where`)."""
     stdout = _run(
@@ -149,6 +154,7 @@ def get_config(project_root: Path, key: str) -> Result[ConfigEntry, ServiceError
     return Ok(ConfigEntry(**match.groupdict()))
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def set_config(
     project_root: Path, key: str, value: str, level: Literal["global", "local"]
 ) -> Result[ConfigEntry, ServiceError]:
@@ -164,6 +170,7 @@ def set_config(
     return get_config(project_root, key)
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def doctor(project_root: Path) -> Result[list[object], ServiceError]:
     """`regolith doctor --json` parsed straight as JSON (the one
     regolith surface that already speaks structured data natively)."""

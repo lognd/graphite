@@ -48,6 +48,7 @@ def _find_one(pattern: re.Pattern[str]) -> Path | None:
     return matches[0]
 
 
+# frob:doc docs/spec/02-architecture.md#13-build-and-ci-scripts
 def main() -> int:
     """Exit 0 iff both main-bundle budgets hold."""
     if not STATIC_ASSETS.is_dir():
