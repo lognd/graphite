@@ -16,6 +16,7 @@ from graphite.server.deps import (
 )
 from tests.api.conftest import PROJECT_NAME
 
+
 # frob:tests graphite/server/deps.py kind="integration"
 # frob:tests graphite/server/deps.py::scan_root kind="unit"
 def test_scan_root_reads_env_var(

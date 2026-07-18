@@ -21,9 +21,15 @@ def test_render_produces_sorted_deterministic_json() -> None:
 
 
 # frob:tests scripts/gen_openapi.py::main kind="unit"
-def test_main_writes_openapi_json(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+# frob:ticket T-0006
+def test_main_writes_openapi_json(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
     fake_repo_root = tmp_path
-    monkeypatch.setattr("scripts.gen_openapi.__file__", str(fake_repo_root / "scripts" / "gen_openapi.py"))
+    monkeypatch.setattr(
+        "scripts.gen_openapi.__file__",
+        str(fake_repo_root / "scripts" / "gen_openapi.py"),
+    )
     main()
     out_path = fake_repo_root / "openapi.json"
     assert out_path.is_file()

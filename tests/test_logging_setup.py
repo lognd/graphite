@@ -8,21 +8,33 @@ from graphite.logging_setup import _LevelPrefixFormatter, configure, get_logger
 
 
 # frob:tests graphite/logging_setup.py::_LevelPrefixFormatter.format
+# frob:ticket T-0006
 def test_level_prefix_formatter_plain_below_warning():
     fmt = _LevelPrefixFormatter()
     record = logging.LogRecord(
-        name="x", level=logging.INFO, pathname="", lineno=0,
-        msg="hello", args=(), exc_info=None,
+        name="x",
+        level=logging.INFO,
+        pathname="",
+        lineno=0,
+        msg="hello",
+        args=(),
+        exc_info=None,
     )
     assert fmt.format(record) == "hello"
 
 
 # frob:tests graphite/logging_setup.py::_LevelPrefixFormatter.format
+# frob:ticket T-0006
 def test_level_prefix_formatter_prefixes_warning_and_above():
     fmt = _LevelPrefixFormatter()
     record = logging.LogRecord(
-        name="x", level=logging.WARNING, pathname="", lineno=0,
-        msg="uh oh", args=(), exc_info=None,
+        name="x",
+        level=logging.WARNING,
+        pathname="",
+        lineno=0,
+        msg="uh oh",
+        args=(),
+        exc_info=None,
     )
     assert fmt.format(record) == "WARNING: uh oh"
 

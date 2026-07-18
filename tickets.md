@@ -88,8 +88,7 @@ parent: null
 scope:
 - graphite/,tests/,scripts/
 evidence:
-- ruff format graphite/server/routes/scans.py graphite/service/artifact_index.py graphite/service/scan_upload.py
-  tests/service/test_artifact_index.py
+- tests/service/test_artifact_index.py::test_load_index_over_mainboard_fixture
 attachments: []
 acceptance: []
 threat: null
