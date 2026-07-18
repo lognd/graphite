@@ -137,7 +137,9 @@ def load_index(dist_root: Path) -> tuple[ArtifactIndexRow, ...]:
     try:
         raw = json.loads(index_path.read_text())
     except (OSError, json.JSONDecodeError) as exc:
-        _log.warning("artifact_index: unreadable %s: %s -- falling back", index_path, exc)
+        _log.warning(
+            "artifact_index: unreadable %s: %s -- falling back", index_path, exc
+        )
         return _synthesize_index(dist_root)
 
     rows: list[ArtifactIndexRow] = []

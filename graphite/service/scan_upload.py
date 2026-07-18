@@ -86,9 +86,7 @@ def save_scan(
         )
     if len(data) == 0:
         _log.warning("scan_upload: refused empty upload for scan %r", name)
-        return Err(
-            ServiceError(kind="invalid_input", message="uploaded scan is empty")
-        )
+        return Err(ServiceError(kind="invalid_input", message="uploaded scan is empty"))
 
     scans_dir = project_root / "traced" / "scans"
     scans_dir.mkdir(parents=True, exist_ok=True)

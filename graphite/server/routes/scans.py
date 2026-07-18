@@ -17,7 +17,9 @@ router = APIRouter(prefix="/api/projects", tags=["scans"])
 
 
 @router.post("/{project}/scans", response_model=ScanEntry)
-async def upload_scan(project: str, file: UploadFile, name: str = Form(...)) -> ScanEntry:
+async def upload_scan(
+    project: str, file: UploadFile, name: str = Form(...)
+) -> ScanEntry:
     """Store an uploaded scan under `traced/scans/<name><ext>` and
     return its blake3 hash. `name` is the studio's display name for the
     scan (validated, never the raw client filename); the extension is

@@ -34,7 +34,9 @@ def test_load_index_harness_honest_absence_carried_through(mainboard_mx: Path) -
     assert "no expected-signal record was authored" in body
 
 
-def test_load_index_over_timber_pavilion_no_boards_no_harness(timber_pavilion: Path) -> None:
+def test_load_index_over_timber_pavilion_no_boards_no_harness(
+    timber_pavilion: Path,
+) -> None:
     rows = load_index(timber_pavilion / "dist")
     families = {r.family for r in rows}
     assert "boards" not in families
@@ -56,7 +58,9 @@ def test_load_index_empty_dist_is_empty(tmp_path: Path) -> None:
     assert load_index(tmp_path / "dist") == ()
 
 
-def test_load_index_row_dropped_when_relpath_missing_on_disk(mainboard_mx: Path) -> None:
+def test_load_index_row_dropped_when_relpath_missing_on_disk(
+    mainboard_mx: Path,
+) -> None:
     dist = mainboard_mx / "dist"
     (dist / "boards" / "board_status.json").unlink()
     rows = load_index(dist)
