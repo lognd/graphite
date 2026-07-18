@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { VerdictBadge } from './VerdictBadge';
 
 describe('VerdictBadge', () => {
+  // frob:tests frontend/src/components/VerdictBadge/VerdictBadge.tsx::VerdictBadge
   it('renders the full label by default', () => {
     render(<VerdictBadge verdict="discharged" />);
     expect(screen.getByText('DISCHARGED')).toBeInTheDocument();

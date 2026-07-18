@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { ConfigField } from './ConfigField';
 
 describe('ConfigField', () => {
+  // frob:tests frontend/src/components/ConfigField/ConfigField.tsx::ConfigField
   it('renders label, value, and source attribution', () => {
     render(
       <ConfigField

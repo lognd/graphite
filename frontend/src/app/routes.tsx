@@ -65,8 +65,10 @@ if (import.meta.env.DEV) {
 // no-route-for-family test): `createBrowserRouter`'s route objects are
 // awkward to introspect through browser APIs in vitest's jsdom
 // environment, but the plain `children` array is not.
+// frob:doc docs/guide.md#1018-app-shell
 export const routeChildren = children;
 
+// frob:doc docs/guide.md#1018-app-shell
 export const router = createBrowserRouter([
   {
     path: '/',

@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { StatusLine } from './StatusLine';
 
 describe('StatusLine', () => {
+  // frob:tests frontend/src/components/StatusLine/StatusLine.tsx::StatusLine
   it('renders the project name and server state', () => {
     render(
       <StatusLine projectName="flagship-printer-a" serverState="connected" lastAction="build ok" />,

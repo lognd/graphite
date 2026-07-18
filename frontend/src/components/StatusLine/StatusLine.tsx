@@ -3,6 +3,7 @@
 
 import './StatusLine.css';
 
+// frob:doc docs/guide.md#107-statusline
 export interface StatusLineProps {
   projectName: string | null;
   serverState: 'connected' | 'connecting' | 'disconnected';
@@ -16,6 +17,7 @@ const SERVER_LABEL: Record<StatusLineProps['serverState'], string> = {
   disconnected: 'DISCONNECTED',
 };
 
+// frob:doc docs/guide.md#107-statusline
 export function StatusLine({
   projectName,
   serverState,

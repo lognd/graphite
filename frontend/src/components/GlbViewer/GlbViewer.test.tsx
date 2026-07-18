@@ -11,6 +11,7 @@ import { render, screen } from '@testing-library/react';
 import { GlbViewer } from './GlbViewer';
 
 describe('GlbViewer', () => {
+  // frob:tests frontend/src/components/GlbViewer/GlbViewer.tsx::GlbViewer
   it('renders a named-absence empty state when no GLB bytes are supplied', () => {
     render(
       <GlbViewer

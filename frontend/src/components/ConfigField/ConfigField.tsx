@@ -9,6 +9,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import './ConfigField.css';
 
+// frob:doc docs/guide.md#1011-configfield
 export interface ConfigFieldProps {
   label: string;
   doc?: string;
@@ -33,6 +34,7 @@ export interface ConfigFieldProps {
   }) => ReactNode;
 }
 
+// frob:doc docs/guide.md#1011-configfield
 export function ConfigField({
   label,
   doc,

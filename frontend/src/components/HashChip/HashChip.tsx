@@ -6,11 +6,13 @@
 import { useState } from 'react';
 import './HashChip.css';
 
+// frob:doc docs/guide.md#104-hashchip
 export interface HashChipProps {
   full: string;
   shortLength?: number;
 }
 
+// frob:doc docs/guide.md#104-hashchip
 export function HashChip({ full, shortLength = 7 }: HashChipProps) {
   const [expanded, setExpanded] = useState(false);
   const [copied, setCopied] = useState(false);

@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { LogPane } from './LogPane';
 
 describe('LogPane', () => {
+  // frob:tests frontend/src/components/LogPane/LogPane.tsx::LogPane
   it('renders every log line', () => {
     render(<LogPane lines={['starting build', 'linking...', 'done']} />);
     expect(screen.getByText('starting build')).toBeInTheDocument();

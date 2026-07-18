@@ -10,6 +10,7 @@ import { createContext, useContext, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { RunRecord, RunVerb } from '../api/client';
 
+// frob:doc docs/guide.md#1020-runcontext
 export interface ActiveRunState {
   runId: string;
   project: string;
@@ -29,6 +30,7 @@ interface RunContextValue {
 
 const RunContext = createContext<RunContextValue | null>(null);
 
+// frob:doc docs/guide.md#1020-runcontext
 export function RunProvider({ children }: { children: ReactNode }) {
   const [activeRun, setActiveRun] = useState<ActiveRunState | null>(null);
 
@@ -44,6 +46,7 @@ export function RunProvider({ children }: { children: ReactNode }) {
   return <RunContext.Provider value={value}>{children}</RunContext.Provider>;
 }
 
+// frob:doc docs/guide.md#1020-runcontext
 export function useRunContext(): RunContextValue {
   const ctx = useContext(RunContext);
   if (!ctx) {

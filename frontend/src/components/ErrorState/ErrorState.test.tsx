@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { ErrorState } from './ErrorState';
 
 describe('ErrorState', () => {
+  // frob:tests frontend/src/components/ErrorState/ErrorState.tsx::ErrorState
   it('renders the title with alert role', () => {
     render(<ErrorState title="Build failed" />);
     expect(screen.getByRole('alert')).toHaveTextContent('Build failed');

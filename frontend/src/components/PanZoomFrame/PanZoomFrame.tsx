@@ -6,6 +6,7 @@
 import { useRef, useState, type ReactNode, type WheelEvent } from 'react';
 import './PanZoomFrame.css';
 
+// frob:doc docs/guide.md#1012-panzoomframe
 export interface PanZoomFrameProps {
   children: ReactNode;
   ariaLabel: string;
@@ -14,6 +15,7 @@ export interface PanZoomFrameProps {
 const MIN_SCALE = 0.1;
 const MAX_SCALE = 8;
 
+// frob:doc docs/guide.md#1012-panzoomframe
 export function PanZoomFrame({ children, ariaLabel }: PanZoomFrameProps) {
   const [scale, setScale] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });

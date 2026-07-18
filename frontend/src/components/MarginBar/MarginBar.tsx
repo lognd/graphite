@@ -4,6 +4,7 @@
 
 import './MarginBar.css';
 
+// frob:doc docs/guide.md#103-marginbar
 export interface MarginBarProps {
   /** Current value, in `unit`. */
   value: number;
@@ -18,6 +19,7 @@ export interface MarginBarProps {
   labelVisible?: boolean;
 }
 
+// frob:doc docs/guide.md#103-marginbar
 export function MarginBar({ value, limit, unit, label, labelVisible = true }: MarginBarProps) {
   const ratio = limit === 0 ? (value === 0 ? 0 : Infinity) : value / limit;
   const pct = Math.max(0, Math.min(100, Math.abs(ratio) * 100));

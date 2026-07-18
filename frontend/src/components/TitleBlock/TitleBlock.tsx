@@ -9,6 +9,7 @@ import { HashChip } from '../HashChip/HashChip';
 import { VerdictBadge } from '../VerdictBadge/VerdictBadge';
 import './TitleBlock.css';
 
+// frob:doc docs/guide.md#106-titleblock
 export interface TitleBlockProps {
   projectName: string;
   designHash: string | null;
@@ -17,6 +18,7 @@ export interface TitleBlockProps {
   verdict: Verdict | null;
 }
 
+// frob:doc docs/guide.md#106-titleblock
 export function TitleBlock({
   projectName,
   designHash,

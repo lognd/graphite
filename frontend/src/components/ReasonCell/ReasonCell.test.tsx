@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { ReasonCell } from './ReasonCell';
 
 describe('ReasonCell', () => {
+  // frob:tests frontend/src/components/ReasonCell/ReasonCell.tsx::ReasonCell
   it('renders a dash placeholder when there is no reason', () => {
     render(<ReasonCell reason={null} />);
     expect(screen.getByText('--')).toBeInTheDocument();

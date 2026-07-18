@@ -22,6 +22,7 @@ const VIRTUALIZE_ROW_THRESHOLD = 1000;
 const ROW_HEIGHT_PX = 32;
 const OVERSCAN_ROWS = 8;
 
+// frob:doc docs/guide.md#101-datatable
 export interface DataTableColumn<T> {
   key: string;
   header: string;
@@ -31,6 +32,7 @@ export interface DataTableColumn<T> {
   sortable?: boolean;
 }
 
+// frob:doc docs/guide.md#101-datatable
 export interface DataTableProps<T> {
   columns: DataTableColumn<T>[];
   rows: T[];
@@ -42,6 +44,7 @@ export interface DataTableProps<T> {
 
 type SortDir = 'asc' | 'desc';
 
+// frob:doc docs/guide.md#101-datatable
 export function DataTable<T>({
   columns,
   rows,

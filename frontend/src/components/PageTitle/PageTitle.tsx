@@ -4,6 +4,7 @@
 // Screen-reader-only by default so it never duplicates the visible title
 // block on screen; routes that already render a genuine visible <h1>
 // (e.g. ClaimDetail) do not need this.
+// frob:doc docs/guide.md#1015-pagetitle
 export function PageTitle({ text }: { text: string }) {
   return <h1 className="gr-sr-only">{text}</h1>;
 }

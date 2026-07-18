@@ -4,12 +4,14 @@
 
 import './ErrorState.css';
 
+// frob:doc docs/guide.md#1010-emptystate-and-errorstate
 export interface ErrorStateProps {
   title: string;
   detail?: string;
   onRetry?: () => void;
 }
 
+// frob:doc docs/guide.md#1010-emptystate-and-errorstate
 export function ErrorState({ title, detail, onRetry }: ErrorStateProps) {
   return (
     <div className="gr-error-state" role="alert">

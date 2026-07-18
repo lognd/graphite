@@ -3,17 +3,20 @@
 
 import './ShortcutSheet.css';
 
+// frob:doc docs/guide.md#1016-shortcutsheet
 export interface Shortcut {
   keys: string;
   description: string;
 }
 
+// frob:doc docs/guide.md#1016-shortcutsheet
 export interface ShortcutSheetProps {
   open: boolean;
   onClose: () => void;
   shortcuts: Shortcut[];
 }
 
+// frob:doc docs/guide.md#1016-shortcutsheet
 export function ShortcutSheet({ open, onClose, shortcuts }: ShortcutSheetProps) {
   if (!open) return null;
   return (

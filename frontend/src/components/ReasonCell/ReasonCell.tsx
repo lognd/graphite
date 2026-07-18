@@ -9,11 +9,13 @@
 
 import './ReasonCell.css';
 
+// frob:doc docs/guide.md#105-reasoncell
 export interface ReasonCellProps {
   reason: string | null;
   fNumber?: string | null;
 }
 
+// frob:doc docs/guide.md#105-reasoncell
 export function ReasonCell({ reason, fNumber }: ReasonCellProps) {
   if (!reason) {
     return <span className="gr-reason-cell gr-reason-cell--empty">--</span>;

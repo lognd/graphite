@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { MarginBar } from './MarginBar';
 
 describe('MarginBar', () => {
+  // frob:tests frontend/src/components/MarginBar/MarginBar.tsx::MarginBar
   it('renders the value and limit as text', () => {
     render(<MarginBar value={12.4} limit={20} unit="degC" label="thermal" />);
     expect(screen.getByText('12.4degC / 20degC')).toBeInTheDocument();

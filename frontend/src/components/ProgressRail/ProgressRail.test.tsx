@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { ProgressRail } from './ProgressRail';
 
 describe('ProgressRail', () => {
+  // frob:tests frontend/src/components/ProgressRail/ProgressRail.tsx::ProgressRail
   it('renders the current step and elapsed time', () => {
     render(<ProgressRail step="compiling hematite" percent={42} elapsedSeconds={95} />);
     expect(screen.getByText('compiling hematite')).toBeInTheDocument();

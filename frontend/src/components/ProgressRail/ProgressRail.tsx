@@ -4,6 +4,7 @@
 
 import './ProgressRail.css';
 
+// frob:doc docs/guide.md#109-progressrail
 export interface ProgressRailProps {
   step: string;
   percent: number | null;
@@ -17,6 +18,7 @@ function formatElapsed(seconds: number): string {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 
+// frob:doc docs/guide.md#109-progressrail
 export function ProgressRail({ step, percent, elapsedSeconds, onCancel }: ProgressRailProps) {
   return (
     <div className="gr-progress-rail">

@@ -22,6 +22,7 @@ const columns: DataTableColumn<Row>[] = [
 ];
 
 describe('DataTable', () => {
+  // frob:tests frontend/src/components/DataTable/DataTable.tsx::DataTable
   it('shows the row count in the header', () => {
     render(<DataTable columns={columns} rows={rows} rowKey={(r) => r.id} />);
     expect(screen.getByText('3 rows')).toBeInTheDocument();

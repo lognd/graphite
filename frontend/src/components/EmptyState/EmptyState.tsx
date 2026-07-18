@@ -4,12 +4,14 @@
 import type { ReactNode } from 'react';
 import './EmptyState.css';
 
+// frob:doc docs/guide.md#1010-emptystate-and-errorstate
 export interface EmptyStateProps {
   title: string;
   detail?: string;
   action?: ReactNode;
 }
 
+// frob:doc docs/guide.md#1010-emptystate-and-errorstate
 export function EmptyState({ title, detail, action }: EmptyStateProps) {
   return (
     <div className="gr-empty-state" role="status">

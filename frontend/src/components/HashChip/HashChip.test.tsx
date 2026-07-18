@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { HashChip } from './HashChip';
 
 describe('HashChip', () => {
+  // frob:tests frontend/src/components/HashChip/HashChip.tsx::HashChip
   it('shows the short form by default', () => {
     render(<HashChip full="a3f9c21bc9912" />);
     expect(screen.getByText('a3f9c21')).toBeInTheDocument();

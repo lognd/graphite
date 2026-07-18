@@ -7,6 +7,7 @@
 import { Link } from 'react-router-dom';
 import './DetailNav.css';
 
+// frob:doc docs/guide.md#1014-detailnav
 export interface DetailNavProps {
   prevTo: string | null;
   nextTo: string | null;
@@ -14,6 +15,7 @@ export interface DetailNavProps {
   total: number;
 }
 
+// frob:doc docs/guide.md#1014-detailnav
 export function DetailNav({ prevTo, nextTo, index, total }: DetailNavProps) {
   return (
     <div className="gr-detail-nav">

@@ -23,6 +23,7 @@ const SHORTCUTS = [
   { keys: 'esc', description: 'close the open dialog' },
 ];
 
+// frob:doc docs/guide.md#1018-app-shell
 export function AppShell() {
   const navigate = useNavigate();
   const { preference, resolved, setPreference } = useTheme();

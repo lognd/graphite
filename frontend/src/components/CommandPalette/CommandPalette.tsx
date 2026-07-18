@@ -5,18 +5,21 @@
 import { useMemo, useState } from 'react';
 import './CommandPalette.css';
 
+// frob:doc docs/guide.md#1017-commandpalette
 export interface Command {
   id: string;
   label: string;
   run: () => void;
 }
 
+// frob:doc docs/guide.md#1017-commandpalette
 export interface CommandPaletteProps {
   open: boolean;
   onClose: () => void;
   commands: Command[];
 }
 
+// frob:doc docs/guide.md#1017-commandpalette
 export function CommandPalette({ open, onClose, commands }: CommandPaletteProps) {
   // Mounted only while open, so a fresh instance (and fresh query state)
   // is created every time the palette opens -- no reset-on-close effect

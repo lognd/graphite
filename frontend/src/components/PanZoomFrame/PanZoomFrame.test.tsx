@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { PanZoomFrame } from './PanZoomFrame';
 
 describe('PanZoomFrame', () => {
+  // frob:tests frontend/src/components/PanZoomFrame/PanZoomFrame.tsx::PanZoomFrame
   it('renders its children inside the pan/zoom viewport', () => {
     render(
       <PanZoomFrame ariaLabel="test graphic">

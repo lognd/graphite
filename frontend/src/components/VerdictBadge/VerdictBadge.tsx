@@ -13,11 +13,13 @@ const LABEL: Record<Verdict, string> = {
   excluded: 'EXCLUDED',
 };
 
+// frob:doc docs/guide.md#102-verdictbadge-and-verdict-vocabulary
 export interface VerdictBadgeProps {
   verdict: Verdict;
   compact?: boolean;
 }
 
+// frob:doc docs/guide.md#102-verdictbadge-and-verdict-vocabulary
 export function VerdictBadge({ verdict, compact = false }: VerdictBadgeProps) {
   return (
     <span

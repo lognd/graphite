@@ -6,8 +6,10 @@
 
 import type { components } from '../../api/api.generated';
 
+// frob:doc docs/guide.md#102-verdictbadge-and-verdict-vocabulary
 export type Verdict = 'discharged' | 'violated' | 'deferred' | 'accepted-deviation' | 'excluded';
 
+// frob:doc docs/guide.md#102-verdictbadge-and-verdict-vocabulary
 export type Disposition = components['schemas']['AuditRow']['disposition'];
 
 // calc_sheet means the obligation was discharged with evidence (a calc
@@ -19,6 +21,7 @@ const DISPOSITION_TO_VERDICT: Record<Disposition, Verdict> = {
   violated: 'violated',
 };
 
+// frob:doc docs/guide.md#102-verdictbadge-and-verdict-vocabulary
 export function dispositionToVerdict(disposition: Disposition): Verdict {
   return DISPOSITION_TO_VERDICT[disposition];
 }

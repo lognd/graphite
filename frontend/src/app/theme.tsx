@@ -5,7 +5,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 
+// frob:doc docs/guide.md#1019-theme
 export type ThemeMode = 'dark' | 'light';
+// frob:doc docs/guide.md#1019-theme
 export type ThemePreference = ThemeMode | 'system';
 
 const STORAGE_KEY = 'graphite.theme';
@@ -30,6 +32,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
+// frob:doc docs/guide.md#1019-theme
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [preference, setPreferenceState] = useState<ThemePreference>(readStoredPreference);
   const [system, setSystem] = useState<ThemeMode>(systemTheme);
@@ -63,6 +66,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
+// frob:doc docs/guide.md#1019-theme
 export function useTheme(): ThemeContextValue {
   const ctx = useContext(ThemeContext);
   if (!ctx) throw new Error('useTheme must be used within ThemeProvider');

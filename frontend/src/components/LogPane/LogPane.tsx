@@ -6,6 +6,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './LogPane.css';
 
+// frob:doc docs/guide.md#108-logpane
 export interface LogPaneProps {
   lines: string[];
 }
@@ -17,6 +18,7 @@ function stripAnsi(line: string): string {
   return line.replace(/\x1b\[[0-9;]*m/g, '');
 }
 
+// frob:doc docs/guide.md#108-logpane
 export function LogPane({ lines }: LogPaneProps) {
   const [query, setQuery] = useState('');
   const [follow, setFollow] = useState(true);

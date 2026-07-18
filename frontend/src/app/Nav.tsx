@@ -15,6 +15,7 @@ const ROUTES = [
   { path: '/settings', label: 'settings' },
 ];
 
+// frob:doc docs/guide.md#1018-app-shell
 export function Nav() {
   const { data: projects } = useProjects();
 

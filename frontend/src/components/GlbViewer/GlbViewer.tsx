@@ -22,6 +22,7 @@ import { ErrorState } from '../ErrorState/ErrorState';
 import { HashChip } from '../HashChip/HashChip';
 import './GlbViewer.css';
 
+// frob:doc docs/guide.md#1013-glbviewer
 export interface GlbViewerProps {
   /** The GLB's raw bytes (already fetched by content hash -- this
    * component never fetches on its own, spec 02.2's one api-layer rule). */
@@ -31,6 +32,7 @@ export interface GlbViewerProps {
   stepContentHash: string | null;
 }
 
+// frob:doc docs/guide.md#1013-glbviewer
 export function GlbViewer({
   glbBytes,
   contentHash,
