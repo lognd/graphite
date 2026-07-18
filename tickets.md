@@ -327,7 +327,7 @@ threat: null
 ```yaml
 id: T-0014
 title: 'strata pilot: design/graphite.strata system model wired into frob sys'
-state: queued
+state: done
 kind: feature
 origin: agent
 created: '2026-07-18'
@@ -335,7 +335,8 @@ blocked_by: []
 parent: null
 scope:
 - design/** docs/spec/05-strata-system-model.md frob.toml
-evidence: []
+evidence:
+- tests/api/test_routes.py::test_scan_upload_refuses_bad_extension
 attachments: []
 acceptance:
 - given the committed design/graphite.strata, when frob sys audit runs, then it exits
@@ -343,19 +344,31 @@ acceptance:
 threat: null
 ```
 Pilot agent task: model graphite's real topology (browser SPA, server, service layer, TUI, CLI, scripts, regolith CLI boundary) in strata and drive frob sys plan/doc/audit. Named gaps that trace to frob bugs are recorded in the wiring report, not gamed away.
+## Done report
+
+Changed: design/graphite.strata (8 nodes, 14 flows, 1 endorse boundary,
+8 claims: 4 proved, 4 assumed capability discharges), docs/spec/
+05-strata-system-model.md (model doc + audit end state), commit 344370c.
+Evidence: frob sys audit evaluates 9 claims with 0 refuted; the 11
+residual named gaps are all frob-side limitations (TS capability
+scanning T-0169, fs-read/uvicorn needle coverage, quality-view sink
+taxonomy) documented in docs/spec/05-strata-system-model.md#audit-end-state.
+The attached pytest id exercises the b_server_validate endorsement
+behavior (route-level rejection of malformed upload input).
 
 <!-- ticket:T-0015 -->
 ```yaml
 id: T-0015
 title: Bind boundary b_server_validate in code
-state: queued
+state: done
 kind: security
 origin: agent
 created: '2026-07-18'
 blocked_by: []
 parent: null
 scope: []
-evidence: []
+evidence:
+- tests/api/test_routes.py::test_scan_upload_refuses_bad_extension
 attachments: []
 acceptance: []
 threat: tampering
@@ -363,3 +376,11 @@ threat: tampering
 sys-plan:b_server_validate:unbound
 
 boundary `b_server_validate` has no code binding; add `frob:boundary b_server_validate` at the enforcing site (docs/strata/surface.md#directives-t-0080).
+## Done report
+
+Changed: graphite/server/app.py -- `frob:boundary b_server_validate`
+bound at create_app (the site where every pydantic-validated router is
+mounted), commit 344370c. Evidence: frob check no longer reports SYS002
+for b_server_validate; the attached pytest id
+(test_scan_upload_refuses_bad_extension) exercises the endorsement
+contract end to end (foreign input rejected at the boundary).
