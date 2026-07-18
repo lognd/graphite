@@ -285,3 +285,40 @@ attachments: []
 acceptance: []
 threat: null
 ```
+
+<!-- ticket:T-0012 -->
+```yaml
+id: T-0012
+title: 'frob compliance: add pytest-cov dependency to unblock TEST006 coverage stamp'
+state: queued
+kind: bug
+origin: agent
+created: '2026-07-17'
+blocked_by: []
+parent: null
+scope:
+- pyproject.toml,Makefile
+evidence: []
+attachments: []
+acceptance: []
+threat: null
+```
+
+<!-- ticket:T-0013 -->
+```yaml
+id: T-0013
+title: 'frob compliance: bind TEST002 min-unit-case findings surfaced post-T001 cleanup
+  (87, mostly frontend)'
+state: queued
+kind: bug
+origin: agent
+created: '2026-07-17'
+blocked_by: []
+parent: null
+scope:
+- frontend/src/,graphite/,tests/
+evidence: []
+attachments: []
+acceptance: []
+threat: null
+```
