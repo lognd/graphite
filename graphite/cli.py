@@ -19,6 +19,7 @@ app = typer.Typer(
 
 
 @app.command()
+# frob:doc docs/spec/02-architecture.md#3-process-model
 def tui(project: str = typer.Argument(".", help="Project root to open.")) -> None:
     """Launch the textual TUI: fleet dashboard, obligation list, run
     console, and config/doctor/settings -- the second renderer over the
@@ -32,6 +33,7 @@ _LOCALHOST_HOSTS = ("127.0.0.1", "localhost", "::1")
 
 
 @app.command()
+# frob:doc docs/spec/02-architecture.md#3-process-model
 def serve(
     project: str = typer.Argument(".", help="Fleet scan root to serve."),
     host: str = typer.Option("127.0.0.1", "--host", help="Bind host (localhost only)."),

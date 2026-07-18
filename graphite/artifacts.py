@@ -27,6 +27,7 @@ _log = get_logger(__name__)
 _DRAWING_JSON_SUFFIX = ".drawing.json"
 
 
+# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
 class SheetEntry(BaseModel):
     """One `<subject>.drawing.*` sibling set discovered under a `drawings/`
     directory. `track` is read from the drawing JSON's own `track` field
@@ -56,6 +57,7 @@ def _track_of(json_path: Path) -> str:
     return str(track) if isinstance(track, str) else "unknown"
 
 
+# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
 def list_sheets(drawings_dir: Path) -> tuple[SheetEntry, ...]:
     """Every `<subject>.drawing.*` sibling set under `drawings_dir`,
     subject-sorted. Absent directory -> empty tuple (not an error: a fresh
@@ -98,6 +100,7 @@ def list_sheets(drawings_dir: Path) -> tuple[SheetEntry, ...]:
     return tuple(sheets)
 
 
+# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
 def find_drawings_dirs(root: Path) -> tuple[Path, ...]:
     """Every `drawings/` directory under `root` (a ship `--out` tree may
     nest one per shipped assembly) -- sorted for determinism."""
@@ -107,6 +110,7 @@ def find_drawings_dirs(root: Path) -> tuple[Path, ...]:
     return tuple(found)
 
 
+# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
 def list_payload_files(payload_store_dir: Path) -> tuple[Path, ...]:
     """Every content-addressed payload file under `.regolith/payloads/`
     (WO-30 D96 sec. 8.3), name-sorted -- pretty-printed by the caller if
@@ -116,6 +120,7 @@ def list_payload_files(payload_store_dir: Path) -> tuple[Path, ...]:
     return tuple(sorted(p for p in payload_store_dir.iterdir() if p.is_file()))
 
 
+# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
 def find_trace_files(root: Path) -> tuple[Path, ...]:
     """Every on-disk `OptimizationTrace` JSON dump under `root`'s
     `.regolith/` tree (the `optimize --json` / payload-store shape) --
@@ -126,6 +131,7 @@ def find_trace_files(root: Path) -> tuple[Path, ...]:
     return tuple(sorted(regolith_dir.rglob("*trace*.json")))
 
 
+# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
 def read_json(path: Path) -> str:
     """Pretty-printed JSON text for `path`, or the raw text if it does not
     parse as JSON (never raises -- a debug dump that fails to parse is

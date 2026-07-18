@@ -9,6 +9,7 @@ from graphite.service.reports import (
     read_acceptance_ledger,
     read_audit_index,
     read_calc_book,
+    read_gate_summary,
     read_lockfile,
     read_manifest,
     read_staged_build_report,
@@ -70,3 +71,13 @@ def test_read_manifest(timber_pavilion: Path) -> None:
     assert result.is_ok
     assert result.danger_ok.signed is False
     assert "index" in result.danger_ok.raw or result.danger_ok.raw
+
+
+# frob:tests graphite/service/reports.py::read_gate_summary
+def test_read_gate_summary(timber_pavilion: Path) -> None:
+    result = read_gate_summary(timber_pavilion / "dist" / "gate_summary.json")
+    assert result.is_ok
+    summary = result.danger_ok
+    assert summary.tier == "RELEASE"
+    assert summary.release_ok is True
+    assert summary.counts.accepted_deviation == 4

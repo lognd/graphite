@@ -66,6 +66,7 @@ def _read_text(path: Path) -> Result[str, ServiceError]:
         )
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def read_staged_build_report(path: Path) -> Result[StagedBuildReport, ServiceError]:
     """`.regolith/build/build_report.json` as a `StagedBuildReport`. A
     plain (non-staged) `BuildReport` JSON is wrapped so callers always
@@ -93,6 +94,7 @@ def read_staged_build_report(path: Path) -> Result[StagedBuildReport, ServiceErr
     return Ok(StagedBuildReport(final=final, iterations=1))
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def read_lockfile(path: Path) -> Result[Lockfile, ServiceError]:
     """`.regolith/build/regolith.lock` via regolith's own text parser
     (`regolith.orchestrator.lockfile.parse`) -- never a local re-parse
@@ -113,6 +115,7 @@ def read_lockfile(path: Path) -> Result[Lockfile, ServiceError]:
     return Ok(result.danger_ok)
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def read_calc_book(path: Path) -> Result[CalcBook, ServiceError]:
     """`dist/calc/calc_book.json` -> `CalcBook` (sheets + audit index)."""
     text = _read_text(path)
@@ -131,6 +134,7 @@ def read_calc_book(path: Path) -> Result[CalcBook, ServiceError]:
         )
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def read_audit_index(path: Path) -> Result[AuditIndex, ServiceError]:
     """`dist/calc/audit_index.json` -> `AuditIndex` directly (cheaper
     than loading the full calc book when only the summary/rows are
@@ -151,6 +155,7 @@ def read_audit_index(path: Path) -> Result[AuditIndex, ServiceError]:
         )
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 class AcceptedDeviation(BaseModel):
     """One row of `dist/acceptance_ledger.json`'s `accepted_deviations`
     array (WOG1-F3 below) -- field-for-field what
@@ -169,6 +174,7 @@ class AcceptedDeviation(BaseModel):
     expires: str | None = None
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 class AcceptanceLedgerSummary(BaseModel):
     """WOG1-F3 marked-provisional bridge: the ON-DISK
     `acceptance_ledger.json` (written by
@@ -190,6 +196,7 @@ class AcceptanceLedgerSummary(BaseModel):
     errors: tuple[str, ...] = ()
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def read_acceptance_ledger(path: Path) -> Result[AcceptanceLedgerSummary, ServiceError]:
     """`dist/acceptance_ledger.json` -> `AcceptanceLedgerSummary` (WOG1-F3:
     the on-disk shape has no matching regolith model to validate
@@ -210,6 +217,7 @@ def read_acceptance_ledger(path: Path) -> Result[AcceptanceLedgerSummary, Servic
         )
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 class ManifestSummary(BaseModel):
     """WOG1-F2 marked-provisional bridge: the ship package
     `manifest.json` shape trimmed to what the UI needs, pending a real
@@ -225,6 +233,7 @@ class ManifestSummary(BaseModel):
     raw: dict[str, object]
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def read_manifest(path: Path) -> Result[ManifestSummary, ServiceError]:
     """`dist/manifest.json` -> `ManifestSummary` (WOG1-F2). `design_hash`
     is lifted out of `raw` for the TitleBlock's identity element (03
@@ -254,6 +263,7 @@ def read_manifest(path: Path) -> Result[ManifestSummary, ServiceError]:
     )
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 class GateCounts(BaseModel):
     """`dist/gate_summary.json`'s `counts` object verbatim (WOG3-F1
     marked-provisional bridge, same posture as `ManifestSummary`/
@@ -269,6 +279,7 @@ class GateCounts(BaseModel):
     ledger_blocked: bool
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 class GateSummary(BaseModel):
     """`dist/gate_summary.json` -> the release-gate summary panel (04.1
     project-view release-gate deliverable): tier + ok + release_ok +
@@ -282,6 +293,7 @@ class GateSummary(BaseModel):
     counts: GateCounts
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def read_gate_summary(path: Path) -> Result[GateSummary, ServiceError]:
     """`dist/gate_summary.json` -> `GateSummary` (WOG3-F1)."""
     text = _read_text(path)

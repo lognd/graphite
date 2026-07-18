@@ -69,6 +69,7 @@ _VERBOSITY_FLAGS: dict[RunVerbosity, tuple[str, ...]] = {
 }
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def runs_home() -> Path:
     """The configured run-record directory (`GRAPHITE_RUNS_HOME`,
     default `~/.graphite/runs`) -- read fresh on every call, mirroring
@@ -87,6 +88,7 @@ RunVerb = Literal["build", "ship", "test", "optimize", "check", "preview"]
 RunStatus = Literal["running", "ok", "failed", "cancelled"]
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 class HealthSnapshot(BaseModel):
     """A best-effort project-health reading (same two reports
     `graphite.server.routes.health.get_project_health` combines), taken
@@ -126,6 +128,7 @@ def _capture_health(project_root: Path) -> HealthSnapshot:
     )
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 class VerdictDiff(BaseModel):
     """The before/after health-snapshot pair for one run's exit summary
     (deliverable 1) -- both sides real reports, never a recomputed
@@ -137,6 +140,7 @@ class VerdictDiff(BaseModel):
     after: HealthSnapshot
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 class RunRecord(BaseModel):
     """One persisted run: identity, the verb driven, its live/final
     status, timestamps, and the project root it ran against. The log
@@ -172,6 +176,7 @@ def _write_record(record: RunRecord) -> None:
     _record_path(record.run_id).write_text(record.model_dump_json(indent=2))
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def start_run(
     project_root: Path,
     verb: RunVerb,
@@ -312,6 +317,7 @@ def _read_record(run_id: str) -> Result[RunRecord, ServiceError]:
     return Ok(RunRecord.model_validate_json(path.read_text()))
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def get_run(run_id: str) -> Result[RunRecord, ServiceError]:
     """The current record for `run_id`, re-polling the OS process table
     when the persisted status is still `running` (a `graphite serve`
@@ -328,6 +334,7 @@ def get_run(run_id: str) -> Result[RunRecord, ServiceError]:
     return record
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def mark_finished(run_id: str, exit_code: int) -> None:
     """Test/CLI-runner seam: explicitly finalize a run once its
     subprocess is known to have exited (used by the SSE route after it
@@ -336,6 +343,7 @@ def mark_finished(run_id: str, exit_code: int) -> None:
     _finalize(run_id, exit_code)
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def prune_run_history(limit: int) -> int:
     """Delete the oldest FINISHED run records (and their `.log` /
     `.stdout.json` siblings) beyond `limit`, returning how many were
@@ -367,6 +375,7 @@ def prune_run_history(limit: int) -> int:
     return len(doomed)
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def list_runs(project_root: Path | None = None) -> tuple[RunRecord, ...]:
     """Every persisted run, newest first; `project_root` filters to one
     project when given."""
@@ -388,6 +397,7 @@ def list_runs(project_root: Path | None = None) -> tuple[RunRecord, ...]:
     return tuple(records)
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def tail_log_lines(run_id: str) -> Iterator[str]:
     """Yield every line currently in `run_id`'s log file (the SSE route
     calls this in a loop with a poll interval -- this function itself
@@ -402,6 +412,7 @@ def tail_log_lines(run_id: str) -> Iterator[str]:
             yield line.rstrip("\n")
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def get_full_log(run_id: str) -> tuple[str, ...]:
     """Every captured log line for `run_id`, as a plain tuple -- the
     non-streaming counterpart to `tail_log_lines`, used by run-history
@@ -410,6 +421,7 @@ def get_full_log(run_id: str) -> tuple[str, ...]:
     return tuple(tail_log_lines(run_id))
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def cancel_run(run_id: str) -> Result[RunRecord, ServiceError]:
     """Stop a running run (deliverable 1's cancel affordance -- WOG1-F6:
     no kill route existed before WO-G5). Prefers the in-process `Popen`
@@ -456,6 +468,7 @@ def cancel_run(run_id: str) -> Result[RunRecord, ServiceError]:
     return Ok(updated)
 
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 def compute_verdict_diff(run_id: str) -> Result[VerdictDiff, ServiceError]:
     """`before_health` (captured at `start_run`) paired with a fresh
     `_capture_health` read of the project's CURRENT reports -- the exit

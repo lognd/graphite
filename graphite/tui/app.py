@@ -41,6 +41,7 @@ Keyboard shortcuts
 """
 
 
+# frob:doc docs/guide.md#6-keyboard-map
 class ShortcutSheet(ModalScreen[None]):
     """The `?` shortcut sheet (03 sec. 3.5) -- a modal, dismissed by
     any key, listing the keyboard map above."""
@@ -48,13 +49,16 @@ class ShortcutSheet(ModalScreen[None]):
     BINDINGS = [Binding("escape", "dismiss", "close")]
 
     def compose(self) -> ComposeResult:
+        # frob:doc docs/guide.md#6-keyboard-map
         with Vertical(id="shortcut-sheet"):
             yield Static(_SHORTCUTS)
 
     def on_key(self, event: events.Key) -> None:
+        # frob:doc docs/guide.md#6-keyboard-map
         self.dismiss(None)
 
 
+# frob:doc docs/guide.md#6-keyboard-map
 class NavigationProvider(Provider):
     """Command-palette entries for jumping straight to a surface --
     the ctrl+k "first-class citizen" requirement (03 sec. 3.5), not an
@@ -63,6 +67,7 @@ class NavigationProvider(Provider):
     WOG7-F1: the surface shortcuts assumed a single-project session)."""
 
     async def search(self, query: str) -> Hits:
+        # frob:doc docs/guide.md#6-keyboard-map
         matcher = self.matcher(query)
         app = self.app
         assert isinstance(app, GraphiteApp)
@@ -93,6 +98,7 @@ class NavigationProvider(Provider):
                 )
 
 
+# frob:doc docs/spec/02-architecture.md#8-tui-shell-graphitetui
 class GraphiteApp(App[None]):
     """graphite's textual TUI: `project_root` is the fleet-scan root
     (dashboard) and the INITIAL active project for the obligations/run/
@@ -117,36 +123,45 @@ class GraphiteApp(App[None]):
     @property
     def scan_root(self) -> Path:
         """The fleet-scan root the app was launched with (never changes)."""
+        # frob:doc docs/spec/02-architecture.md#8-tui-shell-graphitetui
         return self._scan_root
 
     @property
     def active_project(self) -> Path:
         """The project the surface shortcuts (run console, config,
         obligations) currently target."""
+        # frob:doc docs/spec/02-architecture.md#8-tui-shell-graphitetui
         return self._active_project
 
     def set_active_project(self, root: Path) -> None:
         """Point the surface shortcuts at another discovered project
         (WOG7-F1); the dashboard keeps scanning the launch root."""
+        # frob:doc docs/spec/02-architecture.md#8-tui-shell-graphitetui
         self._active_project = root.resolve()
         _log.info("graphite tui: active project -> %s", self._active_project)
         self.notify(f"active project: {self._active_project.name}")
 
     def on_mount(self) -> None:
+        # frob:doc docs/spec/02-architecture.md#8-tui-shell-graphitetui
         _log.info("graphite tui: starting, project=%s", self._scan_root)
         self.push_screen(DashboardScreen(self._scan_root))
 
     def action_show_help(self) -> None:
+        # frob:doc docs/guide.md#6-keyboard-map
         self.push_screen(ShortcutSheet())
 
     def action_go_dashboard(self) -> None:
+        # frob:doc docs/guide.md#1-reading-the-dashboard-is-my-fleet-healthy
         self.push_screen(DashboardScreen(self._scan_root))
 
     def action_go_run_console(self) -> None:
+        # frob:doc docs/guide.md#4-driving-runs
         self.push_screen(RunConsoleScreen(self._active_project))
 
     def action_go_config(self) -> None:
+        # frob:doc docs/guide.md#5-config-doctor-settings
         self.push_screen(ConfigScreen(self._active_project))
 
     def action_go_obligations(self) -> None:
+        # frob:doc docs/guide.md#2-the-obligation-explorer-why-did-this-claim-deferfail
         self.push_screen(ObligationsScreen(self._active_project))

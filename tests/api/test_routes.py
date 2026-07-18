@@ -14,6 +14,7 @@ from graphite.server.app import create_app
 from tests.api.conftest import PROJECT_NAME
 
 
+# frob:tests graphite/server/routes kind="integration"
 def test_ping(api_client: TestClient) -> None:
     assert api_client.get("/api/ping").json() == {"status": "ok"}
 
@@ -74,6 +75,7 @@ def test_calc_audit(api_client: TestClient) -> None:
     assert resp.json()["summary"]["obligations"] == 10
 
 
+# frob:tests graphite/service/reports.py kind="integration"
 def test_build_report(api_client: TestClient) -> None:
     resp = api_client.get(f"/api/projects/{PROJECT_NAME}/build-report")
     assert resp.status_code == 200
@@ -253,6 +255,7 @@ def test_settings_invalid_verbosity_is_a_real_validation_error(
     assert resp.status_code == 422
 
 
+# frob:tests graphite/service/runs.py kind="integration"
 def test_start_run_and_poll(api_client: TestClient) -> None:
     started = api_client.post(
         f"/api/projects/{PROJECT_NAME}/runs",

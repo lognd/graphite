@@ -18,6 +18,7 @@ class _LevelPrefixFormatter(logging.Formatter):
     """Plain message; WARNING+ prefixes the level name."""
 
     def format(self, record: logging.LogRecord) -> str:
+        # frob:doc docs/spec/02-architecture.md#9-logging
         msg = record.getMessage()
         if record.levelno >= logging.WARNING:
             return f"{record.levelname}: {msg}"
@@ -43,6 +44,7 @@ def _config() -> dict[str, object]:
     }
 
 
+# frob:doc docs/spec/02-architecture.md#9-logging
 def configure() -> None:
     """Apply the dictConfig exactly once (idempotent across imports)."""
     global _configured
@@ -52,6 +54,7 @@ def configure() -> None:
     _configured = True
 
 
+# frob:doc docs/spec/02-architecture.md#9-logging
 def get_logger(name: str) -> logging.Logger:
     """The one entry point every graphite module uses instead of `print`."""
     configure()

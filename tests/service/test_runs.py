@@ -45,6 +45,7 @@ def test_start_run_persists_a_running_record(timber_pavilion: Path) -> None:
     assert record.status in ("running", "ok")
 
 
+# frob:tests graphite/service/runs.py::mark_finished
 def test_start_run_and_get_run_converge_on_ok(timber_pavilion: Path) -> None:
     started = runs_module.start_run(
         timber_pavilion,
@@ -58,6 +59,7 @@ def test_start_run_and_get_run_converge_on_ok(timber_pavilion: Path) -> None:
     assert finished.finished_at is not None
 
 
+# frob:tests graphite/service/runs.py::tail_log_lines
 def test_log_lines_are_tailable(timber_pavilion: Path) -> None:
     started = runs_module.start_run(
         timber_pavilion,
@@ -68,6 +70,11 @@ def test_log_lines_are_tailable(timber_pavilion: Path) -> None:
     _wait_until_finished(started.run_id)
     lines = list(runs_module.tail_log_lines(started.run_id))
     assert any("check" in line for line in lines)
+
+
+# frob:tests graphite/service/runs.py::runs_home
+def test_runs_home_reads_env_var(_runs_home: Path) -> None:
+    assert runs_module.runs_home() == _runs_home
 
 
 def test_start_run_missing_project_root(tmp_path: Path) -> None:
