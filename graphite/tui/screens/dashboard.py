@@ -37,6 +37,7 @@ def _row(info: ProjectInfo) -> tuple[str, ...]:
     )
 
 
+# frob:doc docs/guide.md#1-reading-the-dashboard-is-my-fleet-healthy
 class DashboardScreen(Screen[None]):
     """The fleet census: every discovered project, j/k navigable,
     enter drills into that project's obligation list (progressive
@@ -54,6 +55,7 @@ class DashboardScreen(Screen[None]):
         self._projects: tuple[ProjectInfo, ...] = ()
 
     def compose(self) -> ComposeResult:
+        # frob:doc docs/guide.md#1-reading-the-dashboard-is-my-fleet-healthy
         yield TitleBlock()
         with Vertical():
             yield Static("fleet census", classes="heading")
@@ -61,6 +63,7 @@ class DashboardScreen(Screen[None]):
         yield StatusLine()
 
     def on_mount(self) -> None:
+        # frob:doc docs/guide.md#1-reading-the-dashboard-is-my-fleet-healthy
         table = self.query_one("#fleet-table", DataTable)
         table.add_columns(*_COLUMNS)
         self.query_one(TitleBlock).set_identity(project=str(self._scan_root))
@@ -69,6 +72,7 @@ class DashboardScreen(Screen[None]):
     def action_refresh(self) -> None:
         """Re-scan the fleet (empty-state honest: zero projects is a
         state, not an error, per `discovery.scan_projects`)."""
+        # frob:doc docs/guide.md#1-reading-the-dashboard-is-my-fleet-healthy
         self._projects = scan_projects(self._scan_root)
         table = self.query_one("#fleet-table", DataTable)
         table.clear()
@@ -84,9 +88,11 @@ class DashboardScreen(Screen[None]):
         _log.info("dashboard: refreshed, %d project(s)", len(self._projects))
 
     def action_cursor_down(self) -> None:
+        # frob:doc docs/guide.md#1-reading-the-dashboard-is-my-fleet-healthy
         self.query_one("#fleet-table", DataTable).action_cursor_down()
 
     def action_cursor_up(self) -> None:
+        # frob:doc docs/guide.md#1-reading-the-dashboard-is-my-fleet-healthy
         self.query_one("#fleet-table", DataTable).action_cursor_up()
 
     def _selected_project(self) -> ProjectInfo | None:
@@ -100,6 +106,7 @@ class DashboardScreen(Screen[None]):
         return None
 
     def action_open_project(self) -> None:
+        # frob:doc docs/guide.md#1-reading-the-dashboard-is-my-fleet-healthy
         info = self._selected_project()
         if info is None:
             return
@@ -115,6 +122,7 @@ class DashboardScreen(Screen[None]):
         self.app.push_screen(ObligationsScreen(Path(info.root)))
 
     def on_data_table_row_selected(self, event: DataTable.RowSelected) -> None:
+        # frob:doc docs/guide.md#1-reading-the-dashboard-is-my-fleet-healthy
         # DataTable's own `enter` binding (`select_cursor`) fires this
         # message -- the drill-down affordance (charter sec. 2.2
         # progressive disclosure) rides it rather than a competing

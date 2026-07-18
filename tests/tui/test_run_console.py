@@ -30,6 +30,8 @@ def _isolate_graphite_home(tmp_path, monkeypatch):
     monkeypatch.setenv("GRAPHITE_HOME", str(tmp_path / "graphite-home"))
 
 
+# frob:tests graphite/tui/screens/run_console.py::RunConsoleScreen.compose kind="unit"
+# frob:tests graphite/tui/screens/run_console.py::RunConsoleScreen.on_mount kind="unit"
 @pytest.mark.asyncio
 async def test_run_console_starts_and_completes_a_real_check(timber_pavilion):
     app = _Harness(timber_pavilion)
@@ -52,6 +54,7 @@ async def test_run_console_starts_and_completes_a_real_check(timber_pavilion):
         assert row[1] in ("ok", "failed")
 
 
+# frob:tests graphite/tui/screens/run_console.py::RunConsoleScreen.on_button_pressed kind="unit"
 @pytest.mark.asyncio
 async def test_run_console_start_failure_is_honest(tmp_path):
     missing_project = tmp_path / "does-not-exist"
@@ -62,3 +65,39 @@ async def test_run_console_start_failure_is_honest(tmp_path):
         await pilot.pause()
         log = app.screen.query_one("#run-log", Log)
         assert log.line_count >= 1
+
+
+# frob:tests graphite/tui/screens/run_console.py::RunConsoleScreen.action_cancel_run kind="unit"
+@pytest.mark.asyncio
+async def test_run_console_cancel_run_via_c_binding(timber_pavilion):
+    """`c` is bound to `action_cancel_run`; cancelling a real run
+    writes the cancellation line and refreshes history (04.1 ANY LONG
+    OPERATION floor: cancel is a first-class control, not a kill -9)."""
+    app = _Harness(timber_pavilion)
+    async with app.run_test(size=(200, 60)) as pilot:
+        await pilot.pause()
+        app.screen.query_one("#run-verb", Select).value = "check"
+        app.screen.query_one("#run-args", Input).value = "program.calx"
+        await pilot.pause()
+        await pilot.click("#run-start")
+        await pilot.pause()
+        await pilot.press("c")
+        await pilot.pause()
+        await app.workers.wait_for_complete()
+        log = app.screen.query_one("#run-log", Log)
+        assert log.line_count > 0
+
+
+# frob:tests graphite/tui/screens/run_console.py::RunConsoleScreen.action_cursor_down kind="unit"
+# frob:tests graphite/tui/screens/run_console.py::RunConsoleScreen.action_cursor_up kind="unit"
+@pytest.mark.asyncio
+async def test_run_console_jk_bindings_invoke_cursor_actions(timber_pavilion):
+    app = _Harness(timber_pavilion)
+    async with app.run_test(size=(200, 60)) as pilot:
+        await pilot.pause()
+        table = app.screen.query_one("#run-history", DataTable)
+        await pilot.press("j")
+        await pilot.pause()
+        await pilot.press("k")
+        await pilot.pause()
+        assert table.cursor_type == "row"

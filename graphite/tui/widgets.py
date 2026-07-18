@@ -29,6 +29,7 @@ _VERDICT_COLOR = {
 }
 
 
+# frob:doc docs/guide.md#2-the-obligation-explorer-why-did-this-claim-deferfail
 class VerdictBadge(Static):
     """One obligation verdict, colored per the shared token mirror --
     the TUI's side of the web `VerdictBadge` component (03 sec. 5:
@@ -49,6 +50,7 @@ class VerdictBadge(Static):
         self.styles.color = color
 
 
+# frob:doc docs/spec/02-architecture.md#8-tui-shell-graphitetui
 class TitleBlock(Static):
     """The persistent identity element (03 sec. 3.1): project name,
     design-hash short-form, schema version, and report timestamp --
@@ -68,6 +70,7 @@ class TitleBlock(Static):
         schema_version: str | None = None,
         timestamp: str | None = None,
     ) -> None:
+        # frob:doc docs/spec/02-architecture.md#8-tui-shell-graphitetui
         parts = [project]
         if design_hash:
             parts.append(f"hash={design_hash[:12]}")
@@ -78,6 +81,7 @@ class TitleBlock(Static):
         self.update(" | ".join(parts))
 
 
+# frob:doc docs/spec/02-architecture.md#8-tui-shell-graphitetui
 class StatusLine(Horizontal):
     """The persistent bottom status bar (03 sec. 3.2, vim/tmux
     lineage): current project, server/run state, last action, and a
@@ -94,8 +98,10 @@ class StatusLine(Horizontal):
     """
 
     def compose(self) -> ComposeResult:
+        # frob:doc docs/spec/02-architecture.md#8-tui-shell-graphitetui
         yield Static("", id="status-left")
         yield Static("? help  ctrl+k palette  j/k navigate", id="status-right")
 
     def set_status(self, text: str) -> None:
+        # frob:doc docs/spec/02-architecture.md#8-tui-shell-graphitetui
         self.query_one("#status-left", Static).update(text)

@@ -31,6 +31,7 @@ _VERDICT_NAME = {
 }
 
 
+# frob:doc docs/guide.md#2-the-obligation-explorer-why-did-this-claim-deferfail
 class ObligationsScreen(Screen[None]):
     """One project's obligations: summary counts, then rows grouped by
     disposition and (for deferred/violated) by reason text."""
@@ -47,6 +48,7 @@ class ObligationsScreen(Screen[None]):
         self._project_root = project_root
 
     def compose(self) -> ComposeResult:
+        # frob:doc docs/guide.md#2-the-obligation-explorer-why-did-this-claim-deferfail
         yield TitleBlock()
         with Vertical():
             yield Static("", id="obligations-summary")
@@ -56,12 +58,14 @@ class ObligationsScreen(Screen[None]):
         yield StatusLine()
 
     def on_mount(self) -> None:
+        # frob:doc docs/guide.md#2-the-obligation-explorer-why-did-this-claim-deferfail
         table = self.query_one("#obligations-table", DataTable)
         table.add_columns("verdict", "claim", "subject", "reason / detail")
         self.query_one(TitleBlock).set_identity(project=self._project_root.name)
         self.action_refresh()
 
     def action_refresh(self) -> None:
+        # frob:doc docs/guide.md#2-the-obligation-explorer-why-did-this-claim-deferfail
         path = self._project_root / "dist" / "calc" / "audit_index.json"
         result = read_audit_index(path)
         table = self.query_one("#obligations-table", DataTable)
@@ -120,7 +124,9 @@ class ObligationsScreen(Screen[None]):
         )
 
     def action_cursor_down(self) -> None:
+        # frob:doc docs/guide.md#2-the-obligation-explorer-why-did-this-claim-deferfail
         self.query_one("#obligations-table", DataTable).action_cursor_down()
 
     def action_cursor_up(self) -> None:
+        # frob:doc docs/guide.md#2-the-obligation-explorer-why-did-this-claim-deferfail
         self.query_one("#obligations-table", DataTable).action_cursor_up()

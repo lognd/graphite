@@ -41,7 +41,7 @@ Keyboard shortcuts
 """
 
 
-# frob:doc docs/guide.md#6-keyboard-map
+# frob:doc docs/guide.md#8-keyboard-map
 class ShortcutSheet(ModalScreen[None]):
     """The `?` shortcut sheet (03 sec. 3.5) -- a modal, dismissed by
     any key, listing the keyboard map above."""
@@ -49,16 +49,16 @@ class ShortcutSheet(ModalScreen[None]):
     BINDINGS = [Binding("escape", "dismiss", "close")]
 
     def compose(self) -> ComposeResult:
-        # frob:doc docs/guide.md#6-keyboard-map
+        # frob:doc docs/guide.md#8-keyboard-map
         with Vertical(id="shortcut-sheet"):
             yield Static(_SHORTCUTS)
 
     def on_key(self, event: events.Key) -> None:
-        # frob:doc docs/guide.md#6-keyboard-map
+        # frob:doc docs/guide.md#8-keyboard-map
         self.dismiss(None)
 
 
-# frob:doc docs/guide.md#6-keyboard-map
+# frob:doc docs/guide.md#8-keyboard-map
 class NavigationProvider(Provider):
     """Command-palette entries for jumping straight to a surface --
     the ctrl+k "first-class citizen" requirement (03 sec. 3.5), not an
@@ -67,7 +67,7 @@ class NavigationProvider(Provider):
     WOG7-F1: the surface shortcuts assumed a single-project session)."""
 
     async def search(self, query: str) -> Hits:
-        # frob:doc docs/guide.md#6-keyboard-map
+        # frob:doc docs/guide.md#8-keyboard-map
         matcher = self.matcher(query)
         app = self.app
         assert isinstance(app, GraphiteApp)
@@ -147,7 +147,7 @@ class GraphiteApp(App[None]):
         self.push_screen(DashboardScreen(self._scan_root))
 
     def action_show_help(self) -> None:
-        # frob:doc docs/guide.md#6-keyboard-map
+        # frob:doc docs/guide.md#8-keyboard-map
         self.push_screen(ShortcutSheet())
 
     def action_go_dashboard(self) -> None:

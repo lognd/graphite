@@ -26,6 +26,8 @@ def _isolate_graphite_home(tmp_path, monkeypatch):
     monkeypatch.setenv("GRAPHITE_HOME", str(tmp_path / "graphite-home"))
 
 
+# frob:tests graphite/tui/screens/config.py::ConfigScreen.compose kind="unit"
+# frob:tests graphite/tui/screens/config.py::ConfigScreen.on_mount kind="unit"
 @pytest.mark.asyncio
 async def test_config_list_has_source_attribution(timber_pavilion):
     app = _Harness(timber_pavilion)
@@ -39,6 +41,7 @@ async def test_config_list_has_source_attribution(timber_pavilion):
             assert source  # every key carries a source, never blank
 
 
+# frob:tests graphite/tui/screens/config.py::ConfigScreen.on_button_pressed kind="unit"
 @pytest.mark.asyncio
 async def test_config_set_writes_through_real_cli(timber_pavilion):
     app = _Harness(timber_pavilion)

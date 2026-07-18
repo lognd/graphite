@@ -45,6 +45,7 @@ _RunVerbosity = Literal["quiet", "normal", "verbose"]
 _log = get_logger(__name__)
 
 
+# frob:doc docs/guide.md#5-config-doctor-settings
 class ConfigScreen(Screen[None]):
     """Config / doctor / settings tabs -- the TUI's parity surface for
     the WO-G6 gap table (G7-GAP-1..7)."""
@@ -68,6 +69,7 @@ class ConfigScreen(Screen[None]):
     """
 
     def compose(self) -> ComposeResult:
+        # frob:doc docs/guide.md#5-config-doctor-settings
         yield TitleBlock()
         with TabbedContent():
             with TabPane("config", id="tab-config"):
@@ -114,6 +116,7 @@ class ConfigScreen(Screen[None]):
         yield StatusLine()
 
     def on_mount(self) -> None:
+        # frob:doc docs/guide.md#5-config-doctor-settings
         self.query_one(TitleBlock).set_identity(project=self._project_root.name)
         self.query_one("#config-table", DataTable).add_columns(
             "key", "value", "source", "default"
@@ -172,6 +175,7 @@ class ConfigScreen(Screen[None]):
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        # frob:doc docs/guide.md#5-config-doctor-settings
         button_id = event.button.id
         if button_id == "cfg-set":
             self._set_config()

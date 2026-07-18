@@ -40,6 +40,7 @@ _VERBS: tuple[RunVerb, ...] = ("check", "build", "ship", "test", "optimize", "pr
 _POLL_SECONDS = 0.25
 
 
+# frob:doc docs/guide.md#4-driving-runs
 class RunConsoleScreen(Screen[None]):
     """Verb+args form, live log/progress while a run is active, and a
     history table of prior runs for this project (durable records, 04.1
@@ -66,6 +67,7 @@ class RunConsoleScreen(Screen[None]):
     """
 
     def compose(self) -> ComposeResult:
+        # frob:doc docs/guide.md#4-driving-runs
         yield TitleBlock()
         with Vertical():
             with Horizontal(id="run-form"):
@@ -80,6 +82,7 @@ class RunConsoleScreen(Screen[None]):
         yield StatusLine()
 
     def on_mount(self) -> None:
+        # frob:doc docs/guide.md#4-driving-runs
         table = self.query_one("#run-history", DataTable)
         table.add_columns("verb", "status", "started", "exit")
         self.query_one(TitleBlock).set_identity(project=self._project_root.name)
@@ -98,6 +101,7 @@ class RunConsoleScreen(Screen[None]):
             )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        # frob:doc docs/guide.md#4-driving-runs
         if event.button.id == "run-start":
             self._start()
         elif event.button.id == "run-cancel":
@@ -172,6 +176,7 @@ class RunConsoleScreen(Screen[None]):
             bar.update(total=event.total, progress=event.done or 0)
 
     def action_cancel_run(self) -> None:
+        # frob:doc docs/guide.md#4-driving-runs
         if self._run_id is None:
             return
         result = cancel_run(self._run_id)
@@ -183,7 +188,9 @@ class RunConsoleScreen(Screen[None]):
             self._refresh_history()
 
     def action_cursor_down(self) -> None:
+        # frob:doc docs/guide.md#4-driving-runs
         self.query_one("#run-history", DataTable).action_cursor_down()
 
     def action_cursor_up(self) -> None:
+        # frob:doc docs/guide.md#4-driving-runs
         self.query_one("#run-history", DataTable).action_cursor_up()

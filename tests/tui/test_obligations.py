@@ -19,6 +19,8 @@ class _Harness(App[None]):
         self.push_screen(ObligationsScreen(self._project_root))
 
 
+# frob:tests graphite/tui/screens/obligations.py::ObligationsScreen.compose kind="unit"
+# frob:tests graphite/tui/screens/obligations.py::ObligationsScreen.on_mount kind="unit"
 @pytest.mark.asyncio
 async def test_obligations_renders_fixture_summary(timber_pavilion):
     app = _Harness(timber_pavilion)
@@ -31,6 +33,7 @@ async def test_obligations_renders_fixture_summary(timber_pavilion):
         assert table.row_count > 0
 
 
+# frob:tests graphite/tui/screens/obligations.py::ObligationsScreen.action_refresh kind="unit"
 @pytest.mark.asyncio
 async def test_obligations_missing_audit_index_is_honest_empty_state(tmp_path):
     empty_project = tmp_path / "fresh"
@@ -42,3 +45,18 @@ async def test_obligations_missing_audit_index_is_honest_empty_state(tmp_path):
         assert "no audit index" in summary
         table = app.screen.query_one("#obligations-table", DataTable)
         assert table.row_count == 0
+
+
+# frob:tests graphite/tui/screens/obligations.py::ObligationsScreen.action_cursor_down kind="unit"
+# frob:tests graphite/tui/screens/obligations.py::ObligationsScreen.action_cursor_up kind="unit"
+@pytest.mark.asyncio
+async def test_obligations_jk_bindings_invoke_cursor_actions(timber_pavilion):
+    app = _Harness(timber_pavilion)
+    async with app.run_test(size=(120, 60)) as pilot:
+        await pilot.pause()
+        table = app.screen.query_one("#obligations-table", DataTable)
+        await pilot.press("j")
+        await pilot.pause()
+        await pilot.press("k")
+        await pilot.pause()
+        assert table.cursor_type == "row"
