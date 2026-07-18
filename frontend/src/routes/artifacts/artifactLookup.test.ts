@@ -18,6 +18,7 @@ describe('findCalcSheetPdf', () => {
     entry('calc/calc_book.json'),
   ];
 
+  // frob:tests frontend/src/routes/artifacts/artifactLookup.ts::findCalcSheetPdf
   it('matches the sheet_id::anchor -> anchor__.pdf naming convention', () => {
     expect(findCalcSheetPdf(artifacts, 'deflect::afc15fc09a7f')?.relpath).toBe(
       'calc/deflect__afc15fc09a7f.pdf',
@@ -45,6 +46,7 @@ describe('findDrawingArtifact / listDrawingNames', () => {
     entry('drawings/drawings/contract_graph.svg'),
   ];
 
+  // frob:tests frontend/src/routes/artifacts/artifactLookup.ts::findDrawingArtifact
   it('finds the svg/pdf/drawing.json companions by name', () => {
     expect(findDrawingArtifact(artifacts, 'PavilionFrame', 'svg')?.relpath).toBe(
       'drawings/drawings/PavilionFrame.svg',
@@ -57,6 +59,7 @@ describe('findDrawingArtifact / listDrawingNames', () => {
     );
   });
 
+  // frob:tests frontend/src/routes/artifacts/artifactLookup.ts::listDrawingNames
   it('lists every distinct drawing name derived from shipped .svg files', () => {
     expect(listDrawingNames(artifacts)).toEqual(['PavilionFrame', 'contract_graph']);
   });

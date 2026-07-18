@@ -10,6 +10,7 @@ import { describe, expect, it } from 'vitest';
 import { parseGerberRs274x } from './gerberRs274x';
 
 describe('parseGerberRs274x (WO-G9, closes WOG4-F2)', () => {
+  // frob:tests frontend/src/routes/artifacts/gerberRs274x.ts::parseGerberRs274x
   it('parses the real F_Silkscreen layer (KiCad stroke text, circle apertures) into visible strokes', () => {
     const layer = parseGerberRs274x(fSilkscreenGerber);
     expect(layer.primitives.length).toBeGreaterThan(50);

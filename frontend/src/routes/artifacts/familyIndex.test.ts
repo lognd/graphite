@@ -17,6 +17,7 @@ function row(family: string, viewer: ArtifactIndexRow['viewer']): ArtifactIndexR
 }
 
 describe('familiesFromIndex (WO-G9 deliverable 1: no hardcoded family list)', () => {
+  // frob:tests frontend/src/routes/artifacts/familyIndex.ts::familiesFromIndex
   it('surfaces a family that was never in the old hardcoded FAMILIES constant', () => {
     // The old Artifacts.tsx hardcoded exactly: calc, drawings, model,
     // bom, boards. "harness" and a hypothetical brand-new
@@ -39,6 +40,7 @@ describe('familiesFromIndex (WO-G9 deliverable 1: no hardcoded family list)', ()
 });
 
 describe('familyLabel', () => {
+  // frob:tests frontend/src/routes/artifacts/familyIndex.ts::familyLabel
   it('title-cases without a lookup table', () => {
     expect(familyLabel('mystery_future_family')).toBe('Mystery Future Family');
     expect(familyLabel('3d')).toBe('3d');
