@@ -59,3 +59,36 @@ lithos WO-151 (waveform/mask record class)
   -> WO-G15 (read-only waveform/mask view -- render before author)
      -> WO-G16 (the signal-design editor; consumes WO-G12's write-
         source seam, extended to the `records/` path)
+
+## Work order index
+
+- [WO-G1](work-orders/WO-G1-backend-api.md) -- Backend API v1 +
+  the one-schema-source chain
+- [WO-G2](work-orders/WO-G2-frontend-foundation.md) -- Frontend
+  foundation: tokens, shell, component library
+- [WO-G3](work-orders/WO-G3-dashboard-and-explorer.md) -- Fleet
+  dashboard + obligation explorer
+- [WO-G4](work-orders/WO-G4-artifact-viewers.md) -- Artifact
+  viewers: calc book, drawings, 3D, BOM, boards
+- [WO-G5](work-orders/WO-G5-run-console.md) -- Run console: drive
+  builds with live progress
+- [WO-G6](work-orders/WO-G6-config-doctor.md) -- Config editor +
+  doctor + settings
+- [WO-G7](work-orders/WO-G7-tui-refresh.md) -- TUI refresh on the
+  shared body
+- [WO-G8](work-orders/WO-G8-system-polish.md) -- System polish:
+  a11y, performance, docs, release
+- [WO-G9](work-orders/WO-G9-render-any-family.md) -- Render ANY
+  artifact family, via lithos's typed artifact index
+- [WO-G11](work-orders/WO-G11-scan-trace-studio.md) -- scan-trace
+  studio substrate: upload, calibration rungs A/B, grid capture
+- [WO-G12](work-orders/WO-G12-trace-tools-and-write-seam.md) --
+  trace tools + `.rgp` emission + the write-source seam
+- [WO-G13](work-orders/WO-G13-trace-roundtrip-ux.md) -- round-trip
+  + pipeline UX for traced profiles
+- [WO-G14](work-orders/WO-G14-calibration-rung-c-distortion-fit.md)
+  -- calibration rung C: radial (+tangential) distortion fit (v1.1)
+- [WO-G15](work-orders/WO-G15-waveform-view.md) -- read-only
+  waveform/mask view in the Artifacts hub
+- [WO-G16](work-orders/WO-G16-waveform-editor.md) -- the signal-
+  design editor: PWL/step + envelope/tolerance authoring

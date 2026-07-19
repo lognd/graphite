@@ -44,14 +44,20 @@ TEST002 = "warn"
 TEST003 = "error"
 TEST005 = "warn"
 TEST006 = "warn"
+DOC001 = "error"
 
 [gates.docs]
-# No docs/index.md and no docs/ root that already links every file (the
-# work-order log and workflow README are intentionally not part of the
-# README's reading path); adding index links for DOC001 would be
-# inventing a docs index that does not exist. See tickets/ for the
-# seeded ticket tracking this debt instead.
-include = []
+# T-0002 retrofit (2026-07-19), following the feldspar precedent:
+# docs/README.md (new -- "File index") links every docs/spec/*.md and
+# points at docs/workflow/README.md; docs/workflow/README.md got a new
+# "Work order index" section linking every workflow/work-orders/WO-Gnn-*.md.
+# Every file under docs/ is now reachable from a root. DOC001 is the
+# default include glob at error severity, matching the COV001/TEST001/
+# TEST003 ratchet above -- no more blanket disable. `docs/README.md` is
+# not literally `docs/index.md` (frob's built-in default root), so it is
+# named explicitly in `roots` alongside the repo `README.md`.
+include = ["docs/**/*.md"]
+roots = ["docs/README.md", "README.md"]
 
 [testing]
 min_unit_cases = 1

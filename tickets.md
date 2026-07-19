@@ -24,19 +24,46 @@ frob adoption baseline: 1159 COV001 findings (public symbols with no frob:doc ed
 ```yaml
 id: T-0002
 title: Decide DOC001 docs-index posture for docs/
-state: queued
+state: done
 kind: docs
 origin: human
 created: '2026-07-17'
 blocked_by: []
 parent: null
 scope: []
-evidence: []
+evidence:
+- cmd:frob check exit=0 sha256=7dda54e6e250
 attachments: []
 acceptance: []
 threat: null
 ```
 frob.toml sets [gates.docs] include = [] because graphite has no docs/index.md and README.md links only docs/guide.md and docs/screenshots/*.png -- docs/spec/01..04, docs/workflow/README.md, and docs/workflow/work-orders/*.md are all currently unlinked from any root. Either build a real docs/index.md that links every doc (then re-enable include = ["docs/**/*.md"]) or explicitly accept the work-order log as out-of-band and narrow include to the spec/guide subtree only.
+
+## Done report
+
+2026-07-19. Decided and implemented the feldspar precedent (its
+`frob.toml` [gates.docs] retrofit, docs/README.md "File index" +
+docs/workflow/README.md "Work order index"): built a real
+`docs/README.md` linking `docs/guide.md`, every `docs/spec/0N-*.md`
+(01 charter through 05 strata-system-model), and
+`docs/workflow/README.md`; added a new "Work order index" section
+to `docs/workflow/README.md` linking all 16
+`docs/workflow/work-orders/WO-Gnn-*.md` files. Every file under
+`docs/` is now reachable via markdown link from a root. Flipped
+`frob.toml` [gates.docs] `include = ["docs/**/*.md"]` (the default
+glob) with `roots = ["docs/README.md", "README.md"]` (docs/README.md
+named explicitly since it is not literally `docs/index.md`), and
+added `DOC001 = "error"` to [gates.severity], matching the
+COV001/TEST001/TEST003 ratchet.
+
+Evidence: `frob check` after the change reports 0 DOC001 findings, 0
+orphaned docs, and the full run stays at "0 errors, 0 warnings, 4
+waived" (the 4 waived findings are the pre-existing, unrelated
+PERF004 waivers). `uv run pytest -q` unaffected (docs-only change).
+
+Files touched: docs/README.md (new), docs/workflow/README.md (new
+"Work order index" section), frob.toml ([gates.severity] DOC001,
+[gates.docs] include/roots).
 
 <!-- ticket:T-0003 -->
 ```yaml
