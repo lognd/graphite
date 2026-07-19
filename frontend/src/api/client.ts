@@ -37,59 +37,59 @@ import {
   mockVerdictDiff,
 } from '../mocks/fixtures';
 
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type ProjectInfo = components['schemas']['ProjectInfo'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type ArtifactEntry = components['schemas']['ArtifactEntry'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type ScanEntry = components['schemas']['ScanEntry'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type ArtifactIndexRow = components['schemas']['ArtifactIndexRow'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type ProjectHealth = components['schemas']['ProjectHealth'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type ObligationsResponse = components['schemas']['ObligationsResponse'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type ObligationGroup = components['schemas']['ObligationGroup'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type AuditRow = components['schemas']['AuditRow'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type AuditSummary = components['schemas']['AuditSummary'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type AuditIndex = components['schemas']['AuditIndex'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type CalcSheet = components['schemas']['CalcSheet'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type StagedBuildReport = components['schemas']['StagedBuildReport'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type Lockfile = components['schemas']['Lockfile'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type LockSection = components['schemas']['LockSection'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type LockRow = components['schemas']['LockRow'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type GateSummary = components['schemas']['GateSummary'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type ManifestSummary = components['schemas']['ManifestSummary'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type AcceptanceLedgerSummary = components['schemas']['AcceptanceLedgerSummary'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type AcceptedDeviation = components['schemas']['AcceptedDeviation'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type ConfigEntry = components['schemas']['ConfigEntry'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type ConfigKeyDefault = components['schemas']['ConfigKeyDefault'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type GraphiteSettings = components['schemas']['GraphiteSettings'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type RunVerbosity = GraphiteSettings['run_verbosity'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type RunRecord = components['schemas']['RunRecord'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type RunVerb = RunRecord['verb'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type HealthSnapshot = components['schemas']['HealthSnapshot'];
-// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain
+// frob:doc docs/spec/02-architecture.md#2-the-one-schema-source-chain-the-dedup-laws-backbone
 export type VerdictDiff = components['schemas']['VerdictDiff'];
 
 // The two SSE event kinds `/api/runs/{id}/events` emits (graphite/routes/
