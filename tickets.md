@@ -6,18 +6,26 @@ Central ledger managed by `frob ticket` -- one section per ticket.
 ```yaml
 id: T-0001
 title: Backfill COV001 doc edges for public symbols
-state: queued
+state: done
 kind: docs
 origin: human
 created: '2026-07-17'
 blocked_by: []
 parent: null
 scope: []
-evidence: []
+evidence:
+- cmd:bash -c 'frob check --only gates 2>&1 | grep -q "0 errors, 0 warnings"' exit=0
+  sha256=e3b0c44298fc
 attachments: []
 acceptance: []
 threat: null
 ```
+## Done report
+
+COV001 driven to zero across the campaign (G1/G2 lanes + queue-drain
+commits) and ratcheted to ERROR severity; gates hold 0/0 with the
+rule enforced. Goal state achieved and locked.
+
 frob adoption baseline: 1159 COV001 findings (public symbols with no frob:doc edge) across the legacy surface. Severity is warn per the legacy-adoption dial in frob.toml; this ticket tracks annotating public API with frob:doc anchors and eventually flipping COV001 back to error.
 
 <!-- ticket:T-0002 -->
