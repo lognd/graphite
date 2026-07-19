@@ -49,6 +49,7 @@ def test_no_harness_or_private_imports_anywhere_in_graphite():
     )
 
 
+# frob:ticket T-0009
 def test_orchestrator_imports_limited_to_report_models():
     graphite_dir = Path(__file__).resolve().parents[1] / "graphite"
     offenders = []
@@ -58,6 +59,7 @@ def test_orchestrator_imports_limited_to_report_models():
             submodule = match.group(1) or match.group(2)
             if submodule not in _ALLOWED_ORCHESTRATOR_SUBMODULES:
                 offenders.append(f"{path}: regolith.orchestrator.{submodule}")
+    # frob:waive PERF004 reason="one sort in an assert message, not per-iteration"
     assert offenders == [], (
         "graphite may only import the read-only report-model submodules of "
         f"regolith.orchestrator ({sorted(_ALLOWED_ORCHESTRATOR_SUBMODULES)}): {offenders}"

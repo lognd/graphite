@@ -30,7 +30,9 @@ from graphite.server.routes import (
 
 _log = get_logger(__name__)
 
+# frob:doc docs/spec/02-architecture.md#11-server-app-dependencies-and-error-mapping
 API_TITLE = "graphite backend API"
+# frob:doc docs/spec/02-architecture.md#11-server-app-dependencies-and-error-mapping
 API_VERSION = "1.0.0"
 
 # The vite build output (frontend/vite.config.ts outDir) bundled into the

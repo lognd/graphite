@@ -376,6 +376,7 @@ def prune_run_history(limit: int) -> int:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
+# frob:ticket T-0009
 def list_runs(project_root: Path | None = None) -> tuple[RunRecord, ...]:
     """Every persisted run, newest first; `project_root` filters to one
     project when given."""
@@ -393,6 +394,7 @@ def list_runs(project_root: Path | None = None) -> tuple[RunRecord, ...]:
         ):
             continue
         records.append(record)
+    # frob:waive PERF004 reason="one sort after the loop, not per-iteration"
     records.sort(key=lambda r: r.started_at, reverse=True)
     return tuple(records)
 

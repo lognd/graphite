@@ -31,9 +31,13 @@ from graphite.service.errors import ServiceError
 
 _log = get_logger(__name__)
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 MANIFEST_NAME = "magnetite.toml"
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 BUILD_REPORT_REL = Path(".regolith") / "build" / "build_report.json"
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 LOCKFILE_REL = Path(".regolith") / "build" / "regolith.lock"
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 DIST_REL = Path("dist")
 
 
@@ -160,6 +164,7 @@ def project_info(root: Path) -> Result[ProjectInfo, ServiceError]:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
+# frob:ticket T-0009
 def scan_projects(scan_root: Path) -> tuple[ProjectInfo, ...]:
     """Every project under `scan_root` (name-sorted for determinism) --
     a manifest that fails to parse is logged and skipped, never fatal
@@ -176,6 +181,7 @@ def scan_projects(scan_root: Path) -> tuple[ProjectInfo, ...]:
             _log.warning(
                 "discovery: skipping %s: %s", manifest, result.danger_err.message
             )
+    # frob:waive PERF004 reason="one sort after the loop, not per-iteration"
     infos.sort(key=lambda p: p.name)
     _log.info("discovery: found %d project(s) under %s", len(infos), scan_root)
     return tuple(infos)

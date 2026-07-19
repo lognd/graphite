@@ -123,6 +123,7 @@ def _hash_relpath(dist_root: Path, relpath: str) -> str | None:
 
 
 # frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
+# frob:ticket T-0009
 def load_index(dist_root: Path) -> tuple[ArtifactIndexRow, ...]:
     """The project's typed artifact index, relpath-sorted. Reads the
     shipped `artifact_index.json` when present and re-keys every row to
@@ -180,6 +181,7 @@ def load_index(dist_root: Path) -> tuple[ArtifactIndexRow, ...]:
                 synthesized=False,
             )
         )
+    # frob:waive PERF004 reason="one sort after the loop, not per-iteration"
     rows.sort(key=lambda r: r.relpath)
     _log.info("artifact_index: loaded %d row(s) from %s", len(rows), index_path)
     return tuple(rows)
