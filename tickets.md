@@ -761,7 +761,7 @@ orchestrator`/`harness`/`realizer`/`compiler` imports anywhere under
 ```yaml
 id: T-0022
 title: 'TEST005 backfill wave 2: settings + tui screens + route tails to 75 percent'
-state: in-progress
+state: done
 kind: feature
 origin: agent
 created: '2026-07-19'
@@ -773,8 +773,58 @@ scope:
 - graphite/server/**
 - tests/**
 - frob.toml
-evidence: []
+evidence:
+- tests/service/test_settings.py::test_get_settings_malformed_json_is_a_service_error
+- tests/service/test_settings.py::test_get_settings_invalid_shape_is_a_service_error
+- tests/service/test_settings.py::test_get_settings_unreadable_file_is_an_io_error
+- tests/service/test_settings.py::test_set_settings_write_failure_is_an_io_error
+- tests/tui/test_run_console.py::test_run_console_cancel_button_with_no_active_run_is_a_noop
+- tests/tui/test_run_console.py::test_run_console_unknown_button_id_is_ignored
 attachments: []
 acceptance: []
 threat: null
 ```
+## Done report
+
+Backfilled real branch-covering tests for the 3 sites T-0020 named as
+residue but left out of its own scope (6 new tests total):
+
+- `graphite/service/settings.py::get_settings` (60% -> clears 75%): 3
+  tests -- malformed JSON (`json.JSONDecodeError`), invalid shape
+  (pydantic `ValidationError` on an out-of-range `run_verbosity`),
+  unreadable file (`OSError` on `Path.read_text`).
+- `graphite/service/settings.py::set_settings` (70% -> clears 75%): 1
+  test -- write failure (`OSError` on `Path.write_text`).
+- `graphite/tui/screens/run_console.py::RunConsoleScreen.
+  on_button_pressed` (60% -> clears 75%): 2 tests -- clicking
+  `#run-cancel` with no active run (the `elif` branch, landing in
+  `action_cancel_run`'s early-return no-op) and an unrecognized
+  button id (both branches fall through untouched -- guards a future
+  third button from silently doing the wrong thing).
+
+Result: `frob check` shows ZERO TEST005 findings for any of the 3
+sites -- all 3 `# frob:waive TEST005` comments removed from
+`settings.py`/`run_console.py` (grep confirms no `frob:waive TEST005`
+left anywhere in the tree).
+
+Floor decision: `unit_branch_cov` stays at 75 (not raised toward
+90/85). Re-measured by temporarily bumping the floor to 90 and
+re-running `frob check`: it surfaces ~30 TEST005 findings across
+`server/routes/*` and `tui/screens/*` that neither T-0020 nor T-0022
+touched -- raising the floor would misrepresent this backfill's
+actual scope, the same conclusion T-0020 reached when it first tried
+90. `module_line_cov`/`system_line_cov` unchanged at 80/80, both
+still comfortably clear of measured reality (worst module 81.9%,
+overall line coverage 92.9%). `frob.toml [testing]` comment updated
+in place to record both tickets' contributions.
+
+Evidence: `uv run pytest -q` -> 212 passed, 1 skipped (6 new tests on
+top of T-0020's baseline of 206 passed, 1 skipped). `make coverage`:
+same result, `coverage.xml` restamped (`source_sha=5aff6e99`). `frob
+check`: 0 errors, 0 warnings, 4 waived (pre-existing PERF004 sites,
+unrelated to TEST005). `frob check --stamp-coverage`: stamped clean.
+`frob sys audit`: PROVED, 6 waived (all pre-existing, T-0013/T-0017/
+T-0018 -- unaffected by this ticket).
+
+Commits: `440ba33` (settings backfill), `92b792b` (run_console
+backfill), `ff5bc69` (frob.toml floor-comment update). Not pushed.
