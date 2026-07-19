@@ -534,7 +534,7 @@ remain.
 ```yaml
 id: T-0010
 title: 'frob compliance: break tui/app.py <-> tui/screens/dashboard.py import cycle'
-state: queued
+state: done
 kind: bug
 origin: agent
 created: '2026-07-17'
@@ -542,11 +542,38 @@ blocked_by: []
 parent: null
 scope:
 - graphite/tui/app.py,graphite/tui/screens/dashboard.py
-evidence: []
+evidence:
+- tests/tui/test_dashboard.py::test_dashboard_enter_drills_into_obligations
 attachments: []
 acceptance: []
 threat: null
 ```
+## Done report
+
+2026-07-19. Verified: `graphite/tui/app.py` imports
+`graphite.tui.screens.dashboard.DashboardScreen` at module top level
+(line 25, needed to push it as the initial screen in
+`GraphiteApp.on_mount`). The other direction is already broken the
+smallest honest way -- `graphite/tui/screens/dashboard.py` does NOT
+import `graphite.tui.app` at module scope; it has a deferred, in-
+method `from graphite.tui.app import GraphiteApp` inside
+`DashboardScreen`'s drilldown handler (line 113), used only to
+`isinstance`-check `self.app` before calling
+`set_active_project`/`push_screen`. A deferred import never
+participates in the static or eager-runtime import graph, so there is
+no cycle to break -- this was already the fix, just never verified
+and closed against this ticket. Confirmed with `frob cycle graphite`
+-> "no cycles found" and a clean `import graphite.tui;
+import graphite.tui.screens` (exercised again while closing out
+T-0008's exports work, which made both packages' `__init__.py` eager-
+import these same modules with no cycle surfacing).
+
+Evidence: `frob cycle graphite` -> "no cycles found";
+`uv run pytest -q tests/tui/` all passing, including the dashboard
+drilldown test that exercises the deferred-import path.
+
+No source changes needed; this ticket closes as verification of an
+existing, already-correct fix.
 
 <!-- ticket:T-0011 -->
 ```yaml
