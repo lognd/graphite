@@ -31,6 +31,7 @@ from typani.result import Err, Ok, Result
 
 from graphite.logging_setup import get_logger
 from graphite.service.errors import ServiceError
+from graphite.service.kill_switch import NO_EXEC_ENV, no_exec_engaged
 
 _log = get_logger(__name__)
 
@@ -91,7 +92,18 @@ def key_defaults() -> tuple[ConfigKeyDefault, ...]:
     )
 
 
+# frob:ticket T-0016
 def _run(argv: list[str], cwd: Path) -> Result[str, ServiceError]:
+    if no_exec_engaged():
+        _log.warning(
+            "config_cli: refusing to spawn regolith %s (%s engaged)", argv, NO_EXEC_ENV
+        )
+        return Err(
+            ServiceError(
+                kind="capability_disabled",
+                message=f"regolith subprocess execution disabled ({NO_EXEC_ENV} set)",
+            )
+        )
     full = [sys.executable, "-m", "regolith.cli", "--color", "never", *argv]
     try:
         completed = subprocess.run(  # noqa: S603
@@ -171,7 +183,6 @@ def set_config(
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
-# frob:waive TEST005 reason="55.6% branch cov as of 2026-07-18; T-0020 backfill"
 def doctor(project_root: Path) -> Result[list[object], ServiceError]:
     """`regolith doctor --json` parsed straight as JSON (the one
     regolith surface that already speaks structured data natively)."""

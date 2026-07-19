@@ -51,6 +51,7 @@ from typani.result import Err, Ok, Result
 
 from graphite.logging_setup import get_logger
 from graphite.service.errors import ServiceError
+from graphite.service.kill_switch import NO_EXEC_ENV, no_exec_engaged
 from graphite.service.reports import read_audit_index, read_staged_build_report
 from graphite.service.settings import (
     DEFAULT_RUN_HISTORY_LIMIT,
@@ -177,6 +178,7 @@ def _write_record(record: RunRecord) -> None:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
+# frob:ticket T-0016
 def start_run(
     project_root: Path,
     verb: RunVerb,
@@ -197,6 +199,16 @@ def start_run(
     if not project_root.is_dir():
         return Err(
             ServiceError(kind="not_found", message=f"no project root at {project_root}")
+        )
+    if no_exec_engaged():
+        _log.warning(
+            "runs: refusing to start run verb=%s (%s engaged)", verb, NO_EXEC_ENV
+        )
+        return Err(
+            ServiceError(
+                kind="capability_disabled",
+                message=f"regolith subprocess execution disabled ({NO_EXEC_ENV} set)",
+            )
         )
     run_id = uuid.uuid4().hex
     runs_home().mkdir(parents=True, exist_ok=True)
@@ -335,7 +347,6 @@ def get_run(run_id: str) -> Result[RunRecord, ServiceError]:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
-# frob:waive TEST005 reason="50.0% branch cov as of 2026-07-18; T-0020 backfill"
 def mark_finished(run_id: str, exit_code: int) -> None:
     """Test/CLI-runner seam: explicitly finalize a run once its
     subprocess is known to have exited (used by the SSE route after it
@@ -425,7 +436,6 @@ def get_full_log(run_id: str) -> tuple[str, ...]:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
-# frob:waive TEST005 reason="59.3% branch cov as of 2026-07-18; T-0020 backfill"
 def cancel_run(run_id: str) -> Result[RunRecord, ServiceError]:
     """Stop a running run (deliverable 1's cancel affordance -- WOG1-F6:
     no kill route existed before WO-G5). Prefers the in-process `Popen`

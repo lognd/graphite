@@ -21,6 +21,7 @@ _STATUS_BY_KIND: dict[ErrorKind, int] = {
     "cli_failed": 502,
     "cli_not_found": 503,
     "io_error": 500,
+    "capability_disabled": 503,  # kill-switch engaged (GRAPHITE_NO_EXEC et al.)
 }
 
 

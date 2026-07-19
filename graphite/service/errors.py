@@ -26,6 +26,7 @@ ErrorKind = Literal[
     "cli_failed",
     "cli_not_found",
     "io_error",
+    "capability_disabled",
 ]
 
 

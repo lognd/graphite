@@ -8,6 +8,7 @@ from pathlib import Path
 import typer
 
 from graphite.logging_setup import get_logger
+from graphite.service.kill_switch import OFFLINE_ENV, offline_engaged
 
 _log = get_logger(__name__)
 
@@ -34,6 +35,7 @@ _LOCALHOST_HOSTS = ("127.0.0.1", "localhost", "::1")
 
 @app.command()
 # frob:doc docs/spec/02-architecture.md#3-process-model
+# frob:ticket T-0016
 def serve(
     project: str = typer.Argument(".", help="Fleet scan root to serve."),
     host: str = typer.Option("127.0.0.1", "--host", help="Bind host (localhost only)."),
@@ -52,6 +54,11 @@ def serve(
         _log.error("graphite serve: refused non-localhost host %r", host)
         raise typer.BadParameter(
             f"graphite serve binds localhost only, got host={host!r}"
+        )
+    if offline_engaged():
+        _log.error("graphite serve: refused to bind (%s engaged)", OFFLINE_ENV)
+        raise typer.BadParameter(
+            f"graphite serve's net bind is disabled ({OFFLINE_ENV} set)"
         )
 
     scan_root = Path(project).resolve()

@@ -26,6 +26,27 @@ def test_serve_binds_localhost(tmp_path):
         mock_run.assert_called_once()
 
 
+# frob:tests graphite/cli.py::serve
+# frob:tests graphite/service/kill_switch.py kind="integration"
+# frob:ticket T-0016
+def test_serve_refuses_when_offline_engaged(tmp_path, monkeypatch):
+    monkeypatch.setenv("GRAPHITE_OFFLINE", "1")
+    with patch("uvicorn.run") as mock_run:
+        result = runner.invoke(app, ["serve", str(tmp_path), "--host", "127.0.0.1"])
+        assert result.exit_code != 0
+        mock_run.assert_not_called()
+
+
+# frob:tests graphite/cli.py::serve
+# frob:ticket T-0016
+def test_serve_binds_when_offline_unset(tmp_path, monkeypatch):
+    monkeypatch.delenv("GRAPHITE_OFFLINE", raising=False)
+    with patch("uvicorn.run") as mock_run:
+        result = runner.invoke(app, ["serve", str(tmp_path), "--host", "127.0.0.1"])
+        assert result.exit_code == 0
+        mock_run.assert_called_once()
+
+
 # frob:tests graphite/cli.py::tui
 def test_tui_launches_app(tmp_path):
     with patch("graphite.tui.app.GraphiteApp") as mock_app:

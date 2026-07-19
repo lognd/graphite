@@ -116,12 +116,14 @@ node service : trusted {
     // env: settings.py (GRAPHITE_HOME), runs.py (GRAPHITE_RUNS_HOME,
     // REGOLITH_LOG passthrough).
     may "env";
-    // LINT004: exec is risky and genuinely has no kill switch in the
-    // codebase today -- rather than fabricate a flag=<id> attr naming a
-    // mechanism that does not exist (frob's own design/frob.strata
-    // documents this exact waive-not-fabricate pattern), waived pending
-    // T-0016.
-    waive "LINT004" reason "no real kill switch around regolith subprocess spawning yet" ticket "T-0016";
+    // LINT004 (T-0016, closed): exec's real kill switch is the
+    // GRAPHITE_NO_EXEC env var, checked at both subprocess choke
+    // points (`graphite.service.runs.start_run`,
+    // `graphite.service.config_cli._run`) via the shared
+    // `graphite.service.kill_switch` module -- set it and both refuse
+    // with a typed `capability_disabled` ServiceError instead of
+    // spawning. No waiver needed; the mechanism is real.
+    attr flag=GRAPHITE_NO_EXEC;
 }
 
 // The textual TUI: graphite/tui/**. Imports service functions directly
@@ -159,10 +161,13 @@ node core : trusted {
     // a read-only module can never satisfy SYS101's observed side. See
     // FROBLEMS.md.
     waive "SYS101:fs" reason "vet scanner has no read-only fs signal, only fs-write (frob design gap)" ticket "T-0018";
-    // LINT004: net (the localhost uvicorn bind) is risky and has no
-    // kill switch in the codebase today; same waive-not-fabricate
-    // pattern as service's exec above.
-    waive "LINT004" reason "no real kill switch around the uvicorn bind yet" ticket "T-0016";
+    // LINT004 (T-0016, closed): net's real kill switch is the
+    // GRAPHITE_OFFLINE env var, checked in `graphite.cli.serve` (its
+    // one uvicorn-bind call site) via the shared `graphite.service.
+    // kill_switch` module -- set it and `serve` refuses (typer.
+    // BadParameter, non-zero exit) instead of binding. No waiver
+    // needed; the mechanism is real.
+    attr flag=GRAPHITE_OFFLINE;
 }
 
 // Build/CI scripts: scripts/** (gen_openapi.py dumps openapi.json,
@@ -285,6 +290,15 @@ flow f_tui_core : tui -> core { label Internal; }
 // frob:doc docs/spec/05-strata-system-model.md#what-this-is
 // frob:ticket T-0014
 flow f_scripts_core : scripts -> core { label Internal; }
+
+// Core -> service: cli.py's `serve` command imports graphite.service.
+// kill_switch (T-0016's GRAPHITE_OFFLINE check) -- the one real-time
+// kill-switch mechanism shared with the service layer's own
+// GRAPHITE_NO_EXEC check, so both live in the SAME module rather than
+// two copies (NO DUPLICATION).
+// frob:doc docs/spec/05-strata-system-model.md#what-this-is
+// frob:ticket T-0016
+flow f_core_service : core -> service { label Internal; }
 
 // -- boundaries -------------------------------------------------------
 
