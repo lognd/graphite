@@ -56,3 +56,60 @@ def test_reset_settings_restores_defaults() -> None:
     assert reset_result.is_ok
     assert reset_result.danger_ok == GraphiteSettings()
     assert get_settings().danger_ok == GraphiteSettings()
+
+
+# frob:tests graphite/service/settings.py::get_settings kind="unit"
+def test_get_settings_malformed_json_is_a_service_error() -> None:
+    path = settings_home() / "settings.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("{not valid json")
+
+    result = get_settings()
+    assert result.is_err
+    assert result.danger_err.kind == "io_error"
+    assert "cannot read" in result.danger_err.message
+
+
+# frob:tests graphite/service/settings.py::get_settings kind="unit"
+def test_get_settings_invalid_shape_is_a_service_error() -> None:
+    path = settings_home() / "settings.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text('{"run_verbosity": "way-too-loud"}')
+
+    result = get_settings()
+    assert result.is_err
+    assert result.danger_err.kind == "invalid_input"
+    assert "invalid settings" in result.danger_err.message
+
+
+# frob:tests graphite/service/settings.py::get_settings kind="unit"
+def test_get_settings_unreadable_file_is_an_io_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    path = settings_home() / "settings.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("{}")
+
+    def _boom(self: Path) -> str:
+        raise OSError("permission denied")
+
+    monkeypatch.setattr(Path, "read_text", _boom)
+
+    result = get_settings()
+    assert result.is_err
+    assert result.danger_err.kind == "io_error"
+
+
+# frob:tests graphite/service/settings.py::set_settings kind="unit"
+def test_set_settings_write_failure_is_an_io_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def _boom(self: Path, *args: object, **kwargs: object) -> int:
+        raise OSError("disk full")
+
+    monkeypatch.setattr(Path, "write_text", _boom)
+
+    result = set_settings(GraphiteSettings(default_project_root="/tmp/x"))
+    assert result.is_err
+    assert result.danger_err.kind == "io_error"
+    assert "cannot write" in result.danger_err.message

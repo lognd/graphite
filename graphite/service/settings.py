@@ -67,7 +67,6 @@ def _settings_path() -> Path:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
-# frob:waive TEST005 reason="measured 60.0% branch on 2026-07-19 after floors rose to 75; outside the T-0020 backfill surface; backfill T-0022"
 def get_settings() -> Result[GraphiteSettings, ServiceError]:
     """The current settings, or the recorded defaults when no settings
     file has been written yet (first run)."""
@@ -98,7 +97,6 @@ def get_settings() -> Result[GraphiteSettings, ServiceError]:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
-# frob:waive TEST005 reason="measured 70.0% branch on 2026-07-19 after floors rose to 75; outside the T-0020 backfill surface; backfill T-0022"
 def set_settings(settings: GraphiteSettings) -> Result[GraphiteSettings, ServiceError]:
     """Overwrite the whole settings file (the settings shape is small
     enough that a whole-document PUT, not per-key PATCH, is the
