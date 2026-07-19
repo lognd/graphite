@@ -35,10 +35,13 @@ skip = ["ty"]
 # Legacy-adoption baseline: graphite predates frob, so the snapshot-wide
 # annotation-coverage obligations warn on the un-annotated legacy surface
 # rather than blocking; diff-scoped and drift rules stay hard errors.
-COV001 = "warn"
-TEST001 = "warn"
+# Ratchet stage 1 (2026-07-19): annotation surface at zero unwaived
+# violations -- structural coverage rules flip to hard errors; count/
+# coverage-flow rules stay warn (T-0020 tracks the coverage backfill).
+COV001 = "error"
+TEST001 = "error"
 TEST002 = "warn"
-TEST003 = "warn"
+TEST003 = "error"
 TEST005 = "warn"
 TEST006 = "warn"
 
