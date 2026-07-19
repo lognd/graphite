@@ -379,7 +379,7 @@ scope.
 id: T-0013
 title: 'frob compliance: bind TEST002 min-unit-case findings surfaced post-T001 cleanup
   (87, mostly frontend)'
-state: queued
+state: done
 kind: bug
 origin: agent
 created: '2026-07-17'

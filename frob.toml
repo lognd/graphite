@@ -1,12 +1,16 @@
 check_base = "main"
 
 [graph]
+# frontend/** (entire tree, not just build/vendor output) is excluded from
+# the obligation graph as of 2026-07-18 (T-0013): the frontend has its own
+# complete toolchain (`make frontend-check` -- lint, typecheck, its own
+# TS/React test runner). frob's obligation graph and its pytest-based
+# evidence oracle are Python-only today and cannot bind TS tests, so the
+# 87 TEST002 + 8 TEST003 + 5 COV001 findings under frontend/ were noise,
+# not real debt. Revisit only if frob grows a first-class TS test runner
+# (see T-0013 for the reopen criterion).
 exclude = [
-    "frontend/node_modules/**",
-    "frontend/dist-e2e/**",
-    "frontend/coverage/**",
-    "frontend/playwright-report/**",
-    "frontend/test-results/**",
+    "frontend/**",
     "graphite/server/static/**",
     "tests/fixtures/**",
     ".worktrees/**",
