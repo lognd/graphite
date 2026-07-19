@@ -100,7 +100,6 @@ class RunConsoleScreen(Screen[None]):
                 key=record.run_id,
             )
 
-    # frob:waive TEST005 reason="measured 60.0% branch on 2026-07-19 after floors rose to 75; outside the T-0020 backfill surface; backfill T-0022"
     def on_button_pressed(self, event: Button.Pressed) -> None:
         # frob:doc docs/guide.md#4-driving-runs
         if event.button.id == "run-start":

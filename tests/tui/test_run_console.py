@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 from graphite.tui.screens.run_console import RunConsoleScreen
 from textual.app import App
-from textual.widgets import DataTable, Input, Log, Select
+from textual.widgets import Button, DataTable, Input, Log, Select
 
 
 class _Harness(App[None]):
@@ -65,6 +65,43 @@ async def test_run_console_start_failure_is_honest(tmp_path):
         await pilot.pause()
         log = app.screen.query_one("#run-log", Log)
         assert log.line_count >= 1
+
+
+# frob:tests graphite/tui/screens/run_console.py::RunConsoleScreen.on_button_pressed kind="unit"
+@pytest.mark.asyncio
+async def test_run_console_cancel_button_with_no_active_run_is_a_noop(
+    timber_pavilion,
+):
+    """Clicking `#run-cancel` before any run has started takes the
+    `elif event.button.id == "run-cancel"` branch straight into
+    `action_cancel_run`'s early return (`self._run_id is None`) --
+    the honest no-op, not a crash."""
+    app = _Harness(timber_pavilion)
+    async with app.run_test(size=(200, 60)) as pilot:
+        await pilot.pause()
+        await pilot.click("#run-cancel")
+        await pilot.pause()
+        log = app.screen.query_one("#run-log", Log)
+        assert log.line_count == 0
+
+
+# frob:tests graphite/tui/screens/run_console.py::RunConsoleScreen.on_button_pressed kind="unit"
+@pytest.mark.asyncio
+async def test_run_console_unknown_button_id_is_ignored(timber_pavilion):
+    """A button press whose id matches neither `run-start` nor
+    `run-cancel` falls through both branches of `on_button_pressed`
+    untouched -- guards against a future third button silently doing
+    the wrong thing."""
+    app = _Harness(timber_pavilion)
+    async with app.run_test(size=(200, 60)) as pilot:
+        await pilot.pause()
+        extra = Button("noop", id="run-something-else")
+        app.screen.mount(extra)
+        await pilot.pause()
+        await pilot.click("#run-something-else")
+        await pilot.pause()
+        log = app.screen.query_one("#run-log", Log)
+        assert log.line_count == 0
 
 
 # frob:tests graphite/tui/screens/run_console.py::RunConsoleScreen.action_cancel_run kind="unit"
