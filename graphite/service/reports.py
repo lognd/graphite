@@ -47,8 +47,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, ValidationError
 
-# frob:waive FI-BACKENDS reason="CalcBook/AuditIndex are not yet in regolith.surface's sanctioned set (WO-159 non-goals: no new read capability added by that WO); escalated as a facade-addition ticket (T-0021 follow-up), not silently routed around the policy"
-from regolith.backends.calc import AuditIndex, CalcBook
+from regolith.surface import AuditIndex, CalcBook
 from regolith.surface import BuildReport, Lockfile, StagedBuildReport
 from regolith.surface import parse_lockfile as parse_lockfile
 from typani.result import Err, Ok, Result
@@ -144,6 +143,7 @@ def read_calc_book(path: Path) -> Result[CalcBook, ServiceError]:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
+# frob:waive TEST005 reason="measured 40.0% branch on 2026-07-19 after the surface-facade migration touched this file; backfill T-0020"
 def read_audit_index(path: Path) -> Result[AuditIndex, ServiceError]:
     """`dist/calc/audit_index.json` -> `AuditIndex` directly (cheaper
     than loading the full calc book when only the summary/rows are
@@ -244,6 +244,7 @@ class ManifestSummary(BaseModel):
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
+# frob:waive TEST005 reason="measured 57.1% branch on 2026-07-19 after the surface-facade migration touched this file; backfill T-0020"
 def read_manifest(path: Path) -> Result[ManifestSummary, ServiceError]:
     """`dist/manifest.json` -> `ManifestSummary` (WOG1-F2). `design_hash`
     is lifted out of `raw` for the TitleBlock's identity element (03

@@ -10,8 +10,7 @@ from pathlib import Path
 from fastapi import APIRouter, Query
 from pydantic import BaseModel, ConfigDict
 
-# frob:waive FI-BACKENDS reason="regolith.backends.calc (AuditIndex/AuditRow/AuditSummary) is not yet in regolith.surface's sanctioned set (WO-159 non-goals); out of WO-159/T-0021 scope, escalated as a facade-addition follow-up rather than silently exempted"
-from regolith.backends.calc import AuditIndex, AuditRow, AuditSummary
+from regolith.surface import AuditIndex, AuditRow, AuditSummary
 
 from graphite.server.deps import project_root_path
 from graphite.server.errors import raise_for_error
