@@ -61,6 +61,14 @@ node browser : foreign {
     // FROBLEMS.md.
     waive "THREAT002:html_render" reason "no QUALITY_CATALOG mapping; BenignCapability has no per-repo .strata channel (frob design gap)" ticket "T-0017";
     waive "THREAT002:client_storage" reason "no QUALITY_CATALOG mapping; BenignCapability has no per-repo .strata channel (frob design gap)" ticket "T-0017";
+    // Frontend/** left the obligation scan (T-0013 scope decision), so
+    // the scanner can no longer observe this external browser's real
+    // capabilities in code; declarations stay (they are true of the
+    // browser) with SYS101 waived, same posture as scanner-invisible
+    // compiled-extension ffi elsewhere.
+    waive "SYS101:html_render" reason "external browser node; observing code excluded by the T-0013 frontend scope decision" ticket "T-0013";
+    waive "SYS101:client_storage" reason "external browser node; observing code excluded by the T-0013 frontend scope decision" ticket "T-0013";
+    waive "SYS101:fetch_url" reason "external browser node; observing code excluded by the T-0013 frontend scope decision" ticket "T-0013";
 }
 
 // The FastAPI app: graphite/server/** (app.py, deps.py, errors.py,
