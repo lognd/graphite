@@ -59,8 +59,6 @@ node browser : foreign {
     // (BenignCapability) is a Python-side tuple in frob's OWN source
     // with no .strata-level surface syntax for a per-repo entry -- see
     // FROBLEMS.md.
-    waive "THREAT002:html_render" reason "no QUALITY_CATALOG mapping; BenignCapability has no per-repo .strata channel (frob design gap)" ticket "T-0017";
-    waive "THREAT002:client_storage" reason "no QUALITY_CATALOG mapping; BenignCapability has no per-repo .strata channel (frob design gap)" ticket "T-0017";
     // Frontend/** left the obligation scan (T-0013 scope decision), so
     // the scanner can no longer observe this external browser's real
     // capabilities in code; declarations stay (they are true of the

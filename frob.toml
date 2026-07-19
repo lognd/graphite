@@ -147,3 +147,15 @@ kind = "forbidden-import"
 module = "regolith.compiler"
 within = "graphite/**"
 reason = "regolith.compiler is the AD-4 FFI door, never a UI dependency (AD-44); import regolith.surface for any read need"
+
+# Per-repo benign-capability declarations (frob T-0303 channel,
+# 2026-07-19): these capability kinds are real and intended in a
+# local-first GUI app and match no CWE sink-taxonomy entry; declaring
+# them here retires the in-design THREAT002 waivers (T-0017).
+[[strata.benign_capabilities]]
+kind = "html_render"
+reason = "browser UI renders artifact SVG/text; sanitized at the two dangerouslySetInnerHTML sites (see design/graphite.strata CWE-79 assume)"
+
+[[strata.benign_capabilities]]
+kind = "client_storage"
+reason = "browser localStorage for UI preferences only; no secrets, no pipeline data"

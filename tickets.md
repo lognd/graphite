@@ -909,11 +909,19 @@ blocked_by: []
 parent: null
 scope:
 - design/graphite.strata
-evidence: []
+evidence:
+- tests/test_design_strata.py::test_strata_file_parses_without_sys004
 attachments: []
 acceptance: []
 threat: null
 ```
+## Done report
+
+Upstream landed as frob T-0303 (commit fed6e06 there): the
+[[strata.benign_capabilities]] frob.toml channel. Declared
+html_render + client_storage with reasons here and dropped both
+in-design THREAT002 waivers; audit PROVED with fewer waivers.
+
 frob sys audit reports THREAT002 for browser's may html_render/client_storage under the quality views (web-performance-baseline, reliability-baseline, web-quality-security-baseline): these capability kinds have no QUALITY_CATALOG sink entry. The only excuse mechanism, BenignCapability, is a Python-side tuple (DEFAULT_BENIGN_CAPABILITIES in frob's own src/frob/strata/_threat.py) with no .strata-level surface syntax to add a per-repo entry -- graphite cannot express this excuse without patching frob itself, which is out of bounds for a consuming repo. Waived in design/graphite.strata via frob:waive THREAT002 at the finding site pending an upstream fix; see FROBLEMS.md. Ask upstream (frob repo) for either a .strata-level benign-capability declaration or a documented per-repo BenignCapability extension point.
 
 <!-- ticket:T-0018 -->
@@ -928,11 +936,19 @@ blocked_by: []
 parent: null
 scope:
 - design/graphite.strata
-evidence: []
+evidence:
+- tests/test_design_strata.py::test_strata_file_parses_without_sys004
 attachments: []
 acceptance: []
 threat: null
 ```
+## Done report
+
+Upstream landed as frob T-0304 + T-0306 (478a106, 94beab0): fs-read
+capability kind + the fs-covers-fs-read SYS100 join. Graphite's
+service/core/scripts nodes declare fs-read honestly and the stale
+SYS101:fs waiver is gone (queue-drain commit).
+
 frob sys audit SYS101 fires for node core: may fs is declared (graphite/artifacts.py does real filesystem reads via Path.read_text/json.loads) but never observed. Root cause: frob's vet capability scanner (_capability_registry.py) only pattern-matches fs-WRITE operations into the fs-write kind (normalized to fs for SYS101's observed side); it has no signal at all for read-only filesystem access (open(path)/Path.read_text() alone). So a read-only module can never satisfy SYS101 even though it genuinely touches the filesystem. Waived in design/graphite.strata pending an upstream fix (a read-only fs-read capability kind, or broadening fs-write's patterns to cover reads) -- see FROBLEMS.md.
 
 <!-- ticket:T-0019 -->
@@ -947,11 +963,19 @@ blocked_by: []
 parent: null
 scope:
 - design/graphite.strata
-evidence: []
+evidence:
+- tests/test_design_strata.py::test_strata_file_parses_without_sys004
 attachments: []
 acceptance: []
 threat: null
 ```
+## Done report
+
+Upstream landed as frob T-0305 (5504274): identifier-boundary napi
+matching with graphite's api.generated.ts as the verbatim regression
+fixture; the SYS100:ffi false positive can no longer fire and its
+waiver was already retired post-v0.6.0.
+
 frob sys audit SYS100 fires for node browser: capability ffi observed but not declared. Root cause: frontend/src/api/api.generated.ts and client.ts are OpenAPI-generated/OpenAPI-consuming TypeScript with zero real FFI (no node-ffi/ffi-napi/native addons anywhere) -- the vet capability scanner's typescript ffi pattern is a substring match for napi (node-ffi/ffi-napi detection), which also matches inside the plain word openapi (o-p-e-n-a-p-i contains napi). Confirmed by grep: every napi hit in these two files is inside openapi/OpenAPI text. Waived in design/graphite.strata (SYS100:ffi) rather than declaring a capability that does not exist -- see FROBLEMS.md. Upstream fix: word-boundary or negative-lookbehind the napi pattern so it does not match openapi.
 
 <!-- ticket:T-0020 -->
