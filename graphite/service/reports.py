@@ -3,16 +3,22 @@ book, audit index, and acceptance ledger, all parsed WITH regolith's
 own wheel model classes (never re-declared -- 04.2 dedup law / WO-G1
 hard rule). Every reader returns `Result[Model, ServiceError]`.
 
-Import paths used here (all public, no leading underscore -- verified
-against `tools/health/fleet.py`'s own posture, which never imports
-regolith's schema models but treats `--json` stdout as a raw dict;
-graphite goes one step further and validates with the real model
-classes since they ARE public):
+Import paths used here (WO-159 companion, T-0021, AD-44):
+`StagedBuildReport`, `BuildReport`, and `Lockfile`/`parse()` now come
+from `regolith.surface` -- the ONE sanctioned import surface for
+external UIs (lithos charter
+`docs/spec/toolchain/44-boundary-charter.md` sec. 4) -- never a direct
+`regolith.orchestrator.*` import. `regolith.backends.calc.CalcBook`/
+`AuditIndex` are NOT yet in the facade's sanctioned set (WO-159
+non-goals: no new read capability was added by that WO), so they
+remain a direct import here pending a reviewed facade-addition
+ticket -- named explicitly (`frob:waive FI-BACKENDS` below, with
+reason) rather than silently routed around the new forbidden-import
+policy.
 
-  regolith.orchestrator.orchestrate.StagedBuildReport / BuildReport
-  regolith.orchestrator.acceptance.AcceptanceOutcome
-  regolith.orchestrator.lockfile.Lockfile / parse()
-  regolith.backends.calc.CalcBook / AuditIndex
+  regolith.surface.StagedBuildReport / BuildReport
+  regolith.surface.Lockfile / parse_lockfile
+  regolith.backends.calc.CalcBook / AuditIndex (not yet in surface)
 
 On-disk shapes read (relative to a project root):
   .regolith/build/build_report.json   -> StagedBuildReport (a `build
@@ -40,10 +46,11 @@ import json
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, ValidationError
+
+# frob:waive FI-BACKENDS reason="CalcBook/AuditIndex are not yet in regolith.surface's sanctioned set (WO-159 non-goals: no new read capability added by that WO); escalated as a facade-addition ticket (T-0021 follow-up), not silently routed around the policy"
 from regolith.backends.calc import AuditIndex, CalcBook
-from regolith.orchestrator.lockfile import Lockfile
-from regolith.orchestrator.lockfile import parse as parse_lockfile
-from regolith.orchestrator.orchestrate import BuildReport, StagedBuildReport
+from regolith.surface import BuildReport, Lockfile, StagedBuildReport
+from regolith.surface import parse_lockfile as parse_lockfile
 from typani.result import Err, Ok, Result
 
 from graphite.logging_setup import get_logger

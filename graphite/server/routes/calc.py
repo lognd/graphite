@@ -4,6 +4,8 @@
 from __future__ import annotations
 
 from fastapi import APIRouter
+
+# frob:waive FI-BACKENDS reason="regolith.backends.calc (CalcSheet/AuditIndex) is not yet in regolith.surface's sanctioned set (WO-159 non-goals); out of WO-159/T-0021 scope (that migration named only reports.py/build.py), escalated as a facade-addition follow-up rather than silently exempted"
 from regolith.backends.calc import AuditIndex, CalcSheet
 
 from graphite.server.deps import project_root_path

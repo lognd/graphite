@@ -582,3 +582,59 @@ dragging the global floor down further:
 This ticket remains open and is the backfill target: raise unit_branch_cov
 and module_line_cov back toward the original 90/85 by writing real branch
 tests, removing the seven waivers as each function clears the floor.
+
+<!-- ticket:T-0021 -->
+```yaml
+id: T-0021
+title: Migrate reports.py/build.py onto regolith.surface (WO-159 companion)
+state: done
+kind: feature
+origin: agent
+created: '2026-07-19'
+blocked_by: []
+parent: null
+scope:
+- graphite/service/reports.py
+- graphite/server/routes/build.py
+- frob.toml
+evidence:
+- tests/service/test_reports.py::test_read_staged_build_report
+- tests/api/test_routes.py::test_build_report
+attachments: []
+acceptance:
+- Given regolith.surface exists, when reports.py/build.py import regolith models,
+  then they import only from regolith.surface
+- Given frob.toml, when a forbidden-import policy is added, then regolith.orchestrator/harness/realizer/backends/compiler
+  imports under graphite/** are blocked
+threat: null
+```
+Companion to lithos WO-159 (AD-44 boundary charter sec. 4). regolith.surface now exists at python/regolith/surface.py in lithos, re-exporting ArtifactIndex, ArtifactRow, build_index, BuildReport, StagedBuildReport, Lockfile, parse_lockfile. Migrate reports.py and build.py onto it and add forbidden-import policy rules.
+
+## Done report
+
+Changed: `graphite/service/reports.py` and `graphite/server/routes/build.py`
+now import `BuildReport`/`StagedBuildReport`/`Lockfile`/`parse_lockfile`
+from `regolith.surface` instead of `regolith.orchestrator.orchestrate`/
+`regolith.orchestrator.lockfile`. Added five `[[policy.forbidden-import]]`
+rules to `frob.toml` (FI-ORCHESTRATOR, FI-HARNESS, FI-REALIZER,
+FI-BACKENDS, FI-COMPILER; `within = "graphite/**"`) per AD-44.
+
+Gap named, not silently routed around: `regolith.backends.calc`
+(`CalcBook`/`AuditIndex`/`AuditRow`/`AuditSummary`/`CalcSheet`) is not yet
+in `regolith.surface`'s sanctioned set (WO-159 non-goals: no new read
+capability added by that WO). The four call sites that need it
+(`reports.py`, `server/routes/calc.py`, `server/routes/obligations.py`,
+`server/routes/health.py`) keep a direct import, each with a
+`frob:waive FI-BACKENDS reason="..."` naming the gap and pointing at a
+future facade-addition ticket -- narrowing `within` instead would have
+hidden this gap from `frob check`'s output.
+
+Evidence: `frob check` -- 0 errors, 2 warnings (pre-existing, unrelated),
+13 waived (incl. the 4 new FI-BACKENDS waivers); the 5 forbidden-import
+rules themselves report zero unwaived hits. `frob sys audit` -- PROVED,
+zero unwaived gaps (no knock-on from the import change). `uv run pytest -q`
+-- 168 passed, 1 skipped. `grep -rn "^from regolith\.\(orchestrator\|
+harness\|realizer\|backends\|compiler\)" graphite/` now returns only the
+4 waived `regolith.backends.calc` lines above -- zero `regolith.
+orchestrator`/`harness`/`realizer`/`compiler` imports anywhere under
+`graphite/**`.

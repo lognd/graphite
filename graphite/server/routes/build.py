@@ -3,13 +3,16 @@ staged build report (BOM/cost/schedule data lives inside it --
 `cost_profile`/`cost_record_pins`/`cost_estimates`/`frame_lock_rows`,
 read-mostly per charter sec. 3.2: graphite renders these reference
 pins/hashes verbatim, it never recomputes a cost total itself), the
-resolved lockfile, and the ship package manifest summary."""
+resolved lockfile, and the ship package manifest summary.
+
+`StagedBuildReport`/`Lockfile` import from `regolith.surface` (WO-159
+companion, T-0021, AD-44) -- the ONE sanctioned read surface, never a
+direct `regolith.orchestrator.*` import."""
 
 from __future__ import annotations
 
 from fastapi import APIRouter
-from regolith.orchestrator.lockfile import Lockfile
-from regolith.orchestrator.orchestrate import StagedBuildReport
+from regolith.surface import Lockfile, StagedBuildReport
 
 from graphite.server.deps import project_root_path
 from graphite.server.errors import raise_for_error

@@ -76,3 +76,49 @@ language = "python"
 command = ["uv", "run", "pytest", "-q", "{ids}"]
 all_command = ["uv", "run", "pytest", "-q"]
 cwd = "."
+
+# WO-159 companion (T-0021, AD-44): regolith.surface is the ONE
+# sanctioned import surface for external UIs (lithos charter
+# docs/spec/toolchain/44-boundary-charter.md sec. 4). These five rules
+# ban reaching past it into regolith's internal layers from anywhere
+# under graphite/**. regolith.backends still has pre-existing direct
+# imports (CalcBook/AuditIndex/AuditRow/AuditSummary/CalcSheet are not
+# yet in the facade's sanctioned set -- WO-159 non-goals: no new read
+# capability was added by that WO) -- each waived per-site with
+# `frob:waive FI-BACKENDS reason="..."` naming the facade-addition gap
+# explicitly rather than narrowing this rule's `within` glob to make
+# the gap invisible.
+[[policy.forbidden-import]]
+id = "FI-ORCHESTRATOR"
+kind = "forbidden-import"
+module = "regolith.orchestrator"
+within = "graphite/**"
+reason = "import regolith.surface instead (AD-44); regolith.orchestrator is an internal L2 module, not the sanctioned UI read surface"
+
+[[policy.forbidden-import]]
+id = "FI-HARNESS"
+kind = "forbidden-import"
+module = "regolith.harness"
+within = "graphite/**"
+reason = "regolith.harness (the solve/evidence engine) is never a UI dependency (AD-44); import regolith.surface for any read need"
+
+[[policy.forbidden-import]]
+id = "FI-REALIZER"
+kind = "forbidden-import"
+module = "regolith.realizer"
+within = "graphite/**"
+reason = "regolith.realizer is an internal L3 module, not the sanctioned UI read surface (AD-44); import regolith.surface instead"
+
+[[policy.forbidden-import]]
+id = "FI-BACKENDS"
+kind = "forbidden-import"
+module = "regolith.backends"
+within = "graphite/**"
+reason = "import regolith.surface instead (AD-44) for the D244 artifact index; other regolith.backends models not yet in the facade are a reviewed facade-addition, not a direct import -- see per-site frob:waive FI-BACKENDS comments for the named gaps"
+
+[[policy.forbidden-import]]
+id = "FI-COMPILER"
+kind = "forbidden-import"
+module = "regolith.compiler"
+within = "graphite/**"
+reason = "regolith.compiler is the AD-4 FFI door, never a UI dependency (AD-44); import regolith.surface for any read need"
