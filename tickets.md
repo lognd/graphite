@@ -901,7 +901,7 @@ frob sys audit LINT004 flags node service (may exec) and node core (may net) as 
 ```yaml
 id: T-0017
 title: 'frob design gap: no per-repo BenignCapability channel for THREAT002'
-state: queued
+state: done
 kind: bug
 origin: human
 created: '2026-07-18'
@@ -928,7 +928,7 @@ frob sys audit reports THREAT002 for browser's may html_render/client_storage un
 ```yaml
 id: T-0018
 title: 'frob design gap: vet capability scanner has no read-only fs signal'
-state: queued
+state: done
 kind: bug
 origin: human
 created: '2026-07-18'
@@ -955,7 +955,7 @@ frob sys audit SYS101 fires for node core: may fs is declared (graphite/artifact
 ```yaml
 id: T-0019
 title: 'frob design gap: ffi capability scanner false-positives on the word openapi'
-state: queued
+state: done
 kind: bug
 origin: human
 created: '2026-07-18'
