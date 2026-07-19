@@ -23,4 +23,28 @@ or any private (`regolith._*`) module. See `graphite.artifacts` /
 
 from __future__ import annotations
 
+from graphite.artifacts import (
+    SheetEntry,
+    find_drawings_dirs,
+    find_trace_files,
+    list_payload_files,
+    list_sheets,
+    read_json,
+)
+from graphite.cli import serve, tui
+from graphite.logging_setup import configure, get_logger
+
 __version__ = "0.2.0"
+
+__all__ = [
+    "SheetEntry",
+    "configure",
+    "find_drawings_dirs",
+    "find_trace_files",
+    "get_logger",
+    "list_payload_files",
+    "list_sheets",
+    "read_json",
+    "serve",
+    "tui",
+]
