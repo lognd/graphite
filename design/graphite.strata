@@ -111,8 +111,14 @@ node service : trusted {
     may "exec";
     // fs: reports.py, artifact_index.py, artifact_registry.py,
     // discovery.py, settings.py, runs.py all read (and runs/settings
-    // write) under the fleet root and ~/.graphite.
+    // write) under the fleet root and ~/.graphite. `fs` is kept
+    // (pre-split, backward-compatible umbrella) alongside the newer
+    // `fs-read` kind (T-0018 upstream: frob's vet scanner gained a
+    // real read-only fs signal, so SYS100 now sees genuine reads
+    // here -- reports.py/discovery.py are read-only, so `fs-read`
+    // is the honest, specific declaration for them).
     may "fs";
+    may "fs-read";
     // env: settings.py (GRAPHITE_HOME), runs.py (GRAPHITE_RUNS_HOME,
     // REGOLITH_LOG passthrough).
     may "env";
@@ -153,14 +159,14 @@ node core : trusted {
     // env: cli.py writes GRAPHITE_SCAN_ROOT; logging_setup.py reads
     // GRAPHITE_LOG.
     may "env";
-    // fs: artifacts.py reads artifact JSON files.
+    // fs: artifacts.py reads artifact JSON files. T-0018 upstream
+    // landed a real fs-read signal in frob's vet scanner (frob's own
+    // docs/strata/selfconform.md cites this exact node as its
+    // adoption case), so the `SYS101:fs`/`fs-write`-only waiver this
+    // node used to carry is now stale -- `fs-read` is declared
+    // directly instead and genuinely observed.
     may "fs";
-    // SYS101 (T-0018): artifacts.py genuinely reads files (Path.
-    // read_text/json.loads), but frob's vet capability scanner only has
-    // signal for fs-WRITE patterns -- there is no read-only fs kind, so
-    // a read-only module can never satisfy SYS101's observed side. See
-    // FROBLEMS.md.
-    waive "SYS101:fs" reason "vet scanner has no read-only fs signal, only fs-write (frob design gap)" ticket "T-0018";
+    may "fs-read";
     // LINT004 (T-0016, closed): net's real kill switch is the
     // GRAPHITE_OFFLINE env var, checked in `graphite.cli.serve` (its
     // one uvicorn-bind call site) via the shared `graphite.service.
@@ -178,8 +184,10 @@ node scripts : trusted {
     clearance Internal;
     code "scripts/**";
     // fs: all three scripts read/write build artifacts (openapi.json,
-    // frontend/dist).
+    // frontend/dist). check_openapi_drift.py is read-only (`fs-read`,
+    // T-0018 upstream signal); gen_openapi.py writes.
     may "fs";
+    may "fs-read";
 }
 
 // The regolith CLI + wheel: the external engineering toolchain graphite

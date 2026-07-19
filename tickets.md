@@ -579,7 +579,7 @@ existing, already-correct fix.
 ```yaml
 id: T-0011
 title: 'frob compliance: dedupe renamed 7-line block in tests/api/test_routes.py'
-state: queued
+state: done
 kind: bug
 origin: agent
 created: '2026-07-17'
@@ -587,11 +587,51 @@ blocked_by: []
 parent: null
 scope:
 - tests/api/test_routes.py
-evidence: []
+evidence:
+- tests/api/test_routes.py::test_scan_upload_refuses_bad_input[bad_extension]
+- tests/api/test_routes.py::test_scan_upload_refuses_bad_input[unsafe_name]
 attachments: []
 acceptance: []
 threat: null
 ```
+## Done report
+
+2026-07-19. Collapsed `test_scan_upload_refuses_bad_extension` and
+`test_scan_upload_refuses_unsafe_name` (a structurally-identical
+post + assert 422/invalid_input block, `frob dup` "Group 4 (renamed,
+6 lines)") into one `@pytest.mark.parametrize`-driven
+`test_scan_upload_refuses_bad_input`, rather than extracting a
+shared-assertion helper that still leaves a duplicated request-
+construction block behind (tried that first; `frob dup` still
+flagged the remaining 6-line block as a renamed duplicate).
+Parametrize IDs `bad_extension`/`unsafe_name` preserve both original
+test names as discoverable node ids.
+
+Also updated the 2 stale evidence references this rename broke:
+T-0014 and T-0015's `Done report`/`evidence:` both cited
+`tests/api/test_routes.py::test_scan_upload_refuses_bad_extension`,
+which `frob check`'s COV003 flagged as no-longer-resolving; retargeted
+both to `test_scan_upload_refuses_bad_input[bad_extension]`, the
+same underlying assertion.
+
+Separately (found while restoring the dev frob install after an
+accidental PyPI-release downgrade mid-session, see below): fixed 2
+real `design/graphite.strata` self-conformance gaps (SYS100, `fs-read`
+observed but not declared on `service`/`core`/`scripts`) that a
+just-landed upstream frob capability split (fs-read/fs-write, T-0018)
+now surfaces -- added `may "fs-read";` to those 3 nodes and dropped
+`core`'s now-stale `waive "SYS101:fs" ... ticket "T-0018"` (frob's
+own `docs/strata/selfconform.md` names this exact node as the
+feature's adoption case). This is unrelated to the T-0011 dedupe
+itself but was required to get back to a genuine (not
+degraded-native-extension-masked) `frob sys audit` PROVED state.
+
+Evidence: `frob dup` -- 4 groups -> 3 (the renamed block gone);
+`uv run pytest -q tests/api/test_routes.py` -> 38 passed;
+`uv run ty check --extra-search-path scripts .` -> "All checks
+passed!"; `frob sys audit` -> "self-conformance PROVED (3 waived) --
+zero UNWAIVED SYS gaps"; full `frob check` -> "0 errors, 0 warnings,
+4 waived".
 
 <!-- ticket:T-0012 -->
 ```yaml
@@ -668,7 +708,7 @@ parent: null
 scope:
 - design/** docs/spec/05-strata-system-model.md frob.toml
 evidence:
-- tests/api/test_routes.py::test_scan_upload_refuses_bad_extension
+- tests/api/test_routes.py::test_scan_upload_refuses_bad_input[bad_extension]
 attachments: []
 acceptance:
 - given the committed design/graphite.strata, when frob sys audit runs, then it exits
@@ -700,7 +740,7 @@ blocked_by: []
 parent: null
 scope: []
 evidence:
-- tests/api/test_routes.py::test_scan_upload_refuses_bad_extension
+- tests/api/test_routes.py::test_scan_upload_refuses_bad_input[bad_extension]
 attachments: []
 acceptance: []
 threat: tampering
@@ -714,8 +754,14 @@ Changed: graphite/server/app.py -- `frob:boundary b_server_validate`
 bound at create_app (the site where every pydantic-validated router is
 mounted), commit 344370c. Evidence: frob check no longer reports SYS002
 for b_server_validate; the attached pytest id
-(test_scan_upload_refuses_bad_extension) exercises the endorsement
-contract end to end (foreign input rejected at the boundary).
+(test_scan_upload_refuses_bad_input[bad_extension]) exercises the
+endorsement contract end to end (foreign input rejected at the
+boundary).
+
+Evidence id updated 2026-07-19 (T-0011): the original
+`test_scan_upload_refuses_bad_extension` was collapsed into a single
+parametrized `test_scan_upload_refuses_bad_input`, retargeted here to
+its `[bad_extension]` case, same underlying assertion.
 
 <!-- ticket:T-0016 -->
 ```yaml

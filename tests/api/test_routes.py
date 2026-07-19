@@ -9,6 +9,7 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from httpx import Response
 
 from graphite.server.app import create_app
 from tests.api.conftest import PROJECT_NAME
@@ -430,21 +431,40 @@ def test_scan_upload_stores_and_hashes(api_client: TestClient) -> None:
     assert body["size"] == len(b"fake-png-bytes")
 
 
-def test_scan_upload_refuses_bad_extension(api_client: TestClient) -> None:
-    resp = api_client.post(
+# T-0011: collapsed two verbatim-identical (save for literals) post +
+# 422/invalid_input-refusal cases into one parametrized test, rather than
+# leaving a structurally duplicated request/assert block behind.
+# frob:ticket T-0011
+@pytest.mark.parametrize(
+    ("name", "filename", "content", "content_type"),
+    [
+        pytest.param(
+            "gasket_top",
+            "gasket_top.exe",
+            b"nope",
+            "application/octet-stream",
+            id="bad_extension",
+        ),
+        pytest.param(
+            "../../etc/passwd",
+            "scan.png",
+            b"bytes",
+            "image/png",
+            id="unsafe_name",
+        ),
+    ],
+)
+def test_scan_upload_refuses_bad_input(
+    api_client: TestClient,
+    name: str,
+    filename: str,
+    content: bytes,
+    content_type: str,
+) -> None:
+    resp: Response = api_client.post(
         f"/api/projects/{PROJECT_NAME}/scans",
-        data={"name": "gasket_top"},
-        files={"file": ("gasket_top.exe", b"nope", "application/octet-stream")},
-    )
-    assert resp.status_code == 422
-    assert resp.json()["detail"]["kind"] == "invalid_input"
-
-
-def test_scan_upload_refuses_unsafe_name(api_client: TestClient) -> None:
-    resp = api_client.post(
-        f"/api/projects/{PROJECT_NAME}/scans",
-        data={"name": "../../etc/passwd"},
-        files={"file": ("scan.png", b"bytes", "image/png")},
+        data={"name": name},
+        files={"file": (filename, content, content_type)},
     )
     assert resp.status_code == 422
     assert resp.json()["detail"]["kind"] == "invalid_input"
