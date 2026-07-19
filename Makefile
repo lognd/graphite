@@ -1,4 +1,4 @@
-.PHONY: install test lint format typecheck openapi openapi-check \
+.PHONY: install test coverage lint format typecheck openapi openapi-check \
         frontend-install frontend-api-gen frontend-api-check \
         frontend-check frontend-test frontend-system-test \
         backend-check check clean build size-check screenshots
@@ -11,6 +11,10 @@ install: ## uv sync (editable path dep on ../lithos regolith wheel)
 
 test: ## graphite's pytest suite (fixture-only; add --run-integration for ../lithos)
 	$(UV) run pytest
+
+coverage: ## pytest with coverage.xml, then stamp frob's TEST006 freshness gate
+	$(UV) run pytest --cov=graphite --cov=scripts --cov-report=xml
+	frob check --stamp-coverage
 
 lint: ## ruff check
 	$(UV) run ruff check graphite tests scripts
