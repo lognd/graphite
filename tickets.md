@@ -146,6 +146,17 @@ case `api.generated.ts` in frob.toml's graph.exclude, which is outside
 this campaign's scope (touches frob.toml policy, not doc coverage
 itself). Leaving T-0006 in-progress rather than force-closing.
 
+## Progress notes (2026-07-18)
+
+Fixed all 27 DOC002 (dangling-anchor) findings, distinct from this
+ticket's COV001 (missing-edge) scope but the same doc-coverage family:
+every one was the identical typo in `frontend/src/api/client.ts`'s
+`frob:doc` comments -- `docs/spec/02-architecture.md
+#2-the-one-schema-source-chain` (truncated) instead of the real
+computed slug `#2-the-one-schema-source-chain-the-dedup-laws-backbone`.
+One `sed` pass over the one file fixed all 27. DOC002: 27 -> 0.
+`frob check` (all stages) now passes clean end to end.
+
 Commits: 371850b, 40ef680, 3bb71f6, 5841416, 9523b45, c9c75c3
 (docs(*): bind frob:doc anchors for tui / service+server+scripts /
 frontend-components / frontend-api / frontend-routes), plus a direct
@@ -212,6 +223,26 @@ frob:tests for tui / service+server+scripts / frontend-routes /
 frontend-api / frontend-components), all with matching real test
 coverage. Leaving T-0007 in-progress rather than force-closing.
 
+## Progress notes (2026-07-18)
+
+Closed the remaining 2 python-side TEST003 findings this ticket's scope
+covers: added `tests/scripts/test_check_bundle_size.py::
+test_script_runs_as_a_real_cli_process_against_repo_static_assets`
+(kind="integration" for interface `scripts`, a real subprocess
+invocation of `scripts/check_bundle_size.py`, not the in-process
+`main()` calls the existing unit tests use) and `tests/
+test_design_strata.py::test_strata_file_parses_without_sys004`
+(kind="integration" for interface `design`, runs `frob sys audit` on
+the committed `design/graphite.strata` as a real subprocess). TEST003
+python-side: 2 -> 0 (`design`, `scripts`). Also resolved T-0012 (see
+its own Done report), which cleared TEST006. TEST003's frontend-side
+8 findings (`frontend/src/{App.tsx,api,app,components,lib,mocks,
+routes,tokens}`) are untouched -- still need the Playwright/vitest
+integration-test decision this ticket's 2026-07-17 note already
+flagged. TEST002 (87, essentially all frontend) is T-0013's scope, not
+touched here. Leaving T-0007 in-progress; TEST003 frontend + TEST002
+remain.
+
 <!-- ticket:T-0008 -->
 ```yaml
 id: T-0008
@@ -236,7 +267,7 @@ threat: null
 id: T-0009
 title: 'frob compliance: fix frob-arch findings (long-function/large-file/abstraction,
   20) and PERF001/003/004 (20)'
-state: queued
+state: in-progress
 kind: bug
 origin: agent
 created: '2026-07-17'
@@ -249,6 +280,32 @@ attachments: []
 acceptance: []
 threat: null
 ```
+## Progress notes (2026-07-18)
+
+Investigated all 4 PERF004 findings (graphite/service/runs.py::
+list_runs, graphite/service/discovery.py::scan_projects, graphite/
+service/artifact_index.py::load_index, tests/test_import_boundary.py::
+test_orchestrator_imports_limited_to_report_models). All 4 are false
+positives: the flagged `sort()`/`sorted()` call in each case executes
+exactly ONCE per function call, after the loop that builds the list it
+sorts (or, in the test, inside an assert message never touched per
+loop iteration) -- not per-iteration inside the loop body. Confirmed
+this is a known detector limitation by checking frob's own source
+tree: `src/frob/vet/_containment.py`, `src/frob/strata/_policy.py`,
+`src/frob/testing/_collect.py`, and `src/frob/strata/_lint.py`/
+`_pii.py` all waive the identical pattern with the identical reasoning
+("one sort ... not per-iteration"). Waived all 4 with `frob:waive
+PERF004 reason="..."` above each site, matching frob's own convention.
+PERF004: 4 -> 0 (waived).
+
+The arch findings this ticket also covers (frob-arch: 8 warnings, 13
+suggestions -- long-function/large-file/abstraction-opportunity) are
+untouched; `frob-arch` diagnostics bypass the gates/waiver channel
+entirely (`docs/modules/gates.md#waive-boundary-t-0101`: frob-arch
+calls `analyze_project` directly, its findings are never `Violation`s
+and cannot be waived), so they need real refactoring, not waiving --
+out of scope for this pass. Leaving T-0009 in-progress; arch findings
+remain.
 
 <!-- ticket:T-0010 -->
 ```yaml
@@ -290,7 +347,7 @@ threat: null
 ```yaml
 id: T-0012
 title: 'frob compliance: add pytest-cov dependency to unblock TEST006 coverage stamp'
-state: queued
+state: done
 kind: bug
 origin: agent
 created: '2026-07-17'
@@ -298,11 +355,24 @@ blocked_by: []
 parent: null
 scope:
 - pyproject.toml,Makefile
-evidence: []
+evidence:
+- tests/test_gen_openapi.py::test_main_writes_openapi_json
 attachments: []
 acceptance: []
 threat: null
 ```
+## Done report
+
+Added `pytest-cov` to `[dependency-groups].dev` in pyproject.toml and a
+new `make coverage` target (`uv run pytest --cov=graphite --cov=scripts
+--cov-report=xml` then `frob check --stamp-coverage`). `uv sync` picked
+up `pytest-cov==7.1.0`/`coverage==7.15.2`; `make coverage` ran clean
+(168 passed, 1 skipped) and wrote `coverage.xml`, and `frob check
+--stamp-coverage` stamped 518 files. TEST006 ("no coverage stamp
+found") is gone from `frob check --only gates`. Follow-on debt this
+unblocked (47 TEST005 branch-coverage findings, now visible for the
+first time) is tracked separately as T-0020, not part of this ticket's
+scope.
 
 <!-- ticket:T-0013 -->
 ```yaml
@@ -384,3 +454,99 @@ mounted), commit 344370c. Evidence: frob check no longer reports SYS002
 for b_server_validate; the attached pytest id
 (test_scan_upload_refuses_bad_extension) exercises the endorsement
 contract end to end (foreign input rejected at the boundary).
+
+<!-- ticket:T-0016 -->
+```yaml
+id: T-0016
+title: Add real kill switch for service exec / core net capabilities
+state: queued
+kind: feature
+origin: human
+created: '2026-07-18'
+blocked_by: []
+parent: null
+scope:
+- graphite/service/,graphite/cli.py
+evidence: []
+attachments: []
+acceptance: []
+threat: null
+```
+frob sys audit LINT004 flags node service (may exec) and node core (may net) as risky capabilities with no declared attr flag=<id> kill-switch. No such feature-flag mechanism exists in graphite today. Waived in design/graphite.strata pending this ticket (frob's own design/frob.strata documents the identical waive-not-fabricate pattern for LINT004). Scope: add a real config-backed kill switch (e.g. GRAPHITE_DISABLE_RUNS / GRAPHITE_DISABLE_EXEC env var or settings key) that routes/runs.py and service/config_cli.py check before spawning a regolith subprocess, and a matching one for core's uvicorn net bind if a real disable path is wanted; then declare attr flag=<id> on the strata nodes and drop the waivers.
+
+<!-- ticket:T-0017 -->
+```yaml
+id: T-0017
+title: 'frob design gap: no per-repo BenignCapability channel for THREAT002'
+state: queued
+kind: bug
+origin: human
+created: '2026-07-18'
+blocked_by: []
+parent: null
+scope:
+- design/graphite.strata
+evidence: []
+attachments: []
+acceptance: []
+threat: null
+```
+frob sys audit reports THREAT002 for browser's may html_render/client_storage under the quality views (web-performance-baseline, reliability-baseline, web-quality-security-baseline): these capability kinds have no QUALITY_CATALOG sink entry. The only excuse mechanism, BenignCapability, is a Python-side tuple (DEFAULT_BENIGN_CAPABILITIES in frob's own src/frob/strata/_threat.py) with no .strata-level surface syntax to add a per-repo entry -- graphite cannot express this excuse without patching frob itself, which is out of bounds for a consuming repo. Waived in design/graphite.strata via frob:waive THREAT002 at the finding site pending an upstream fix; see FROBLEMS.md. Ask upstream (frob repo) for either a .strata-level benign-capability declaration or a documented per-repo BenignCapability extension point.
+
+<!-- ticket:T-0018 -->
+```yaml
+id: T-0018
+title: 'frob design gap: vet capability scanner has no read-only fs signal'
+state: queued
+kind: bug
+origin: human
+created: '2026-07-18'
+blocked_by: []
+parent: null
+scope:
+- design/graphite.strata
+evidence: []
+attachments: []
+acceptance: []
+threat: null
+```
+frob sys audit SYS101 fires for node core: may fs is declared (graphite/artifacts.py does real filesystem reads via Path.read_text/json.loads) but never observed. Root cause: frob's vet capability scanner (_capability_registry.py) only pattern-matches fs-WRITE operations into the fs-write kind (normalized to fs for SYS101's observed side); it has no signal at all for read-only filesystem access (open(path)/Path.read_text() alone). So a read-only module can never satisfy SYS101 even though it genuinely touches the filesystem. Waived in design/graphite.strata pending an upstream fix (a read-only fs-read capability kind, or broadening fs-write's patterns to cover reads) -- see FROBLEMS.md.
+
+<!-- ticket:T-0019 -->
+```yaml
+id: T-0019
+title: 'frob design gap: ffi capability scanner false-positives on the word openapi'
+state: queued
+kind: bug
+origin: human
+created: '2026-07-18'
+blocked_by: []
+parent: null
+scope:
+- design/graphite.strata
+evidence: []
+attachments: []
+acceptance: []
+threat: null
+```
+frob sys audit SYS100 fires for node browser: capability ffi observed but not declared. Root cause: frontend/src/api/api.generated.ts and client.ts are OpenAPI-generated/OpenAPI-consuming TypeScript with zero real FFI (no node-ffi/ffi-napi/native addons anywhere) -- the vet capability scanner's typescript ffi pattern is a substring match for napi (node-ffi/ffi-napi detection), which also matches inside the plain word openapi (o-p-e-n-a-p-i contains napi). Confirmed by grep: every napi hit in these two files is inside openapi/OpenAPI text. Waived in design/graphite.strata (SYS100:ffi) rather than declaring a capability that does not exist -- see FROBLEMS.md. Upstream fix: word-boundary or negative-lookbehind the napi pattern so it does not match openapi.
+
+<!-- ticket:T-0020 -->
+```yaml
+id: T-0020
+title: Backfill branch-coverage tests for TEST005 findings (47, unlocked by first
+  coverage stamp)
+state: queued
+kind: bug
+origin: human
+created: '2026-07-18'
+blocked_by: []
+parent: null
+scope:
+- graphite/
+evidence: []
+attachments: []
+acceptance: []
+threat: null
+```
+make coverage (T-0012) produced the repo's first coverage.xml, which unlocked TEST005 (unit_branch_cov=90% threshold) checks that were previously silently skipped (no coverage.xml existed). 47 functions across graphite/ are below the 90% branch-coverage threshold (e.g. graphite/artifacts.py::find_drawings_dirs 80%, graphite/service/config_cli.py::doctor 55.6%). TEST005 is warn severity (frob.toml [gates.severity]) so it does not block frob check today, but is real, honest test debt now visible for the first time. Add branch-covering test cases for each flagged function; re-run make coverage after each batch to confirm the finding clears.
