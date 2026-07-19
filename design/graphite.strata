@@ -54,7 +54,6 @@ node browser : foreign {
     // codegen text, not real FFI (no node-ffi/napi/native addon anywhere
     // in this frontend). Declaring `may "ffi"` would claim a capability
     // that does not exist.
-    waive "SYS100:ffi" reason "napi substring false-positive on the word openapi, not real FFI" ticket "T-0019";
     // THREAT002 (T-0017): html_render/client_storage have no
     // QUALITY_CATALOG sink entry, and frob's only excuse mechanism
     // (BenignCapability) is a Python-side tuple in frob's OWN source
