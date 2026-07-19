@@ -756,3 +756,25 @@ harness\|realizer\|backends\|compiler\)" graphite/` now returns only the
 4 waived `regolith.backends.calc` lines above -- zero `regolith.
 orchestrator`/`harness`/`realizer`/`compiler` imports anywhere under
 `graphite/**`.
+
+<!-- ticket:T-0022 -->
+```yaml
+id: T-0022
+title: 'TEST005 backfill wave 2: settings + tui screens + route tails to 75 percent'
+state: in-progress
+kind: feature
+origin: agent
+created: '2026-07-19'
+blocked_by: []
+parent: null
+scope:
+- graphite/service/**
+- graphite/tui/**
+- graphite/server/**
+- tests/**
+- frob.toml
+evidence: []
+attachments: []
+acceptance: []
+threat: null
+```

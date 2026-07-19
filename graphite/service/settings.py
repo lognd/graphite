@@ -25,11 +25,14 @@ _log = get_logger(__name__)
 
 RunVerbosity = Literal["quiet", "normal", "verbose"]
 
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 DEFAULT_RUN_VERBOSITY: RunVerbosity = "normal"
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 DEFAULT_PROJECT_ROOT = ""
 # WO-G8 (closes WOG5-F3): run records/logs under GRAPHITE_RUNS_HOME used
 # to grow without bound; each new run now prunes history down to this
 # many newest FINISHED records (0 = keep everything, the old behavior).
+# frob:doc docs/spec/02-architecture.md#14-service-layer-modules
 DEFAULT_RUN_HISTORY_LIMIT = 200
 
 _SETTINGS_FILENAME = "settings.json"
@@ -64,6 +67,7 @@ def _settings_path() -> Path:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
+# frob:waive TEST005 reason="measured 60.0% branch on 2026-07-19 after floors rose to 75; outside the T-0020 backfill surface; backfill T-0022"
 def get_settings() -> Result[GraphiteSettings, ServiceError]:
     """The current settings, or the recorded defaults when no settings
     file has been written yet (first run)."""
@@ -94,6 +98,7 @@ def get_settings() -> Result[GraphiteSettings, ServiceError]:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
+# frob:waive TEST005 reason="measured 70.0% branch on 2026-07-19 after floors rose to 75; outside the T-0020 backfill surface; backfill T-0022"
 def set_settings(settings: GraphiteSettings) -> Result[GraphiteSettings, ServiceError]:
     """Overwrite the whole settings file (the settings shape is small
     enough that a whole-document PUT, not per-key PATCH, is the
