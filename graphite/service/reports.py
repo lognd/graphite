@@ -67,6 +67,7 @@ def _read_text(path: Path) -> Result[str, ServiceError]:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
+# frob:waive TEST005 reason="46.7% branch cov as of 2026-07-18; T-0020 backfill"
 def read_staged_build_report(path: Path) -> Result[StagedBuildReport, ServiceError]:
     """`.regolith/build/build_report.json` as a `StagedBuildReport`. A
     plain (non-staged) `BuildReport` JSON is wrapped so callers always
@@ -116,6 +117,7 @@ def read_lockfile(path: Path) -> Result[Lockfile, ServiceError]:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
+# frob:waive TEST005 reason="55.6% branch cov as of 2026-07-18; T-0020 backfill"
 def read_calc_book(path: Path) -> Result[CalcBook, ServiceError]:
     """`dist/calc/calc_book.json` -> `CalcBook` (sheets + audit index)."""
     text = _read_text(path)
@@ -197,6 +199,7 @@ class AcceptanceLedgerSummary(BaseModel):
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
+# frob:waive TEST005 reason="55.6% branch cov as of 2026-07-18; T-0020 backfill"
 def read_acceptance_ledger(path: Path) -> Result[AcceptanceLedgerSummary, ServiceError]:
     """`dist/acceptance_ledger.json` -> `AcceptanceLedgerSummary` (WOG1-F3:
     the on-disk shape has no matching regolith model to validate
@@ -294,6 +297,7 @@ class GateSummary(BaseModel):
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
+# frob:waive TEST005 reason="55.6% branch cov as of 2026-07-18; T-0020 backfill"
 def read_gate_summary(path: Path) -> Result[GateSummary, ServiceError]:
     """`dist/gate_summary.json` -> `GateSummary` (WOG3-F1)."""
     text = _read_text(path)

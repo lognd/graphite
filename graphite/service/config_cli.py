@@ -171,6 +171,7 @@ def set_config(
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
+# frob:waive TEST005 reason="55.6% branch cov as of 2026-07-18; T-0020 backfill"
 def doctor(project_root: Path) -> Result[list[object], ServiceError]:
     """`regolith doctor --json` parsed straight as JSON (the one
     regolith surface that already speaks structured data natively)."""

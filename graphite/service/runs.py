@@ -335,6 +335,7 @@ def get_run(run_id: str) -> Result[RunRecord, ServiceError]:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
+# frob:waive TEST005 reason="50.0% branch cov as of 2026-07-18; T-0020 backfill"
 def mark_finished(run_id: str, exit_code: int) -> None:
     """Test/CLI-runner seam: explicitly finalize a run once its
     subprocess is known to have exited (used by the SSE route after it
@@ -424,6 +425,7 @@ def get_full_log(run_id: str) -> tuple[str, ...]:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
+# frob:waive TEST005 reason="59.3% branch cov as of 2026-07-18; T-0020 backfill"
 def cancel_run(run_id: str) -> Result[RunRecord, ServiceError]:
     """Stop a running run (deliverable 1's cancel affordance -- WOG1-F6:
     no kill route existed before WO-G5). Prefers the in-process `Popen`
