@@ -57,14 +57,11 @@ def _track_of(json_path: Path) -> str:
     return str(track) if isinstance(track, str) else "unknown"
 
 
-# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
-def list_sheets(drawings_dir: Path) -> tuple[SheetEntry, ...]:
-    """Every `<subject>.drawing.*` sibling set under `drawings_dir`,
-    subject-sorted. Absent directory -> empty tuple (not an error: a fresh
-    project has no ship output yet)."""
-    if not drawings_dir.is_dir():
-        _log.info("artifacts: no drawings directory at %s", drawings_dir)
-        return ()
+# frob:ticket T-0009
+def _group_sheet_siblings(drawings_dir: Path) -> dict[str, dict[str, Path]]:
+    """Group `drawings_dir`'s `<subject>.drawing.*`/`.explain.txt` siblings
+    by subject (T-0009: extracted from `list_sheets` to clear its
+    long-function advisory finding -- pure grouping, no behavior change)."""
     subjects: dict[str, dict[str, Path]] = {}
     for entry in drawings_dir.iterdir():
         name = entry.name
@@ -79,6 +76,19 @@ def list_sheets(drawings_dir: Path) -> tuple[SheetEntry, ...]:
             subjects.setdefault(name[: -len(".drawing.pdf")], {})["pdf"] = entry
         elif name.endswith(".explain.txt"):
             subjects.setdefault(name[: -len(".explain.txt")], {})["explain"] = entry
+    return subjects
+
+
+# frob:doc docs/spec/02-architecture.md#10-artifact-registry-and-schema-index
+# frob:ticket T-0009
+def list_sheets(drawings_dir: Path) -> tuple[SheetEntry, ...]:
+    """Every `<subject>.drawing.*` sibling set under `drawings_dir`,
+    subject-sorted. Absent directory -> empty tuple (not an error: a fresh
+    project has no ship output yet)."""
+    if not drawings_dir.is_dir():
+        _log.info("artifacts: no drawings directory at %s", drawings_dir)
+        return ()
+    subjects = _group_sheet_siblings(drawings_dir)
 
     sheets: list[SheetEntry] = []
     for subject in sorted(subjects):

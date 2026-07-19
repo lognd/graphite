@@ -64,8 +64,27 @@ class _SpaStaticFiles(StaticFiles):
         return response
 
 
+# frob:ticket T-0009
+def _mount_static_or_note_api_only(app: FastAPI) -> None:
+    """Mount the bundled frontend if present, else log API-only mode
+    (T-0009: extracted from `create_app` to clear its long-function
+    advisory finding -- pure side effect, no behavior change). Mounted
+    LAST so every /api route (and /api 404s -- the guard in
+    `_SpaStaticFiles` keeps them JSON, never index.html) wins first."""
+    if _STATIC_DIR.is_dir():
+        app.mount("/", _SpaStaticFiles(directory=_STATIC_DIR, html=True), name="static")
+        _log.info("server: serving bundled frontend from %s", _STATIC_DIR)
+    else:
+        _log.info(
+            "server: no bundled frontend at %s (API-only mode -- run "
+            "`make build` or install the wheel for the full app)",
+            _STATIC_DIR,
+        )
+
+
 # frob:doc docs/spec/02-architecture.md#11-server-app-dependencies-and-error-mapping
 # frob:boundary b_server_validate
+# frob:ticket T-0009
 def create_app() -> FastAPI:
     """Build the FastAPI app: every router under `/api`, CORS left OFF
     (localhost-only, single-origin -- charter sec. 3.1, no cross-origin
@@ -93,17 +112,7 @@ def create_app() -> FastAPI:
         `/api/projects/{project}/health` for that)."""
         return {"status": "ok"}
 
-    if _STATIC_DIR.is_dir():
-        # Mounted LAST so every /api route (and /api 404s -- the guard in
-        # _SpaStaticFiles keeps them JSON, never index.html) wins first.
-        app.mount("/", _SpaStaticFiles(directory=_STATIC_DIR, html=True), name="static")
-        _log.info("server: serving bundled frontend from %s", _STATIC_DIR)
-    else:
-        _log.info(
-            "server: no bundled frontend at %s (API-only mode -- run "
-            "`make build` or install the wheel for the full app)",
-            _STATIC_DIR,
-        )
+    _mount_static_or_note_api_only(app)
 
     _log.info("server: app assembled, %d route(s)", len(app.routes))
     return app

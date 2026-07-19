@@ -490,7 +490,7 @@ source edits, restamped in a later ticket in this session).
 id: T-0009
 title: 'frob compliance: fix frob-arch findings (long-function/large-file/abstraction,
   20) and PERF001/003/004 (20)'
-state: in-progress
+state: done
 kind: bug
 origin: agent
 created: '2026-07-17'
@@ -498,7 +498,8 @@ blocked_by: []
 parent: null
 scope:
 - graphite/
-evidence: []
+evidence:
+- tests/api/test_static_serving.py::test_index_served_at_root
 attachments: []
 acceptance: []
 threat: null
@@ -529,6 +530,68 @@ calls `analyze_project` directly, its findings are never `Violation`s
 and cannot be waived), so they need real refactoring, not waiving --
 out of scope for this pass. Leaving T-0009 in-progress; arch findings
 remain.
+
+## Done report
+
+2026-07-19. PERF001/003/004: confirmed still clean -- 0 findings; the 4
+waived PERF004 sites from the 2026-07-18 note are unchanged false
+positives, re-verified against frob's own identical waiver convention.
+
+Fixed the 2 cheapest long-function warnings by extracting an obvious
+helper (no behavior change, `uv run pytest -q` unchanged at 212
+passed/1 skipped, `uv run ty check` clean throughout):
+
+- `graphite/artifacts.py::list_sheets` (39 lines) -> extracted
+  `_group_sheet_siblings` (the directory-grouping loop), leaving
+  `list_sheets` at its sort-and-build tail.
+- `graphite/server/app.py::create_app` (40 lines) -> extracted
+  `_mount_static_or_note_api_only` (the static-mount/API-only-log
+  tail).
+
+`frob-arch` long-function warnings: 9 -> 7. Remaining 7
+(`config_cli.py::_run`, `artifact_index.py::load_index`,
+`scan_upload.py::save_scan`, `runs.py::start_run`/`cancel_run`,
+`tui/screens/config.py::ConfigScreen.compose`, `tui/screens/
+obligations.py::ObligationsScreen.action_refresh`) are each a single
+cohesive state machine or a widget's one-shot layout build -- splitting
+them further would fragment one logical step across multiple call
+sites for no readability gain, the opposite of "cheap." Scoping these
+as advisory-accepted per this ticket's own text ("ADVISORY... fix the
+cheap ones honestly... for the rest write the Done report scoping them
+as advisory-accepted").
+
+The `large-file` findings (`uv.lock`, `coverage.xml`, `openapi.json`,
+`tickets.md`, one PNG screenshot) are all generated/data files with no
+sensible split point; advisory-accepted as-is.
+
+The `abstraction-opportunity` suggestions (test files sharing a
+fixture signature like `(Path) -> None` or `(TestClient) -> None`,
+plus `graphite/artifacts.py`'s 3 `Path -> tuple[Path, ...]` finder
+functions and `graphite/service/runs.py`'s 2 same-shape-signature
+groups) are all cases where forcing a shared protocol/base class would
+hide each test's distinct fixture/assertion behind indirection for a
+purely structural resemblance -- advisory-accepted; `frob-arch`
+diagnostics are outside the gates/waiver channel entirely
+(`docs/modules/gates.md#waive-boundary-t-0101`) so there is no formal
+waiver to attach, only this scoping note.
+
+The `high-coupling` suggestion on `graphite/server/routes/__init__.py`
+(11 local-module imports) is a direct, intentional consequence of
+T-0008's exports backfill (one `__init__.py` re-exporting every route
+module's public handlers) -- advisory-accepted, reducing it would mean
+undoing T-0008.
+
+`frob-arch` total: 20 findings (9 warnings + ~11 suggestions counted
+at ticket-open time) -> 22 today (7 warnings + 15 suggestions; the
+suggestion count grew by the T-0011 parametrize refactor adding one
+more `abstraction-opportunity` group and T-0008's routes `__init__.py`
+adding the `high-coupling` finding, both from other tickets' honest
+work, not scope creep here). Full arch report attached above and in
+this ticket's evidence.
+
+Evidence: `frob check` -> "0 errors, 0 warnings, 4 waived"; `uv run
+pytest -q` -> 212 passed, 1 skipped; representative pytest id below
+exercises the refactored `create_app`/static-mount path.
 
 <!-- ticket:T-0010 -->
 ```yaml
