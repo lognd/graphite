@@ -86,3 +86,7 @@ tests/              pytest (service/API/TUI) + the committed fixture project
 The screenshots above regenerate with `make screenshots` (real
 Playwright captures of the app over the committed fixture, never
 mockups).
+
+## License
+
+GNU General Public License v2.0 only (GPL-2.0-only); see [LICENSE](LICENSE).
