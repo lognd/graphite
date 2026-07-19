@@ -47,6 +47,21 @@ node browser : foreign {
     // text from the server) and FileRenderer.tsx:70 (sanitizeSvg-wrapped
     // SVG text). See the CWE-79 assume below for the honest risk note.
     may "html_render";
+    // SYS100 false positive (T-0019): the vet scanner's typescript ffi
+    // pattern is a bare substring match for "napi" (node-ffi/ffi-napi
+    // detection) that also matches inside the plain word "openapi" --
+    // every hit in api.generated.ts/client.ts is openapi-typescript
+    // codegen text, not real FFI (no node-ffi/napi/native addon anywhere
+    // in this frontend). Declaring `may "ffi"` would claim a capability
+    // that does not exist.
+    waive "SYS100:ffi" reason "napi substring false-positive on the word openapi, not real FFI" ticket "T-0019";
+    // THREAT002 (T-0017): html_render/client_storage have no
+    // QUALITY_CATALOG sink entry, and frob's only excuse mechanism
+    // (BenignCapability) is a Python-side tuple in frob's OWN source
+    // with no .strata-level surface syntax for a per-repo entry -- see
+    // FROBLEMS.md.
+    waive "THREAT002:html_render" reason "no QUALITY_CATALOG mapping; BenignCapability has no per-repo .strata channel (frob design gap)" ticket "T-0017";
+    waive "THREAT002:client_storage" reason "no QUALITY_CATALOG mapping; BenignCapability has no per-repo .strata channel (frob design gap)" ticket "T-0017";
 }
 
 // The FastAPI app: graphite/server/** (app.py, deps.py, errors.py,
@@ -56,7 +71,17 @@ node browser : foreign {
 // frob:ticket T-0014
 node server : trusted {
     clearance Internal;
-    code "graphite/server/**";
+    // Deliberately NOT "graphite/server/**": that glob would also match
+    // graphite/server/static/** (the bundled frontend SPA output, vite's
+    // build artifact -- gitignored, [graph].exclude-d in frob.toml, but
+    // frob sys audit's self-conformance code-binding walks the raw
+    // filesystem and does not consult [graph].exclude, so a broad glob
+    // here would misattribute the BROWSER's fetch_url/html_render/
+    // client_storage capabilities to this node just because its build
+    // output happens to be hosted under the same directory it is served
+    // from -- see FROBLEMS.md (frob design gap: self-conform code-
+    // binding vs. [graph].exclude).
+    code "graphite/server/*.py" "graphite/server/routes/**";
     // env: deps.py reads GRAPHITE_SCAN_ROOT for the fleet root.
     // NOTE deliberately no `may "fs"`: routes delegate every disk write
     // to the service layer (scan uploads land via service/scan_upload.py;
@@ -84,6 +109,12 @@ node service : trusted {
     // env: settings.py (GRAPHITE_HOME), runs.py (GRAPHITE_RUNS_HOME,
     // REGOLITH_LOG passthrough).
     may "env";
+    // LINT004: exec is risky and genuinely has no kill switch in the
+    // codebase today -- rather than fabricate a flag=<id> attr naming a
+    // mechanism that does not exist (frob's own design/frob.strata
+    // documents this exact waive-not-fabricate pattern), waived pending
+    // T-0016.
+    waive "LINT004" reason "no real kill switch around regolith subprocess spawning yet" ticket "T-0016";
 }
 
 // The textual TUI: graphite/tui/**. Imports service functions directly
@@ -115,6 +146,16 @@ node core : trusted {
     may "env";
     // fs: artifacts.py reads artifact JSON files.
     may "fs";
+    // SYS101 (T-0018): artifacts.py genuinely reads files (Path.
+    // read_text/json.loads), but frob's vet capability scanner only has
+    // signal for fs-WRITE patterns -- there is no read-only fs kind, so
+    // a read-only module can never satisfy SYS101's observed side. See
+    // FROBLEMS.md.
+    waive "SYS101:fs" reason "vet scanner has no read-only fs signal, only fs-write (frob design gap)" ticket "T-0018";
+    // LINT004: net (the localhost uvicorn bind) is risky and has no
+    // kill switch in the codebase today; same waive-not-fabricate
+    // pattern as service's exec above.
+    waive "LINT004" reason "no real kill switch around the uvicorn bind yet" ticket "T-0016";
 }
 
 // Build/CI scripts: scripts/** (gen_openapi.py dumps openapi.json,
@@ -155,7 +196,7 @@ store fleet_artifacts : trusted {
 // client.ts and the route hooks), same-origin localhost only.
 // frob:doc docs/spec/05-strata-system-model.md#what-this-is
 // frob:ticket T-0014
-flow f_browser_server : browser -> server { label Internal; }
+flow f_browser_server : browser -> server { label Internal; rate 5 req/s; }
 
 // Server -> browser: the bundled static SPA assets (app.py's static
 // mount) and REST/SSE responses.
