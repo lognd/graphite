@@ -4,6 +4,10 @@ wrappers, against the fixture project."""
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import patch
+
+import pytest
+from typani.result import Ok
 
 from graphite.service.config_cli import (
     doctor,
@@ -62,3 +66,47 @@ def test_doctor_returns_a_list(timber_pavilion: Path) -> None:
     result = doctor(timber_pavilion)
     assert result.is_ok
     assert isinstance(result.danger_ok, list)
+
+
+# frob:tests graphite/service/config_cli.py::doctor
+# frob:ticket T-0020
+def test_doctor_parse_error_on_bad_json(timber_pavilion: Path) -> None:
+    # `doctor` hands `regolith doctor --json`'s stdout straight to
+    # json.loads (module docstring) -- exercises the JSONDecodeError
+    # branch without depending on the real CLI ever emitting bad JSON.
+    with patch("graphite.service.config_cli._run", return_value=Ok("not json at all")):
+        result = doctor(timber_pavilion)
+    assert result.is_err
+    assert result.danger_err.kind == "parse_error"
+
+
+# frob:tests graphite/service/config_cli.py::doctor
+# frob:ticket T-0016
+def test_doctor_refuses_when_no_exec_engaged(
+    timber_pavilion: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("GRAPHITE_NO_EXEC", "1")
+    result = doctor(timber_pavilion)
+    assert result.is_err
+    assert result.danger_err.kind == "capability_disabled"
+
+
+# frob:tests graphite/service/config_cli.py::_run
+# frob:ticket T-0016
+def test_list_config_refuses_when_no_exec_engaged(
+    timber_pavilion: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("GRAPHITE_NO_EXEC", "1")
+    result = list_config(timber_pavilion)
+    assert result.is_err
+    assert result.danger_err.kind == "capability_disabled"
+
+
+# frob:tests graphite/service/config_cli.py::_run
+# frob:ticket T-0016
+def test_list_config_normal_path_when_no_exec_unset(
+    timber_pavilion: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("GRAPHITE_NO_EXEC", raising=False)
+    result = list_config(timber_pavilion)
+    assert result.is_ok

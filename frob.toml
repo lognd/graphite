@@ -56,19 +56,29 @@ include = []
 [testing]
 min_unit_cases = 1
 min_integration = 1
-# Floors below record measured reality as of 2026-07-18 (first real coverage
-# run under frob, T-0020 tracks the backfill to raise them):
-#   unit_branch_cov: main cluster of per-symbol branch coverage sits at
-#   60-89%; six functions fall further behind (46.7-55.6%) and are waived
-#   per-site (`frob:waive TEST005`) rather than dragging the global floor
-#   down to an absurd level -- 60 keeps the floor meaningful while covering
-#   everything else without waivers.
-#   module_line_cov: worst module measured is reports.py at 75.6%; rounded
-#   down to 75 so today's run is green.
-#   system_line_cov: overall measured line coverage is 90.6%, already above
-#   the existing 80 floor, so it is left unchanged.
-unit_branch_cov = 60
-module_line_cov = 75
+# Floors below record measured reality as of 2026-07-19 (T-0020 backfill:
+# real branch-covering tests added for all 9 previously-waived sites --
+# config_cli.doctor; reports.read_staged_build_report/read_calc_book/
+# read_audit_index/read_acceptance_ledger/read_manifest/read_gate_summary;
+# runs.mark_finished/cancel_run -- every `frob:waive TEST005` removed, zero
+# TEST005 waivers remain in the tree):
+#   unit_branch_cov: raised 60 -> 75. Every backfilled site now clears
+#   this floor with real tests (error paths, missing/malformed-file cases).
+#   Three functions OUTSIDE T-0020's scope still sit below 75
+#   (service/settings.py::get_settings 60%, ::set_settings 70%,
+#   tui/screens/run_console.py::RunConsoleScreen.on_button_pressed 60%) --
+#   they surface as TEST005 WARNINGS (still warn severity, non-blocking),
+#   named here rather than pushing the floor back down to paper over them.
+#   90 was tried and rejected as overreach: it drags in ~30 more
+#   functions across server/routes and tui screens that T-0020 never
+#   touched, which would misrepresent this backfill's actual scope.
+#   module_line_cov: raised 75 -> 80. Worst module measured is now
+#   graphite/tui/screens/config.py at 81.9% -- comfortably above 80,
+#   with no module-level TEST005 warnings at this floor.
+#   system_line_cov: overall measured line coverage is 92.9%, already
+#   well above the existing 80 floor, so it is left unchanged.
+unit_branch_cov = 75
+module_line_cov = 80
 system_line_cov = 80
 
 [[test.runner]]

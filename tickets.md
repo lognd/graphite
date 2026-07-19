@@ -471,7 +471,7 @@ contract end to end (foreign input rejected at the boundary).
 ```yaml
 id: T-0016
 title: Add real kill switch for service exec / core net capabilities
-state: queued
+state: done
 kind: feature
 origin: human
 created: '2026-07-18'
@@ -479,11 +479,63 @@ blocked_by: []
 parent: null
 scope:
 - graphite/service/,graphite/cli.py
-evidence: []
+evidence:
+- tests/service/test_kill_switch.py::test_no_exec_engaged_for_truthy_values
+- tests/service/test_kill_switch.py::test_no_exec_not_engaged_for_falsy_values
+- tests/service/test_kill_switch.py::test_no_exec_not_engaged_when_unset
+- tests/service/test_kill_switch.py::test_offline_engaged_when_set
+- tests/service/test_kill_switch.py::test_offline_not_engaged_when_unset
+- tests/service/test_runs.py::test_start_run_refuses_when_no_exec_engaged
+- tests/service/test_runs.py::test_start_run_normal_path_when_no_exec_unset
+- tests/service/test_config_cli.py::test_doctor_refuses_when_no_exec_engaged
+- tests/service/test_config_cli.py::test_list_config_refuses_when_no_exec_engaged
+- tests/service/test_config_cli.py::test_list_config_normal_path_when_no_exec_unset
+- tests/test_cli.py::test_serve_refuses_when_offline_engaged
+- tests/test_cli.py::test_serve_binds_when_offline_unset
 attachments: []
 acceptance: []
 threat: null
 ```
+## Done report
+
+Two real, live-flippable kill switches, both in a single new shared
+module `graphite/service/kill_switch.py` (NO_EXEC_ENV/OFFLINE_ENV +
+`no_exec_engaged()`/`offline_engaged()`, both reading their env var
+fresh on every call, mirroring `settings.py::settings_home`'s pattern):
+
+- `GRAPHITE_NO_EXEC`: checked at both `exec` choke points on the
+  `service` strata node -- `graphite.service.runs.start_run` (before
+  any Popen spawn) and `graphite.service.config_cli._run` (the ONE
+  subprocess call site every config/doctor read funnels through).
+  Engaged: both return `Err(ServiceError(kind="capability_disabled"))`
+  instead of spawning `regolith`. Unengaged: unchanged behavior.
+- `GRAPHITE_OFFLINE`: checked in `graphite.cli.serve` (the `net` bind
+  on the `core` node, its one uvicorn call site) before `uvicorn.run`.
+  Engaged: `typer.BadParameter` (non-zero exit, matching the existing
+  non-localhost-host refusal's shape). Unengaged: unchanged behavior.
+
+Added `capability_disabled` to `ServiceError`'s `ErrorKind` (mapped to
+HTTP 503 in `graphite/server/errors.py`, alongside `cli_not_found`).
+
+`design/graphite.strata` updated: both LINT004 waivers on `service`
+and `core` replaced with real `attr flag=GRAPHITE_NO_EXEC;` /
+`attr flag=GRAPHITE_OFFLINE;` declarations (the mechanism is real now,
+not fabricated) -- plus a new `flow f_core_service : core -> service`
+(cli.py's new import of `graphite.service.kill_switch`, caught by the
+SYS003 gate). `frob sys audit`: PROVED, 6 waived (was 8 before -- the
+2 LINT004 waivers are gone; the remaining 6 are T-0013/T-0017/T-0018
+frob-design-gap waivers, unrelated to this ticket).
+
+12 new tests (`tests/service/test_kill_switch.py` (10),
+`tests/service/test_runs.py`, `tests/service/test_config_cli.py`,
+`tests/test_cli.py`): each flag tested both engaged (refusal, typed
+error / non-zero exit) and unengaged (normal path unaffected).
+`uv run pytest -q`: 206 passed, 1 skipped. `frob check`: 0 errors (was
+25 errors mid-implementation from COV001/COV002/TEST003/SYS003 on the
+new module/changed call sites -- all closed with frob:doc/frob:ticket
+edges, an integration-test edge on `kill_switch.py`, and the new
+core->service flow).
+
 frob sys audit LINT004 flags node service (may exec) and node core (may net) as risky capabilities with no declared attr flag=<id> kill-switch. No such feature-flag mechanism exists in graphite today. Waived in design/graphite.strata pending this ticket (frob's own design/frob.strata documents the identical waive-not-fabricate pattern for LINT004). Scope: add a real config-backed kill switch (e.g. GRAPHITE_DISABLE_RUNS / GRAPHITE_DISABLE_EXEC env var or settings key) that routes/runs.py and service/config_cli.py check before spawning a regolith subprocess, and a matching one for core's uvicorn net bind if a real disable path is wanted; then declare attr flag=<id> on the strata nodes and drop the waivers.
 
 <!-- ticket:T-0017 -->
@@ -548,7 +600,7 @@ frob sys audit SYS100 fires for node browser: capability ffi observed but not de
 id: T-0020
 title: Backfill branch-coverage tests for TEST005 findings (47, unlocked by first
   coverage stamp)
-state: queued
+state: done
 kind: bug
 origin: human
 created: '2026-07-18'
@@ -556,11 +608,77 @@ blocked_by: []
 parent: null
 scope:
 - graphite/
-evidence: []
+evidence:
+- tests/service/test_reports.py::test_read_staged_build_report_wraps_a_plain_build_report
+- tests/service/test_reports.py::test_read_staged_build_report_parse_error
+- tests/service/test_reports.py::test_read_calc_book_not_found
+- tests/service/test_reports.py::test_read_calc_book_parse_error
+- tests/service/test_reports.py::test_read_audit_index_not_found
+- tests/service/test_reports.py::test_read_audit_index_parse_error
+- tests/service/test_reports.py::test_read_acceptance_ledger_not_found
+- tests/service/test_reports.py::test_read_acceptance_ledger_parse_error
+- tests/service/test_reports.py::test_read_manifest_not_found
+- tests/service/test_reports.py::test_read_manifest_parse_error
+- tests/service/test_reports.py::test_read_manifest_non_dict_json_is_honest_empty
+- tests/service/test_reports.py::test_read_gate_summary_not_found
+- tests/service/test_reports.py::test_read_gate_summary_parse_error
+- tests/service/test_config_cli.py::test_doctor_parse_error_on_bad_json
+- tests/service/test_runs.py::test_cancel_run_falls_back_to_persisted_pid_after_restart
+- tests/service/test_runs.py::test_cancel_run_pid_already_gone_is_honest
+- tests/service/test_runs.py::test_mark_finished_unknown_run_id_is_a_noop
+- tests/service/test_runs.py::test_mark_finished_zero_exit_code_is_ok
+- tests/service/test_runs.py::test_mark_finished_nonzero_exit_code_is_failed
 attachments: []
 acceptance: []
 threat: null
 ```
+## Done report
+
+Backfilled real branch-covering tests for all 9 previously-waived
+TEST005 sites (19 new tests total):
+
+- `graphite/service/reports.py` (13 tests): `read_staged_build_report`
+  (plain-BuildReport fallback branch + genuine parse_error),
+  `read_calc_book`/`read_audit_index`/`read_acceptance_ledger`/
+  `read_manifest`/`read_gate_summary` (not_found + parse_error each),
+  plus `read_manifest`'s non-dict-JSON honest-empty branch.
+- `graphite/service/config_cli.py::doctor` (1 test): mocked `_run` to
+  return non-JSON stdout, exercising the `json.JSONDecodeError` branch
+  without depending on the real CLI ever emitting bad JSON.
+- `graphite/service/runs.py::cancel_run` (2 tests): the persisted-pid
+  fallback after the in-process Popen handle is gone (cross-restart
+  scenario the docstring describes), and the `ProcessLookupError`
+  branch (pid already dead).
+- `graphite/service/runs.py::mark_finished` (3 tests): unknown run id
+  (silent no-op), exit_code 0 -> "ok", nonzero -> "failed".
+
+Result: `make coverage` + `frob check` show ZERO TEST005 findings for
+any of the 9 sites -- all 9 `# frob:waive TEST005` comments removed
+from `reports.py`/`config_cli.py`/`runs.py` (grep confirms no
+`frob:waive TEST005` left in the tree).
+
+Floors raised in `frob.toml` `[testing]` (measured 2026-07-19, comment
+updated in place): `unit_branch_cov` 60 -> 75, `module_line_cov` 75 ->
+80, `system_line_cov` unchanged at 80 (measured 92.9%, already clear).
+90/85 was tried and rejected as overreach -- it drags in ~30 findings
+across `server/routes/*`, `tui/screens/*`, and `service/settings.py`
+that T-0020 never touched (would misrepresent this backfill's actual
+scope; TEST005 stays warn severity so none of this blocks `frob
+check`, but a floor should reflect real backfilled coverage, not
+wishful thinking). 75/80 is the honest ceiling for the sites actually
+in scope; three functions outside scope remain below 75 as named
+warn-severity residue in the frob.toml comment (`service/settings.py`
+`get_settings`/`set_settings`, `tui/screens/run_console.py`
+`on_button_pressed`) -- real debt, left for a future ticket rather than
+silently fixed under this one's scope or silently hidden by a lower
+floor.
+
+Evidence: `uv run pytest -q` 206 passed, 1 skipped. `frob check`: 0
+errors (WARN status only, from unrelated pre-existing findings).
+`frob check --stamp-coverage`: stamped clean. `frob sys audit`:
+PROVED, 6 waived (unaffected by this ticket -- T-0016 closed the 2
+LINT004 waivers separately).
+
 make coverage (T-0012) produced the repo's first coverage.xml, which unlocked TEST005 (unit_branch_cov=90% threshold) checks that were previously silently skipped (no coverage.xml existed). 47 functions across graphite/ are below the 90% branch-coverage threshold (e.g. graphite/artifacts.py::find_drawings_dirs 80%, graphite/service/config_cli.py::doctor 55.6%). TEST005 is warn severity (frob.toml [gates.severity]) so it does not block frob check today, but is real, honest test debt now visible for the first time. Add branch-covering test cases for each flagged function; re-run make coverage after each batch to confirm the finding clears.
 
 UPDATE (2026-07-18, coordinator): [testing] floors in frob.toml were lowered

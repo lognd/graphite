@@ -73,7 +73,6 @@ def _read_text(path: Path) -> Result[str, ServiceError]:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
-# frob:waive TEST005 reason="46.7% branch cov as of 2026-07-18; T-0020 backfill"
 def read_staged_build_report(path: Path) -> Result[StagedBuildReport, ServiceError]:
     """`.regolith/build/build_report.json` as a `StagedBuildReport`. A
     plain (non-staged) `BuildReport` JSON is wrapped so callers always
@@ -123,7 +122,6 @@ def read_lockfile(path: Path) -> Result[Lockfile, ServiceError]:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
-# frob:waive TEST005 reason="55.6% branch cov as of 2026-07-18; T-0020 backfill"
 def read_calc_book(path: Path) -> Result[CalcBook, ServiceError]:
     """`dist/calc/calc_book.json` -> `CalcBook` (sheets + audit index)."""
     text = _read_text(path)
@@ -143,7 +141,6 @@ def read_calc_book(path: Path) -> Result[CalcBook, ServiceError]:
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
-# frob:waive TEST005 reason="measured 40.0% branch on 2026-07-19 after the surface-facade migration touched this file; backfill T-0020"
 def read_audit_index(path: Path) -> Result[AuditIndex, ServiceError]:
     """`dist/calc/audit_index.json` -> `AuditIndex` directly (cheaper
     than loading the full calc book when only the summary/rows are
@@ -206,7 +203,6 @@ class AcceptanceLedgerSummary(BaseModel):
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
-# frob:waive TEST005 reason="55.6% branch cov as of 2026-07-18; T-0020 backfill"
 def read_acceptance_ledger(path: Path) -> Result[AcceptanceLedgerSummary, ServiceError]:
     """`dist/acceptance_ledger.json` -> `AcceptanceLedgerSummary` (WOG1-F3:
     the on-disk shape has no matching regolith model to validate
@@ -244,7 +240,6 @@ class ManifestSummary(BaseModel):
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
-# frob:waive TEST005 reason="measured 57.1% branch on 2026-07-19 after the surface-facade migration touched this file; backfill T-0020"
 def read_manifest(path: Path) -> Result[ManifestSummary, ServiceError]:
     """`dist/manifest.json` -> `ManifestSummary` (WOG1-F2). `design_hash`
     is lifted out of `raw` for the TitleBlock's identity element (03
@@ -305,7 +300,6 @@ class GateSummary(BaseModel):
 
 
 # frob:doc docs/spec/02-architecture.md#14-service-layer-modules
-# frob:waive TEST005 reason="55.6% branch cov as of 2026-07-18; T-0020 backfill"
 def read_gate_summary(path: Path) -> Result[GateSummary, ServiceError]:
     """`dist/gate_summary.json` -> `GateSummary` (WOG3-F1)."""
     text = _read_text(path)

@@ -45,6 +45,37 @@ def test_start_run_persists_a_running_record(timber_pavilion: Path) -> None:
     assert record.status in ("running", "ok")
 
 
+# frob:tests graphite/service/runs.py::start_run
+# frob:ticket T-0016
+def test_start_run_refuses_when_no_exec_engaged(
+    timber_pavilion: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setenv("GRAPHITE_NO_EXEC", "1")
+    result = runs_module.start_run(
+        timber_pavilion,
+        "check",
+        ("program.calx",),
+        regolith_argv=(sys.executable, "-m", "regolith.cli"),
+    )
+    assert result.is_err
+    assert result.danger_err.kind == "capability_disabled"
+
+
+# frob:tests graphite/service/runs.py::start_run
+# frob:ticket T-0016
+def test_start_run_normal_path_when_no_exec_unset(
+    timber_pavilion: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.delenv("GRAPHITE_NO_EXEC", raising=False)
+    result = runs_module.start_run(
+        timber_pavilion,
+        "check",
+        ("program.calx",),
+        regolith_argv=(sys.executable, "-m", "regolith.cli"),
+    )
+    assert result.is_ok
+
+
 # frob:tests graphite/service/runs.py::mark_finished
 def test_start_run_and_get_run_converge_on_ok(timber_pavilion: Path) -> None:
     started = runs_module.start_run(
@@ -186,6 +217,90 @@ def test_cancel_run_unknown_id() -> None:
     result = runs_module.cancel_run("no-such-run-id")
     assert result.is_err
     assert result.danger_err.kind == "not_found"
+
+
+# frob:tests graphite/service/runs.py::mark_finished
+# frob:ticket T-0020
+def test_mark_finished_unknown_run_id_is_a_noop() -> None:
+    # record.is_err branch: nothing to finalize, no exception either.
+    runs_module.mark_finished("no-such-run-id", 0)
+
+
+# frob:tests graphite/service/runs.py::mark_finished
+# frob:ticket T-0020
+def test_mark_finished_zero_exit_code_is_ok(timber_pavilion: Path) -> None:
+    started = runs_module.start_run(
+        timber_pavilion,
+        "check",
+        ("program.calx",),
+        regolith_argv=(sys.executable, "-c", "import time; time.sleep(30)"),
+    ).danger_ok
+    try:
+        runs_module.mark_finished(started.run_id, 0)
+        record = runs_module.get_run(started.run_id).danger_ok
+        assert record.status == "ok"
+        assert record.exit_code == 0
+    finally:
+        runs_module._LIVE.pop(started.run_id).kill()
+
+
+# frob:tests graphite/service/runs.py::mark_finished
+# frob:ticket T-0020
+def test_mark_finished_nonzero_exit_code_is_failed(timber_pavilion: Path) -> None:
+    started = runs_module.start_run(
+        timber_pavilion,
+        "check",
+        ("program.calx",),
+        regolith_argv=(sys.executable, "-c", "import time; time.sleep(30)"),
+    ).danger_ok
+    try:
+        runs_module.mark_finished(started.run_id, 7)
+        record = runs_module.get_run(started.run_id).danger_ok
+        assert record.status == "failed"
+        assert record.exit_code == 7
+    finally:
+        runs_module._LIVE.pop(started.run_id).kill()
+
+
+# frob:tests graphite/service/runs.py::cancel_run
+# frob:ticket T-0020
+def test_cancel_run_falls_back_to_persisted_pid_after_restart(
+    timber_pavilion: Path,
+) -> None:
+    # Simulates the cross-restart scenario the docstring describes: the
+    # in-process Popen handle is gone (a fresh server process would
+    # never have had it), so cancel_run must fall back to `os.kill` on
+    # the persisted pid.
+    started = runs_module.start_run(
+        timber_pavilion,
+        "check",
+        ("program.calx",),
+        regolith_argv=(sys.executable, "-c", "import time; time.sleep(30)"),
+    ).danger_ok
+    assert started.status == "running"
+    del runs_module._LIVE[started.run_id]
+    cancelled = runs_module.cancel_run(started.run_id)
+    assert cancelled.is_ok
+    assert cancelled.danger_ok.status == "cancelled"
+    assert cancelled.danger_ok.exit_code is None
+
+
+# frob:tests graphite/service/runs.py::cancel_run
+# frob:ticket T-0020
+def test_cancel_run_pid_already_gone_is_honest(timber_pavilion: Path) -> None:
+    started = runs_module.start_run(
+        timber_pavilion,
+        "check",
+        ("program.calx",),
+        regolith_argv=(sys.executable, "-c", "import time; time.sleep(30)"),
+    ).danger_ok
+    process = runs_module._LIVE.pop(started.run_id)
+    process.kill()
+    process.wait(timeout=5.0)
+    cancelled = runs_module.cancel_run(started.run_id)
+    assert cancelled.is_ok
+    assert cancelled.danger_ok.status == "cancelled"
+    assert cancelled.danger_ok.exit_code is None
 
 
 # -- run_verbosity passthrough (WO-G6 merge) ----------------------------
