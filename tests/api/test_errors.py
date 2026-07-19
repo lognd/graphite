@@ -7,9 +7,9 @@ import pytest
 from fastapi import HTTPException
 
 from graphite.server.errors import raise_for_error
-from graphite.service.errors import ServiceError
+from graphite.service.errors import ErrorKind, ServiceError
 
-_KIND_TO_STATUS = {
+_KIND_TO_STATUS: dict[ErrorKind, int] = {
     "not_found": 404,
     "invalid_path": 400,
     "invalid_input": 422,

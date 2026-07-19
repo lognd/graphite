@@ -23,13 +23,18 @@ exclude = [
 # them specifically -- `graph.exclude` above already keeps frontend build
 # and vendor output out of the obligation graph.
 #
-# ty is skipped: 2 pre-existing diagnostics (tests/service/test_config_cli.py
-# and tests/service/test_runs.py) predate frob adoption -- one relies on a
-# `# type: ignore[arg-type]` comment written for mypy, which ty does not
-# honor, the other is a real narrowing gap ty catches that the repo's own
-# `make typecheck` (also ty) already lets through unfixed on main. Adoption
-# must not touch source; see tickets/ for the seeded ticket tracking this.
-skip = ["ty"]
+# T-0003 (2026-07-19): ty is no longer skipped. All 7 diagnostics found on
+# a full-repo `ty check .` are fixed: tests/service/test_config_cli.py's
+# `# type: ignore[arg-type]` (written for mypy, which ty does not honor)
+# replaced with a real `is not None` narrow; tests/service/test_runs.py's
+# `status: str` param retyped to `runs_module.RunStatus` (the actual
+# Literal); tests/api/test_errors.py's kind-to-status dict retyped to
+# `dict[ErrorKind, int]`; tests/tui/test_app.py's DiscoveryHit-vs-Hit union
+# narrowed with `isinstance(hit, Hit)` before touching `match_display`;
+# and the two tests/scripts/test_check_*.py `sys.path.insert` + `import`
+# patterns (real, deliberate script imports with no package __init__.py)
+# get a `ty.toml` `[environment] extra-paths = ["scripts"]` hint, which
+# frob's ty stage reads and passes as `--extra-search-path`.
 
 [gates.severity]
 # Legacy-adoption baseline: graphite predates frob, so the snapshot-wide

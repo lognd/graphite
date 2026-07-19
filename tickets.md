@@ -69,7 +69,7 @@ Files touched: docs/README.md (new), docs/workflow/README.md (new
 ```yaml
 id: T-0003
 title: Fix pre-existing ty diagnostics blocking the ty check stage
-state: queued
+state: done
 kind: bug
 origin: human
 created: '2026-07-17'
@@ -77,12 +77,63 @@ blocked_by: []
 parent: null
 scope:
 - tests/service/test_config_cli.py,tests/service/test_runs.py
-evidence: []
+evidence:
+- tests/service/test_config_cli.py::test_set_config_unknown_key_is_a_cli_error
+- tests/tui/test_app.py::test_navigation_provider_search_yields_known_commands
+- tests/api/test_errors.py::test_raise_for_error_maps_every_kind_to_its_status
 attachments: []
 acceptance: []
 threat: null
 ```
 frob.toml sets [check] skip = ["ty"] because 2 pre-existing ty diagnostics predate frob adoption: tests/service/test_config_cli.py:49 relies on a # type: ignore[arg-type] comment written for mypy (which ty does not honor) and narrows nothing, and tests/service/test_runs.py:230 passes a plain str where a Literal status is expected. Fix both (or annotate correctly) and remove ty from [check] skip.
+
+## Done report
+
+2026-07-19. Widened scope: a full-repo `ty check .` (the actual command
+frob's ty stage runs, per `frob/src/frob/check/_python.py::_run_ty`)
+found 7 diagnostics, not the 2 named when this ticket was written --
+more had crept in since. Fixed all 7:
+
+1. `tests/service/test_config_cli.py:53` -- real narrow instead of the
+   mypy-only `# type: ignore[arg-type]`: bind `detail =
+   result.danger_err.detail`, assert `detail is not None` before the
+   `in` check (`str | None` -> `str`).
+2. `tests/service/test_runs.py::_plant_finished_record` -- retyped its
+   `status` param from `str` to `runs_module.RunStatus` (the real
+   Literal), dropping the `# type: ignore[arg-type]` mypy relic
+   entirely.
+3. `tests/api/test_errors.py::_KIND_TO_STATUS` -- retyped from an
+   untyped dict literal to `dict[ErrorKind, int]` so each key is the
+   real closed Literal, not `str`.
+4. `tests/tui/test_app.py::test_navigation_provider_search_yields_known_commands`
+   -- `NavigationProvider.search` only ever yields `Hit` (never
+   textual's `DiscoveryHit`, `Hits`'s other union member), so narrowed
+   with an `isinstance(hit, Hit)` filter comprehension before touching
+   `match_display`, which `DiscoveryHit` does not define.
+5. `tests/scripts/test_check_bundle_size.py` and
+   `test_check_openapi_drift.py` -- both do `sys.path.insert(0,
+   ".../scripts")` then `import check_bundle_size` /
+   `import check_openapi_drift` at runtime (the scripts are standalone
+   CLI entry points, deliberately not a package). ty cannot see a
+   runtime sys.path mutation; added `ty.toml` with `[environment]
+   extra-paths = ["scripts"]`, which frob's `_run_ty` already reads and
+   passes as `--extra-search-path` -- no frob changes needed.
+
+Removed `ty` from `frob.toml` `[check] skip`. Ran `make coverage` to
+re-stamp (`.frob/coverage-stamp` had gone stale from the test edits)
+and added `frob:ticket T-0003` to the 3 changed test functions
+(COV002).
+
+Evidence: `uv run ty check --extra-search-path scripts .` -> "All
+checks passed!"; `frob check` -> `ty` stage `pass, no issues`; full
+run "0 errors, 0 warnings, 4 waived" (the 4 waived are the
+pre-existing, unrelated PERF004 findings); `uv run pytest -q` -> 212
+passed, 1 skipped.
+
+Files touched: tests/service/test_config_cli.py,
+tests/service/test_runs.py, tests/api/test_errors.py,
+tests/tui/test_app.py, ty.toml (new), frob.toml ([check] skip),
+.frob/coverage-stamp (restamp).
 
 <!-- ticket:T-0004 -->
 ```yaml

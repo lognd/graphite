@@ -5,6 +5,8 @@ textual's ctrl+p default to match the web app, spec 03 sec. 3.5)."""
 from __future__ import annotations
 
 import pytest
+from textual.command import Hit
+
 from graphite.tui.app import GraphiteApp, NavigationProvider, ShortcutSheet
 from graphite.tui.screens.config import ConfigScreen
 from graphite.tui.screens.dashboard import DashboardScreen
@@ -54,6 +56,7 @@ async def test_app_on_mount_pushes_dashboard(fixture_scan_root):
 
 
 # frob:tests graphite/tui/app.py::NavigationProvider.search kind="unit"
+# frob:ticket T-0003
 @pytest.mark.asyncio
 async def test_navigation_provider_search_yields_known_commands(fixture_scan_root):
     """The ctrl+k palette provider matches the fixed surface commands
@@ -62,9 +65,19 @@ async def test_navigation_provider_search_yields_known_commands(fixture_scan_roo
     async with app.run_test(size=(120, 60)) as pilot:
         await pilot.pause()
         provider = NavigationProvider(app.screen)
-        hits = [hit async for hit in provider.search("run console")]
+        # NavigationProvider.search only ever yields Hit (never textual's
+        # DiscoveryHit, the other half of the Hits union) -- narrow with an
+        # isinstance-filtered comprehension before touching match_display,
+        # which DiscoveryHit does not define.
+        hits = [
+            hit async for hit in provider.search("run console") if isinstance(hit, Hit)
+        ]
         assert any("run console" in str(hit.match_display) for hit in hits)
-        hits = [hit async for hit in provider.search("set active project")]
+        hits = [
+            hit
+            async for hit in provider.search("set active project")
+            if isinstance(hit, Hit)
+        ]
         assert any("set active project" in str(hit.match_display) for hit in hits)
 
 

@@ -1,0 +1,12 @@
+# T-0003: `frob check`'s ty stage (frob/src/frob/check/_python.py::_run_ty)
+# runs `ty check <repo root>`, which covers tests/scripts/*.py. Those tests
+# do `sys.path.insert(0, ".../scripts")` then `import check_bundle_size` /
+# `import check_openapi_drift` at runtime (the scripts have no package
+# `__init__.py`, by design -- they are standalone CLI entry points, not a
+# library). ty resolves imports statically and has no way to see a
+# runtime sys.path mutation, so it reports unresolved-import without this
+# extra-paths hint. This is read by frob (not `ty` itself outside frob),
+# which greps [environment] extra-paths and passes each as
+# --extra-search-path.
+[environment]
+extra-paths = ["scripts"]

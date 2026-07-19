@@ -338,8 +338,12 @@ def test_run_verbosity_verbose_spawns_dash_v(timber_pavilion: Path) -> None:
     assert "--color never -v check" in argv_line
 
 
+# frob:ticket T-0003
 def _plant_finished_record(
-    home: Path, run_id: str, started_at: str, status: str = "ok"
+    home: Path,
+    run_id: str,
+    started_at: str,
+    status: runs_module.RunStatus = "ok",
 ) -> None:
     """Write a synthetic finished record + log/stdout siblings directly
     (retention tests need many aged records without spawning processes)."""
@@ -349,7 +353,7 @@ def _plant_finished_record(
         verb="check",
         project_root="/nowhere",
         args=(),
-        status=status,  # type: ignore[arg-type]
+        status=status,
         started_at=started_at,
         before_health=runs_module.HealthSnapshot(
             release_ok=None, violated=None, total_obligations=None

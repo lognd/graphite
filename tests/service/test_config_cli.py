@@ -46,11 +46,13 @@ def test_set_config_then_reset_to_default(timber_pavilion: Path) -> None:
     assert reset_result.danger_ok.value == str(default_value)
 
 
+# frob:ticket T-0003
 def test_set_config_unknown_key_is_a_cli_error(timber_pavilion: Path) -> None:
     result = set_config(timber_pavilion, "does.not.exist", "1", "local")
     assert result.is_err
     assert result.danger_err.kind == "cli_failed"
-    assert "does.not.exist" in result.danger_err.detail
+    detail = result.danger_err.detail
+    assert detail is not None and "does.not.exist" in detail
 
 
 def test_key_defaults_covers_registered_keys() -> None:
